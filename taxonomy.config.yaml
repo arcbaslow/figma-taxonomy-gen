@@ -1,0 +1,77 @@
+app:
+  type: fintech
+  name: "MyApp"
+
+figma:
+  exclude_pages: ["Archive", "Drafts", "Components"]
+
+naming:
+  style: snake_case
+  pattern: "{screen}_{element}_{action}"
+  max_event_length: 64
+
+  actions:
+    button: "clicked"
+    link: "clicked"
+    input: "entered"
+    toggle: "toggled"
+    checkbox: "checked"
+    dropdown: "selected"
+    tab: "viewed"
+    card: "viewed"
+    modal: "opened"
+    form: "submitted"
+    screen: "pageview"
+
+  screen_name:
+    strip_prefixes: true
+    strip_suffixes: ["- Default", "- Light", "- Dark", "- Skeleton"]
+    max_depth: 2
+
+  element_name:
+    strip_common: ["Component/", "UI/", "Atoms/", "Molecules/", "Organisms/"]
+    use_text_content: true
+    fallback_to_component_name: true
+
+output:
+  formats: ["excel", "csv", "json", "markdown"]
+  directory: "./output"
+
+global_properties:
+  - name: "screen_name"
+    type: "string"
+    description: "Screen where event occurred"
+  - name: "platform"
+    type: "string"
+    enum: ["ios", "android", "web"]
+  - name: "app_version"
+    type: "string"
+    description: "Application version"
+
+property_rules:
+  - match: "*_clicked"
+    add:
+      - name: "element_text"
+        type: "string"
+        description: "Visible text of the clicked element"
+  - match: "*_entered"
+    add:
+      - name: "field_name"
+        type: "string"
+        description: "Name of the input field"
+      - name: "is_valid"
+        type: "boolean"
+        description: "Whether the input passed validation"
+  - match: "*_fail"
+    add:
+      - name: "error_description"
+        type: "string"
+        description: "Error description"
+  - match: "*_payment_success"
+    add:
+      - name: "insurance_premium"
+        type: "string"
+        description: "Insurance premium amount"
+      - name: "card_type"
+        type: "string"
+        description: "Payment card type"
