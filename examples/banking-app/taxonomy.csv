@@ -1,0 +1,78 @@
+Event Type,Category,Description,Property Name,Property Type,Property Description
+login_screen_input_email_entered,Login,User enters value in Input/Email,field_name,string,Name of the input field
+login_screen_input_email_entered,Login,User enters value in Input/Email,is_valid,boolean,Whether the input passed validation
+login_screen_input_email_entered,Login,User enters value in Input/Email,screen_name,string,Screen where event occurred
+login_screen_input_email_entered,Login,User enters value in Input/Email,platform,string,
+login_screen_input_email_entered,Login,User enters value in Input/Email,app_version,string,Application version
+login_screen_input_password_entered,Login,User enters value in Input/Password,field_name,string,Name of the input field
+login_screen_input_password_entered,Login,User enters value in Input/Password,is_valid,boolean,Whether the input passed validation
+login_screen_input_password_entered,Login,User enters value in Input/Password,screen_name,string,Screen where event occurred
+login_screen_input_password_entered,Login,User enters value in Input/Password,platform,string,
+login_screen_input_password_entered,Login,User enters value in Input/Password,app_version,string,Application version
+login_screen_log_in_clicked,Login,User clicks Log In,element_text,string,Visible text of the clicked element
+login_screen_log_in_clicked,Login,User clicks Log In,screen_name,string,Screen where event occurred
+login_screen_log_in_clicked,Login,User clicks Log In,platform,string,
+login_screen_log_in_clicked,Login,User clicks Log In,app_version,string,Application version
+login_screen_forgot_password_clicked,Login,User clicks Forgot password?,element_text,string,Visible text of the clicked element
+login_screen_forgot_password_clicked,Login,User clicks Forgot password?,screen_name,string,Screen where event occurred
+login_screen_forgot_password_clicked,Login,User clicks Forgot password?,platform,string,
+login_screen_forgot_password_clicked,Login,User clicks Forgot password?,app_version,string,Application version
+login_screen_remember_me_toggled,Login,User toggles Remember me,screen_name,string,Screen where event occurred
+login_screen_remember_me_toggled,Login,User toggles Remember me,platform,string,
+login_screen_remember_me_toggled,Login,User toggles Remember me,app_version,string,Application version
+home_account_balance_viewed,Home,User views Account Balance,screen_name,string,Screen where event occurred
+home_account_balance_viewed,Home,User views Account Balance,platform,string,
+home_account_balance_viewed,Home,User views Account Balance,app_version,string,Application version
+home_transfer_clicked,Home,User clicks Transfer,element_text,string,Visible text of the clicked element
+home_transfer_clicked,Home,User clicks Transfer,screen_name,string,Screen where event occurred
+home_transfer_clicked,Home,User clicks Transfer,platform,string,
+home_transfer_clicked,Home,User clicks Transfer,app_version,string,Application version
+home_pay_bills_clicked,Home,User clicks Pay Bills,element_text,string,Visible text of the clicked element
+home_pay_bills_clicked,Home,User clicks Pay Bills,screen_name,string,Screen where event occurred
+home_pay_bills_clicked,Home,User clicks Pay Bills,platform,string,
+home_pay_bills_clicked,Home,User clicks Pay Bills,app_version,string,Application version
+home_accounts_viewed,Home,User views Accounts,screen_name,string,Screen where event occurred
+home_accounts_viewed,Home,User views Accounts,platform,string,
+home_accounts_viewed,Home,User views Accounts,app_version,string,Application version
+home_cards_viewed,Home,User views Cards,screen_name,string,Screen where event occurred
+home_cards_viewed,Home,User views Cards,platform,string,
+home_cards_viewed,Home,User views Cards,app_version,string,Application version
+home_bottom_nav_clicked,Home,User clicks BottomNav,element_text,string,Visible text of the clicked element
+home_bottom_nav_clicked,Home,User clicks BottomNav,screen_name,string,Screen where event occurred
+home_bottom_nav_clicked,Home,User clicks BottomNav,platform,string,
+home_bottom_nav_clicked,Home,User clicks BottomNav,app_version,string,Application version
+payment_form_amount_entered,Payments,User enters value in Amount,field_name,string,Name of the input field
+payment_form_amount_entered,Payments,User enters value in Amount,is_valid,boolean,Whether the input passed validation
+payment_form_amount_entered,Payments,User enters value in Amount,screen_name,string,Screen where event occurred
+payment_form_amount_entered,Payments,User enters value in Amount,platform,string,
+payment_form_amount_entered,Payments,User enters value in Amount,app_version,string,Application version
+payment_form_select_account_selected,Payments,User selects from Select Account,screen_name,string,Screen where event occurred
+payment_form_select_account_selected,Payments,User selects from Select Account,platform,string,
+payment_form_select_account_selected,Payments,User selects from Select Account,app_version,string,Application version
+payment_form_save_recipient_checked,Payments,User checks Save recipient,screen_name,string,Screen where event occurred
+payment_form_save_recipient_checked,Payments,User checks Save recipient,platform,string,
+payment_form_save_recipient_checked,Payments,User checks Save recipient,app_version,string,Application version
+payment_form_send_payment_clicked,Payments,User clicks Send Payment,element_text,string,Visible text of the clicked element
+payment_form_send_payment_clicked,Payments,User clicks Send Payment,screen_name,string,Screen where event occurred
+payment_form_send_payment_clicked,Payments,User clicks Send Payment,platform,string,
+payment_form_send_payment_clicked,Payments,User clicks Send Payment,app_version,string,Application version
+payment_form_interactive_frame_clicked,Payments,User clicks InteractiveFrame,element_text,string,Visible text of the clicked element
+payment_form_interactive_frame_clicked,Payments,User clicks InteractiveFrame,screen_name,string,Screen where event occurred
+payment_form_interactive_frame_clicked,Payments,User clicks InteractiveFrame,platform,string,
+payment_form_interactive_frame_clicked,Payments,User clicks InteractiveFrame,app_version,string,Application version
+payment_success_done_clicked,Payments,User clicks Done,element_text,string,Visible text of the clicked element
+payment_success_done_clicked,Payments,User clicks Done,screen_name,string,Screen where event occurred
+payment_success_done_clicked,Payments,User clicks Done,platform,string,
+payment_success_done_clicked,Payments,User clicks Done,app_version,string,Application version
+home_pageview,Home,User views home screen,screen_name,string,Screen where event occurred
+home_pageview,Home,User views home screen,platform,string,
+home_pageview,Home,User views home screen,app_version,string,Application version
+login_screen_pageview,Login,User views login screen screen,screen_name,string,Screen where event occurred
+login_screen_pageview,Login,User views login screen screen,platform,string,
+login_screen_pageview,Login,User views login screen screen,app_version,string,Application version
+payment_form_pageview,Payments,User views payment form screen,screen_name,string,Screen where event occurred
+payment_form_pageview,Payments,User views payment form screen,platform,string,
+payment_form_pageview,Payments,User views payment form screen,app_version,string,Application version
+payment_success_pageview,Payments,User views payment success screen,screen_name,string,Screen where event occurred
+payment_success_pageview,Payments,User views payment success screen,platform,string,
+payment_success_pageview,Payments,User views payment success screen,app_version,string,Application version

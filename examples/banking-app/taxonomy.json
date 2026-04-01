@@ -1,0 +1,566 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MyApp Event Taxonomy",
+  "events": {
+    "login_screen_input_email_entered": {
+      "description": "User enters value in Input/Email",
+      "category": "Login",
+      "source": "figma:node_id:1:10",
+      "properties": {
+        "field_name": {
+          "type": "string",
+          "description": "Name of the input field"
+        },
+        "is_valid": {
+          "type": "boolean",
+          "description": "Whether the input passed validation"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "login_screen_input_password_entered": {
+      "description": "User enters value in Input/Password",
+      "category": "Login",
+      "source": "figma:node_id:1:12",
+      "properties": {
+        "field_name": {
+          "type": "string",
+          "description": "Name of the input field"
+        },
+        "is_valid": {
+          "type": "boolean",
+          "description": "Whether the input passed validation"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "login_screen_log_in_clicked": {
+      "description": "User clicks Log In",
+      "category": "Login",
+      "source": "figma:node_id:1:14",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "login_screen_forgot_password_clicked": {
+      "description": "User clicks Forgot password?",
+      "category": "Login",
+      "source": "figma:node_id:1:16",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "login_screen_remember_me_toggled": {
+      "description": "User toggles Remember me",
+      "category": "Login",
+      "source": "figma:node_id:1:20",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_account_balance_viewed": {
+      "description": "User views Account Balance",
+      "category": "Home",
+      "source": "figma:node_id:2:10",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_transfer_clicked": {
+      "description": "User clicks Transfer",
+      "category": "Home",
+      "source": "figma:node_id:2:12",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_pay_bills_clicked": {
+      "description": "User clicks Pay Bills",
+      "category": "Home",
+      "source": "figma:node_id:2:14",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_accounts_viewed": {
+      "description": "User views Accounts",
+      "category": "Home",
+      "source": "figma:node_id:2:16",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_cards_viewed": {
+      "description": "User views Cards",
+      "category": "Home",
+      "source": "figma:node_id:2:18",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_bottom_nav_clicked": {
+      "description": "User clicks BottomNav",
+      "category": "Home",
+      "source": "figma:node_id:2:20",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_form_amount_entered": {
+      "description": "User enters value in Amount",
+      "category": "Payments",
+      "source": "figma:node_id:3:10",
+      "properties": {
+        "field_name": {
+          "type": "string",
+          "description": "Name of the input field"
+        },
+        "is_valid": {
+          "type": "boolean",
+          "description": "Whether the input passed validation"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_form_select_account_selected": {
+      "description": "User selects from Select Account",
+      "category": "Payments",
+      "source": "figma:node_id:3:12",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_form_save_recipient_checked": {
+      "description": "User checks Save recipient",
+      "category": "Payments",
+      "source": "figma:node_id:3:14",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_form_send_payment_clicked": {
+      "description": "User clicks Send Payment",
+      "category": "Payments",
+      "source": "figma:node_id:3:16",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_form_interactive_frame_clicked": {
+      "description": "User clicks InteractiveFrame",
+      "category": "Payments",
+      "source": "figma:node_id:3:18",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_success_done_clicked": {
+      "description": "User clicks Done",
+      "category": "Payments",
+      "source": "figma:node_id:3:20",
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "home_pageview": {
+      "description": "User views home screen",
+      "category": "Home",
+      "source": "",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "login_screen_pageview": {
+      "description": "User views login screen screen",
+      "category": "Login",
+      "source": "",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_form_pageview": {
+      "description": "User views payment form screen",
+      "category": "Payments",
+      "source": "",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "payment_success_pageview": {
+      "description": "User views payment success screen",
+      "category": "Payments",
+      "source": "",
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    }
+  }
+}
