@@ -1,0 +1,352 @@
+{
+  "name": "Banking App",
+  "lastModified": "2026-03-15T10:30:00Z",
+  "version": "123456",
+  "document": {
+    "id": "0:0",
+    "name": "Document",
+    "type": "DOCUMENT",
+    "children": [
+      {
+        "id": "1:0",
+        "name": "Login",
+        "type": "CANVAS",
+        "children": [
+          {
+            "id": "1:1",
+            "name": "01 - Login Screen",
+            "type": "FRAME",
+            "children": [
+              {
+                "id": "1:10",
+                "name": "Input/Email",
+                "type": "INSTANCE",
+                "componentId": "C:1",
+                "characters": null,
+                "children": [
+                  {
+                    "id": "1:11",
+                    "name": "Placeholder",
+                    "type": "TEXT",
+                    "characters": "Enter email"
+                  }
+                ]
+              },
+              {
+                "id": "1:12",
+                "name": "Input/Password",
+                "type": "INSTANCE",
+                "componentId": "C:2",
+                "characters": null,
+                "children": [
+                  {
+                    "id": "1:13",
+                    "name": "Placeholder",
+                    "type": "TEXT",
+                    "characters": "Enter password"
+                  }
+                ]
+              },
+              {
+                "id": "1:14",
+                "name": "Button/Primary",
+                "type": "INSTANCE",
+                "componentId": "C:3",
+                "children": [
+                  {
+                    "id": "1:15",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Log In"
+                  }
+                ]
+              },
+              {
+                "id": "1:16",
+                "name": "Link/ForgotPassword",
+                "type": "INSTANCE",
+                "componentId": "C:4",
+                "children": [
+                  {
+                    "id": "1:17",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Forgot password?"
+                  }
+                ]
+              },
+              {
+                "id": "1:18",
+                "name": "Divider",
+                "type": "RECTANGLE"
+              },
+              {
+                "id": "1:19",
+                "name": "Logo",
+                "type": "INSTANCE",
+                "componentId": "C:99"
+              },
+              {
+                "id": "1:20",
+                "name": "Toggle/RememberMe",
+                "type": "INSTANCE",
+                "componentId": "C:5",
+                "children": [
+                  {
+                    "id": "1:21",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Remember me"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "1:2",
+            "name": "01 - Login Screen - Dark",
+            "type": "FRAME",
+            "children": [
+              {
+                "id": "1:30",
+                "name": "Button/Primary",
+                "type": "INSTANCE",
+                "componentId": "C:3",
+                "children": [
+                  {
+                    "id": "1:31",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Log In"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "2:0",
+        "name": "Home",
+        "type": "CANVAS",
+        "children": [
+          {
+            "id": "2:1",
+            "name": "Home - Default",
+            "type": "FRAME",
+            "children": [
+              {
+                "id": "2:10",
+                "name": "Card/AccountBalance",
+                "type": "INSTANCE",
+                "componentId": "C:10",
+                "children": [
+                  {
+                    "id": "2:11",
+                    "name": "Title",
+                    "type": "TEXT",
+                    "characters": "Account Balance"
+                  }
+                ]
+              },
+              {
+                "id": "2:12",
+                "name": "Button/Transfer",
+                "type": "INSTANCE",
+                "componentId": "C:11",
+                "children": [
+                  {
+                    "id": "2:13",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Transfer"
+                  }
+                ]
+              },
+              {
+                "id": "2:14",
+                "name": "Button/Pay",
+                "type": "INSTANCE",
+                "componentId": "C:12",
+                "children": [
+                  {
+                    "id": "2:15",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Pay Bills"
+                  }
+                ]
+              },
+              {
+                "id": "2:16",
+                "name": "Tab/Accounts",
+                "type": "INSTANCE",
+                "componentId": "C:13",
+                "children": [
+                  {
+                    "id": "2:17",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Accounts"
+                  }
+                ]
+              },
+              {
+                "id": "2:18",
+                "name": "Tab/Cards",
+                "type": "INSTANCE",
+                "componentId": "C:14",
+                "children": [
+                  {
+                    "id": "2:19",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Cards"
+                  }
+                ]
+              },
+              {
+                "id": "2:20",
+                "name": "BottomNav",
+                "type": "INSTANCE",
+                "componentId": "C:15"
+              },
+              {
+                "id": "2:22",
+                "name": "Loader",
+                "type": "INSTANCE",
+                "componentId": "C:50"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "3:0",
+        "name": "Payments",
+        "type": "CANVAS",
+        "children": [
+          {
+            "id": "3:1",
+            "name": "Payment Form",
+            "type": "FRAME",
+            "children": [
+              {
+                "id": "3:10",
+                "name": "Input/Amount",
+                "type": "INSTANCE",
+                "componentId": "C:20",
+                "children": [
+                  {
+                    "id": "3:11",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Amount"
+                  }
+                ]
+              },
+              {
+                "id": "3:12",
+                "name": "Dropdown/AccountSelect",
+                "type": "INSTANCE",
+                "componentId": "C:21",
+                "children": [
+                  {
+                    "id": "3:13",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Select Account"
+                  }
+                ]
+              },
+              {
+                "id": "3:14",
+                "name": "Checkbox/SaveRecipient",
+                "type": "INSTANCE",
+                "componentId": "C:22",
+                "children": [
+                  {
+                    "id": "3:15",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Save recipient"
+                  }
+                ]
+              },
+              {
+                "id": "3:16",
+                "name": "Button/Submit",
+                "type": "INSTANCE",
+                "componentId": "C:23",
+                "children": [
+                  {
+                    "id": "3:17",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Send Payment"
+                  }
+                ]
+              },
+              {
+                "id": "3:18",
+                "name": "InteractiveFrame",
+                "type": "FRAME",
+                "interactions": [
+                  {"trigger": {"type": "ON_CLICK"}, "action": {"type": "NAVIGATE", "destinationId": "4:0"}}
+                ],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "3:2",
+            "name": "Payment Success",
+            "type": "FRAME",
+            "children": [
+              {
+                "id": "3:20",
+                "name": "Button/Done",
+                "type": "INSTANCE",
+                "componentId": "C:24",
+                "children": [
+                  {
+                    "id": "3:21",
+                    "name": "Label",
+                    "type": "TEXT",
+                    "characters": "Done"
+                  }
+                ]
+              },
+              {
+                "id": "3:22",
+                "name": "Icon/Checkmark",
+                "type": "INSTANCE",
+                "componentId": "C:25"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "9:0",
+        "name": "Archive",
+        "type": "CANVAS",
+        "children": [
+          {
+            "id": "9:1",
+            "name": "Old Screen",
+            "type": "FRAME",
+            "children": [
+              {
+                "id": "9:10",
+                "name": "Button/Legacy",
+                "type": "INSTANCE",
+                "componentId": "C:99"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
