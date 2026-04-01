@@ -11,6 +11,7 @@ venv/
 .env
 .figma-taxonomy-cache/
 output/
+!src/figma_taxonomy/output/
 *.xlsx
 !taxonomy.config.yaml
 .pytest_cache/
