@@ -16,6 +16,9 @@ dependencies = [
 ai = [
     "anthropic>=0.40",
 ]
+mcp = [
+    "mcp>=1.0",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
@@ -23,6 +26,7 @@ dev = [
 
 [project.scripts]
 figma-taxonomy = "figma_taxonomy.cli:main"
+figma-taxonomy-mcp = "figma_taxonomy.mcp_server:main"
 
 [build-system]
 requires = ["hatchling"]
