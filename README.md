@@ -81,7 +81,27 @@ figma-taxonomy extract ... --config ./my-config.yaml
 
 # Skip API cache
 figma-taxonomy extract ... --no-cache
+
+# Detect drift between a stored taxonomy and the current Figma file
+figma-taxonomy validate ./output/taxonomy.json --figma https://figma.com/file/ABC123/MyApp
+
+# Validate against a fixture; exit non-zero if drift detected (for CI)
+figma-taxonomy validate ./output/taxonomy.json --fixture ./figma.json --exit-code
 ```
+
+## Drift detection
+
+Once you've committed a `taxonomy.json` to your repo, run `validate` to check whether the
+design has changed since. It matches events by Figma `node_id` (so renames are detected as
+renames, not add+remove), and reports:
+
+- **Added** — interactive elements that exist in Figma but not in the stored taxonomy
+- **Removed** — events in the stored taxonomy that no longer correspond to any Figma node
+- **Renamed** — same node, different event name (e.g., after a component was renamed)
+- **Property changes** — properties added or removed on an existing event
+
+Wire this into CI with `--exit-code` to fail the build when designs and the tracking plan
+drift apart.
 
 ## Configuration
 
@@ -172,7 +192,7 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 ## Roadmap
 
 - [x] **v0.1** — Core extraction pipeline, CLI, 4 output formats
-- [ ] **v0.2** — Full config support, `validate` command (taxonomy drift detection)
+- [x] **v0.2** — Full config support, `validate` command (taxonomy drift detection)
 - [ ] **v0.3** — AI enrichment via Claude (property inference from screen context)
 - [ ] **v0.4** — MCP server for Claude Desktop, Amplitude API push, `diff` command
 - [ ] **v1.0** — CI integration, documentation site, PyPI publish
