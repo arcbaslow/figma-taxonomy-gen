@@ -13,7 +13,7 @@ from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
 from figma_taxonomy.figma_client import fetch_file, load_fixture
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
-from figma_taxonomy.validate import diff_taxonomies
+from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 
 
 @click.group()
@@ -149,6 +149,94 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
         click.echo(f"\n  Renamed ({len(report.renamed)}):")
         for old, new in report.renamed:
             click.echo(f"    {old} -> {new}")
+    if report.property_changes:
+        click.echo(f"\n  Property changes ({len(report.property_changes)}):")
+        for change in report.property_changes:
+            click.echo(f"    {change['event_name']}:")
+            for prop in change["added"]:
+                click.echo(f"      + {prop}")
+            for prop in change["removed"]:
+                click.echo(f"      - {prop}")
+
+    if exit_code:
+        raise SystemExit(1)
+
+
+@main.command()
+@click.argument("taxonomy_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--dry-run", is_flag=True, help="Print what would be pushed without calling the API")
+@click.option("--base-url", default="https://amplitude.com", help="Amplitude base URL")
+def push(taxonomy_path, dry_run, base_url):
+    """Push a taxonomy JSON to Amplitude's Taxonomy API (Enterprise only)."""
+    from figma_taxonomy.amplitude_push import make_client, push_taxonomy
+    from figma_taxonomy.validate import _events_from_dict
+
+    api_key = os.environ.get("AMPLITUDE_API_KEY")
+    secret_key = os.environ.get("AMPLITUDE_SECRET_KEY")
+    if not dry_run and not (api_key and secret_key):
+        raise click.ClickException(
+            "AMPLITUDE_API_KEY and AMPLITUDE_SECRET_KEY must be set for non-dry-run pushes."
+        )
+
+    stored = json.loads(Path(taxonomy_path).read_text(encoding="utf-8"))
+    events = _events_from_dict(stored.get("events", {}))
+    click.echo(f"Loaded {len(events)} events from {taxonomy_path}")
+
+    client = make_client(api_key or "dry", secret_key or "dry", base_url=base_url)
+    try:
+        result = push_taxonomy(events, client=client, dry_run=dry_run)
+    finally:
+        client.close()
+
+    if dry_run:
+        categories = sorted({e.flow for e in events if e.flow})
+        properties = sorted({p.name for e in events for p in e.properties})
+        click.echo(f"\nDry run - would push:")
+        click.echo(f"  {len(categories)} categories: {categories}")
+        click.echo(f"  {len(properties)} properties")
+        click.echo(f"  {len(events)} events")
+        return
+
+    click.echo(f"\nCreated: {len(result.events_created)} events, "
+               f"{len(result.properties_created)} properties, "
+               f"{len(result.categories_created)} categories")
+    if result.events_skipped:
+        click.echo(f"Skipped (already exist): {len(result.events_skipped)}")
+    if result.errors:
+        click.echo(click.style(f"\n{len(result.errors)} error(s):", fg="red"))
+        for err in result.errors[:10]:
+            click.echo(f"  {err}")
+        raise SystemExit(1)
+
+
+@main.command(name="diff")
+@click.argument("old_path", type=click.Path(exists=True, path_type=Path))
+@click.argument("new_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--exit-code", is_flag=True, help="Exit non-zero if any differences found")
+def diff_cmd(old_path, new_path, exit_code):
+    """Diff two taxonomy JSON files (e.g., before/after a design change)."""
+    old = json.loads(Path(old_path).read_text(encoding="utf-8")).get("events", {})
+    new = json.loads(Path(new_path).read_text(encoding="utf-8")).get("events", {})
+
+    report = diff_taxonomy_dicts(old, new)
+
+    if report.is_clean():
+        click.echo(click.style("Taxonomies match.", fg="green"))
+        return
+
+    click.echo(click.style("Differences:", fg="yellow", bold=True))
+    if report.added:
+        click.echo(f"\n  Added ({len(report.added)}):")
+        for event in report.added:
+            click.echo(f"    + {event.event_name}")
+    if report.removed:
+        click.echo(f"\n  Removed ({len(report.removed)}):")
+        for name in report.removed:
+            click.echo(f"    - {name}")
+    if report.renamed:
+        click.echo(f"\n  Renamed ({len(report.renamed)}):")
+        for old_name, new_name in report.renamed:
+            click.echo(f"    {old_name} -> {new_name}")
     if report.property_changes:
         click.echo(f"\n  Property changes ({len(report.property_changes)}):")
         for change in report.property_changes:
