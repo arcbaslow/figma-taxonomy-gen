@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from figma_taxonomy.models import TaxonomyEvent
+from figma_taxonomy.models import EventProperty, TaxonomyEvent
 
 
 @dataclass
@@ -84,3 +84,38 @@ def diff_taxonomies(
             report.removed.append(name)
 
     return report
+
+
+def _events_from_dict(taxonomy_dict: dict[str, dict]) -> list[TaxonomyEvent]:
+    """Hydrate a JSON `events` dict back into TaxonomyEvent objects for diffing."""
+    events: list[TaxonomyEvent] = []
+    for name, body in taxonomy_dict.items():
+        node_id = _node_id_from_source(body.get("source", ""))
+        props = []
+        for prop_name, prop_body in (body.get("properties") or {}).items():
+            props.append(
+                EventProperty(
+                    name=prop_name,
+                    type=prop_body.get("type", "string") if isinstance(prop_body, dict) else "string",
+                    description=prop_body.get("description", "") if isinstance(prop_body, dict) else "",
+                    enum_values=prop_body.get("enum") if isinstance(prop_body, dict) else None,
+                )
+            )
+        events.append(
+            TaxonomyEvent(
+                event_name=name,
+                flow=body.get("category", ""),
+                description=body.get("description", ""),
+                source_node_id=node_id,
+                properties=props,
+            )
+        )
+    return events
+
+
+def diff_taxonomy_dicts(
+    old: dict[str, dict],
+    new: dict[str, dict],
+) -> ValidationReport:
+    """Compare two stored taxonomies (parsed JSON `events` dicts)."""
+    return diff_taxonomies(old, _events_from_dict(new))
