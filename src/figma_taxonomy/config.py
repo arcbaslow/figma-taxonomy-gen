@@ -105,11 +105,19 @@ class OutputConfig:
 
 
 @dataclass
+class AIConfig:
+    enabled: bool = False
+    model: str = "claude-haiku-4-5-20251001"
+    max_tokens: int = 2048
+
+
+@dataclass
 class TaxonomyConfig:
     app: AppConfig = field(default_factory=AppConfig)
     figma: FigmaConfig = field(default_factory=FigmaConfig)
     naming: NamingConfig = field(default_factory=NamingConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
+    ai: AIConfig = field(default_factory=AIConfig)
     global_properties: list[dict[str, Any]] = field(default_factory=lambda: list(_DEFAULT_GLOBAL_PROPERTIES))
     property_rules: list[dict[str, Any]] = field(default_factory=lambda: list(_DEFAULT_PROPERTY_RULES))
 
@@ -176,6 +184,14 @@ def load_config(path: Path | None) -> TaxonomyConfig:
         config.output = OutputConfig(
             formats=o.get("formats", config.output.formats),
             directory=o.get("directory", config.output.directory),
+        )
+
+    if "ai" in raw:
+        a = raw["ai"]
+        config.ai = AIConfig(
+            enabled=a.get("enabled", config.ai.enabled),
+            model=a.get("model", config.ai.model),
+            max_tokens=a.get("max_tokens", config.ai.max_tokens),
         )
 
     if "global_properties" in raw:
