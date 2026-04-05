@@ -6,10 +6,13 @@ from pathlib import Path
 
 import click
 
+import json
+
 from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
 from figma_taxonomy.figma_client import fetch_file, load_fixture
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
+from figma_taxonomy.validate import diff_taxonomies
 
 
 @click.group()
@@ -94,3 +97,60 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         click.echo(f"  Markdown: {path}")
 
     click.echo(f"\nDone! {len(events)} events written to {output_dir}/")
+
+
+@main.command()
+@click.argument("taxonomy_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--figma", "figma_url", help="Figma file URL to validate against")
+@click.option("--fixture", type=click.Path(exists=True, path_type=Path), help="Local JSON fixture instead of Figma API")
+@click.option("--config", "-c", "config_path", type=click.Path(exists=True, path_type=Path), help="Path to taxonomy.config.yaml")
+@click.option("--no-cache", is_flag=True, help="Skip Figma API cache")
+@click.option("--exit-code", is_flag=True, help="Exit non-zero if drift is detected (for CI)")
+def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code):
+    """Check an existing taxonomy JSON for drift against the current Figma file."""
+    if not figma_url and not fixture:
+        raise click.UsageError("Provide --figma URL or --fixture with a local JSON file.")
+
+    config = load_config(config_path)
+
+    stored = json.loads(Path(taxonomy_path).read_text(encoding="utf-8"))
+    existing_events = stored.get("events", {})
+
+    if fixture:
+        figma_file = load_fixture(fixture)
+    else:
+        figma_file = fetch_file(figma_url, no_cache=no_cache)
+
+    elements = extract_elements(figma_file, config)
+    current_events = generate_taxonomy(elements, config)
+
+    report = diff_taxonomies(existing_events, current_events)
+
+    if report.is_clean():
+        click.echo(click.style("No drift detected.", fg="green"))
+        return
+
+    click.echo(click.style("Drift detected:", fg="yellow", bold=True))
+    if report.added:
+        click.echo(f"\n  Added ({len(report.added)}):")
+        for event in report.added:
+            click.echo(f"    + {event.event_name}  (node {event.source_node_id})")
+    if report.removed:
+        click.echo(f"\n  Removed ({len(report.removed)}):")
+        for name in report.removed:
+            click.echo(f"    - {name}")
+    if report.renamed:
+        click.echo(f"\n  Renamed ({len(report.renamed)}):")
+        for old, new in report.renamed:
+            click.echo(f"    {old} -> {new}")
+    if report.property_changes:
+        click.echo(f"\n  Property changes ({len(report.property_changes)}):")
+        for change in report.property_changes:
+            click.echo(f"    {change['event_name']}:")
+            for prop in change["added"]:
+                click.echo(f"      + {prop}")
+            for prop in change["removed"]:
+                click.echo(f"      - {prop}")
+
+    if exit_code:
+        raise SystemExit(1)
