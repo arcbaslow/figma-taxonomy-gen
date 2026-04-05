@@ -122,6 +122,56 @@ in the config to use Sonnet for complex screens.
 Cost estimate for the banking-app fixture (6 flows, Haiku): ~$0.001. A real 30-50 screen
 fintech app typically lands between $0.01 and $0.10.
 
+## MCP server
+
+The tool ships an MCP server so Claude Desktop / claude.ai can call its functions
+directly. Three tools are exposed:
+
+| Tool | Description |
+|------|-------------|
+| `extract_taxonomy` | Extract a taxonomy from a Figma file or local fixture |
+| `validate_taxonomy` | Diff a stored taxonomy JSON against the current Figma file |
+| `export_taxonomy` | Write a taxonomy to disk as json / csv / markdown / excel |
+
+Install and run:
+
+```bash
+uv pip install 'figma-taxonomy-gen[mcp]'
+figma-taxonomy-mcp
+```
+
+In Claude Desktop `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "figma-taxonomy": {
+      "command": "figma-taxonomy-mcp",
+      "env": { "FIGMA_TOKEN": "your-figma-pat" }
+    }
+  }
+}
+```
+
+## Pushing to Amplitude (Enterprise)
+
+If you're on an Amplitude plan that exposes the Taxonomy API:
+
+```bash
+export AMPLITUDE_API_KEY="..."
+export AMPLITUDE_SECRET_KEY="..."
+figma-taxonomy push ./output/taxonomy.json            # real push
+figma-taxonomy push ./output/taxonomy.json --dry-run  # preview only
+```
+
+## Diffing two taxonomy files
+
+```bash
+figma-taxonomy diff ./v1/taxonomy.json ./v2/taxonomy.json --exit-code
+```
+
+Useful for reviewing taxonomy changes in PRs before they're pushed to Amplitude.
+
 ## Configuration
 
 Create a `taxonomy.config.yaml` to customize naming conventions:
@@ -213,7 +263,7 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 - [x] **v0.1** — Core extraction pipeline, CLI, 4 output formats
 - [x] **v0.2** — Full config support, `validate` command (taxonomy drift detection)
 - [x] **v0.3** — AI enrichment via Claude (property inference from screen context)
-- [ ] **v0.4** — MCP server for Claude Desktop, Amplitude API push, `diff` command
+- [x] **v0.4** — MCP server for Claude Desktop, Amplitude API push, `diff` command
 - [ ] **v1.0** — CI integration, documentation site, PyPI publish
 
 ## License
