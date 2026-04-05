@@ -103,6 +103,25 @@ renames, not add+remove), and reports:
 Wire this into CI with `--exit-code` to fail the build when designs and the tracking plan
 drift apart.
 
+## AI enrichment (optional)
+
+With `--ai`, the tool sends one prompt per flow to Claude and merges suggested properties
+into the generated events. Good for things like enum values derived from component variants,
+contextual identifiers, and state flags that rule-based generation can't infer.
+
+```bash
+uv pip install 'figma-taxonomy-gen[ai]'
+export ANTHROPIC_API_KEY="sk-ant-..."
+figma-taxonomy extract --fixture tests/fixtures/banking_app.json --ai
+```
+
+Before calling the API, the CLI prints an estimated cost and prompts for confirmation
+(use `--yes` to skip the prompt in scripts). Haiku is the default; override via `ai.model`
+in the config to use Sonnet for complex screens.
+
+Cost estimate for the banking-app fixture (6 flows, Haiku): ~$0.001. A real 30-50 screen
+fintech app typically lands between $0.01 and $0.10.
+
 ## Configuration
 
 Create a `taxonomy.config.yaml` to customize naming conventions:
@@ -193,7 +212,7 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 
 - [x] **v0.1** — Core extraction pipeline, CLI, 4 output formats
 - [x] **v0.2** — Full config support, `validate` command (taxonomy drift detection)
-- [ ] **v0.3** — AI enrichment via Claude (property inference from screen context)
+- [x] **v0.3** — AI enrichment via Claude (property inference from screen context)
 - [ ] **v0.4** — MCP server for Claude Desktop, Amplitude API push, `diff` command
 - [ ] **v1.0** — CI integration, documentation site, PyPI publish
 

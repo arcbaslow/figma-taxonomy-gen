@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 
 import json
+import os
 
 from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
@@ -30,7 +31,9 @@ def main():
 @click.option("--format", "-f", "formats", default="excel,csv,json,markdown", help="Comma-separated output formats")
 @click.option("--page", help="Extract only a specific page by name")
 @click.option("--no-cache", is_flag=True, help="Skip Figma API cache")
-def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache):
+@click.option("--ai", "use_ai", is_flag=True, help="Enrich events with Claude-suggested properties")
+@click.option("--yes", "-y", "assume_yes", is_flag=True, help="Skip cost-estimate confirmation prompt")
+def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache, use_ai, assume_yes):
     """Extract taxonomy from a Figma file.
 
     Pass a Figma URL to fetch from the API, or use --fixture with a local JSON file.
@@ -66,6 +69,9 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
     click.echo("Generating taxonomy...")
     events = generate_taxonomy(elements, config)
     click.echo(f"Generated {len(events)} events")
+
+    if use_ai or config.ai.enabled:
+        events = _run_enrichment(events, config, assume_yes)
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -154,3 +160,50 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
 
     if exit_code:
         raise SystemExit(1)
+
+
+def _run_enrichment(events, config, assume_yes: bool):
+    from figma_taxonomy.ai_enricher import (
+        build_prompt,
+        enrich_events,
+        estimate_cost,
+        group_events_by_flow,
+    )
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise click.ClickException(
+            "ANTHROPIC_API_KEY is not set. Export it or disable --ai."
+        )
+
+    try:
+        import anthropic
+    except ImportError:
+        raise click.ClickException(
+            "anthropic package not installed. Install with: uv pip install 'figma-taxonomy-gen[ai]'"
+        )
+
+    grouped = group_events_by_flow(events)
+    prompts = [
+        build_prompt(flow, flow_events, app_type=config.app.type, app_name=config.app.name)
+        for flow, flow_events in grouped.items()
+    ]
+    estimate = estimate_cost(prompts, model=config.ai.model)
+    click.echo(
+        f"\nAI enrichment: {estimate['num_calls']} call(s), "
+        f"~{estimate['est_input_tokens']} input tokens, "
+        f"est. cost ${estimate['est_cost_usd']:.4f} ({estimate['model']})"
+    )
+    if not assume_yes and not click.confirm("Proceed?", default=True):
+        click.echo("Skipping enrichment.")
+        return events
+
+    client = anthropic.Anthropic(api_key=api_key)
+    click.echo("Calling Claude for property suggestions...")
+    enriched = enrich_events(
+        events, config, client=client,
+        model=config.ai.model, max_tokens=config.ai.max_tokens,
+    )
+    new_prop_count = sum(len(e.properties) for e in enriched) - sum(len(e.properties) for e in events)
+    click.echo(f"Enrichment added {max(new_prop_count, 0)} new properties across {len(enriched)} events.")
+    return enriched
