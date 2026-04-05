@@ -172,6 +172,34 @@ figma-taxonomy diff ./v1/taxonomy.json ./v2/taxonomy.json --exit-code
 
 Useful for reviewing taxonomy changes in PRs before they're pushed to Amplitude.
 
+## CI: drift detection on pull requests
+
+A composite action is included so you can fail PRs when the Figma design and the committed
+taxonomy go out of sync. Drop this into `.github/workflows/taxonomy-drift.yml` in your app
+repository:
+
+```yaml
+name: Taxonomy drift check
+on:
+  pull_request:
+    paths:
+      - "tracking/taxonomy.json"
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
+        with:
+          taxonomy-path: tracking/taxonomy.json
+          figma-url: https://figma.com/design/ABC123/MyApp
+          figma-token: ${{ secrets.FIGMA_TOKEN }}
+```
+
+The job exits non-zero with a human-readable diff when events are added, removed, renamed,
+or when properties change.
+
 ## Configuration
 
 Create a `taxonomy.config.yaml` to customize naming conventions:
@@ -264,7 +292,7 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 - [x] **v0.2** — Full config support, `validate` command (taxonomy drift detection)
 - [x] **v0.3** — AI enrichment via Claude (property inference from screen context)
 - [x] **v0.4** — MCP server for Claude Desktop, Amplitude API push, `diff` command
-- [ ] **v1.0** — CI integration, documentation site, PyPI publish
+- [ ] **v1.0** — CI workflows + drop-in drift-check action, PyPI publish (in progress)
 
 ## License
 
