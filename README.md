@@ -2,6 +2,8 @@
 
 CLI tool that extracts interactive UI elements from Figma designs and generates an opinionated [Amplitude](https://amplitude.com) event taxonomy.
 
+**Documentation:** [arcbaslow.github.io/figma-taxonomy-gen](https://arcbaslow.github.io/figma-taxonomy-gen/)
+
 **Problem:** Every team building a tracking plan goes through the same cycle — designer creates screens, PM manually writes a spreadsheet, analyst maps events, developer implements tracking, nobody keeps it in sync. This tool closes the gap between "design is done" and "tracking plan exists."
 
 ## What it does
@@ -292,7 +294,7 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 - [x] **v0.2** — Full config support, `validate` command (taxonomy drift detection)
 - [x] **v0.3** — AI enrichment via Claude (property inference from screen context)
 - [x] **v0.4** — MCP server for Claude Desktop, Amplitude API push, `diff` command
-- [ ] **v1.0** — CI workflows + drop-in drift-check action, PyPI publish (in progress)
+- [x] **v1.0** — CI workflows, drop-in drift-check action, MkDocs site, PyPI publish (ready to tag)
 
 ## License
 
