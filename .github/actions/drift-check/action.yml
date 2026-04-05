@@ -1,0 +1,54 @@
+name: "Figma Taxonomy Drift Check"
+description: "Fail the build if the stored taxonomy drifts from the current Figma file."
+author: "arcbaslow"
+
+inputs:
+  taxonomy-path:
+    description: "Path to the committed taxonomy.json"
+    required: true
+  figma-url:
+    description: "Figma file URL"
+    required: true
+  figma-token:
+    description: "Figma Personal Access Token"
+    required: true
+  config-path:
+    description: "Optional path to taxonomy.config.yaml"
+    required: false
+    default: ""
+  package-version:
+    description: "Version of figma-taxonomy-gen to install"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install figma-taxonomy-gen
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.package-version }}" ]; then
+          pip install "figma-taxonomy-gen==${{ inputs.package-version }}"
+        else
+          pip install figma-taxonomy-gen
+        fi
+
+    - name: Check for drift
+      shell: bash
+      env:
+        FIGMA_TOKEN: ${{ inputs.figma-token }}
+      run: |
+        ARGS=(
+          "${{ inputs.taxonomy-path }}"
+          --figma "${{ inputs.figma-url }}"
+          --exit-code
+        )
+        if [ -n "${{ inputs.config-path }}" ]; then
+          ARGS+=(--config "${{ inputs.config-path }}")
+        fi
+        figma-taxonomy validate "${ARGS[@]}"
