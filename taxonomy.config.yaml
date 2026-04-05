@@ -37,6 +37,11 @@ output:
   formats: ["excel", "csv", "json", "markdown"]
   directory: "./output"
 
+ai:
+  enabled: false
+  model: "claude-haiku-4-5-20251001"
+  max_tokens: 2048
+
 global_properties:
   - name: "screen_name"
     type: "string"

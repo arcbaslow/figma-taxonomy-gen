@@ -68,3 +68,23 @@ def test_config_output_defaults():
 def test_config_exclude_pages():
     config = load_config(None)
     assert "Archive" in config.figma.exclude_pages
+
+
+def test_ai_config_defaults():
+    config = load_config(None)
+    assert config.ai.enabled is False
+    assert config.ai.model.startswith("claude-")
+
+
+def test_ai_config_from_yaml(tmp_path):
+    yaml_content = textwrap.dedent("""\
+        ai:
+          enabled: true
+          model: claude-sonnet-4-6
+    """)
+    config_file = tmp_path / "ai.yaml"
+    config_file.write_text(yaml_content)
+
+    config = load_config(config_file)
+    assert config.ai.enabled is True
+    assert config.ai.model == "claude-sonnet-4-6"
