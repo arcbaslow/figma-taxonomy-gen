@@ -1,16 +1,38 @@
 [project]
 name = "figma-taxonomy-gen"
-version = "0.1.0"
+version = "0.4.0"
 description = "Extract interactive UI elements from Figma designs and generate Amplitude event taxonomies"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
+authors = [
+    { name = "Dilshat Rakhimov" },
+]
+keywords = ["figma", "amplitude", "analytics", "tracking", "taxonomy", "mcp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: Site Management",
+]
 dependencies = [
     "click>=8.1",
     "httpx>=0.27",
     "pyyaml>=6.0",
     "openpyxl>=3.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/arcbaslow/figma-taxonomy-gen"
+Repository = "https://github.com/arcbaslow/figma-taxonomy-gen"
+Issues = "https://github.com/arcbaslow/figma-taxonomy-gen/issues"
 
 [project.optional-dependencies]
 ai = [
