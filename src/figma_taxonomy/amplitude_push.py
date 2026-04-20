@@ -41,14 +41,10 @@ def make_client(api_key: str, secret_key: str, base_url: str = AMPLITUDE_BASE_UR
 
 
 def _fetch_existing_events(client: httpx.Client) -> set[str]:
-    try:
-        response = client.get("/api/2/taxonomy/event")
-        response.raise_for_status()
-        data = response.json().get("data", [])
-        return {item.get("event_type") for item in data if item.get("event_type")}
-    except httpx.HTTPError:
-        # If we can't reach the API, push nothing rather than creating dupes.
-        return set()
+    response = client.get("/api/2/taxonomy/event")
+    response.raise_for_status()
+    data = response.json().get("data", [])
+    return {item.get("event_type") for item in data if item.get("event_type")}
 
 
 def _post(client: httpx.Client, path: str, payload: dict, result: PushResult) -> bool:
@@ -77,7 +73,6 @@ def push_taxonomy(
     if dry_run:
         return result
 
-    # 1. Unique categories
     seen_categories: set[str] = set()
     for event in events:
         category = event.flow
@@ -92,7 +87,6 @@ def push_taxonomy(
         ):
             result.categories_created.append(category)
 
-    # 2. Unique properties
     seen_properties: set[str] = set()
     for event in events:
         for prop in event.properties:
@@ -107,7 +101,6 @@ def push_taxonomy(
             if _post(client, "/api/2/taxonomy/event-property", payload, result):
                 result.properties_created.append(prop.name)
 
-    # 3. Events (skip already-present)
     for event in events:
         if event.event_name in existing:
             result.events_skipped.append(event.event_name)

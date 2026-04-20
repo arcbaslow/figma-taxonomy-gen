@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import openpyxl
-from openpyxl.styles import Font
-
 from figma_taxonomy.config import TaxonomyConfig
 from figma_taxonomy.models import TaxonomyEvent
 
@@ -16,6 +13,9 @@ def write_excel(
     config: TaxonomyConfig,
     output_path: Path,
 ) -> None:
+    import openpyxl
+    from openpyxl.styles import Font
+
     wb = openpyxl.Workbook()
 
     # --- Events sheet ---
