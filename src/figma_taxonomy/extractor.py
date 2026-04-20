@@ -9,20 +9,23 @@ from figma_taxonomy.models import ScreenElement
 
 
 INTERACTIVE_PATTERNS = [
-    (r"button|btn|cta", "button"),
-    (r"link|anchor", "link"),
-    (r"input|field|text.?field|search.?bar", "input"),
-    (r"toggle|switch", "toggle"),
-    (r"checkbox|check.?box", "checkbox"),
-    (r"radio", "radio"),
-    (r"dropdown|select|picker", "dropdown"),
-    (r"tab|tab.?bar", "tab"),
-    (r"card", "card"),
-    (r"modal|dialog|sheet", "modal"),
-    (r"nav.?bar|bottom.?nav", "nav"),
-    (r"carousel|slider", "carousel"),
-    (r"chip|tag|badge", "chip"),
-    (r"form", "form"),
+    (re.compile(p, re.IGNORECASE), element_type)
+    for p, element_type in [
+        (r"button|btn|cta", "button"),
+        (r"link|anchor", "link"),
+        (r"input|field|text.?field|search.?bar", "input"),
+        (r"toggle|switch", "toggle"),
+        (r"checkbox|check.?box", "checkbox"),
+        (r"radio", "radio"),
+        (r"dropdown|select|picker", "dropdown"),
+        (r"tab|tab.?bar", "tab"),
+        (r"card", "card"),
+        (r"modal|dialog|sheet", "modal"),
+        (r"nav.?bar|bottom.?nav", "nav"),
+        (r"carousel|slider", "carousel"),
+        (r"chip|tag|badge", "chip"),
+        (r"form", "form"),
+    ]
 ]
 
 EXCLUDE_PATTERNS = [
@@ -50,7 +53,7 @@ def _is_excluded(name: str) -> bool:
 
 def _classify_element(name: str) -> str | None:
     for pattern, element_type in INTERACTIVE_PATTERNS:
-        if re.search(pattern, name, re.IGNORECASE):
+        if pattern.search(name):
             return element_type
     return None
 
@@ -148,7 +151,6 @@ def _walk_node(
     if is_interactive_component or is_interactive_frame:
         text_content = _extract_text_content(node)
 
-        # Clean element name: strip common prefixes
         clean_name = name
         for prefix in config.naming.element_name.strip_common:
             if clean_name.startswith(prefix):
@@ -169,7 +171,7 @@ def _walk_node(
                 parent_path=list(parent_path),
             )
         )
-        return elements  # Don't recurse into interactive components
+        return elements
 
     for child in node.get("children", []):
         elements.extend(

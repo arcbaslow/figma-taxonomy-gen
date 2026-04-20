@@ -108,13 +108,11 @@ def generate_taxonomy(
     screens_seen: set[str] = set()
     global_props = _get_global_properties(config)
 
-    # Collect screen → flow mapping
     screen_flow_map: dict[str, str] = {}
     for elem in elements:
         if elem.parent_path:
             screen_flow_map[elem.screen_name] = elem.parent_path[0]
 
-    # Generate element events
     for elem in elements:
         action = config.naming.actions.get(elem.element_type, "clicked")
         element_name = _clean_element_name(elem, config)
@@ -127,7 +125,6 @@ def generate_taxonomy(
 
         rule_props = _get_matching_properties(event_name, config)
 
-        # Deduplicate properties by name
         prop_names_seen: set[str] = set()
         all_props: list[EventProperty] = []
         for p in rule_props + global_props:
@@ -148,7 +145,6 @@ def generate_taxonomy(
             )
         )
 
-    # Generate pageview events for each screen
     for screen_name in sorted(screens_seen):
         pv_name = f"{screen_name}_pageview"
         if pv_name not in seen_names:

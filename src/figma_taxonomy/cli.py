@@ -260,9 +260,7 @@ def _run_enrichment(events, config, assume_yes: bool):
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        raise click.ClickException(
-            "ANTHROPIC_API_KEY is not set. Export it or disable --ai."
-        )
+        raise click.ClickException("Set ANTHROPIC_API_KEY or drop --ai.")
 
     try:
         import anthropic
