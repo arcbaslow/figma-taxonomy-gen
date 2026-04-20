@@ -2,23 +2,23 @@
 
 ## Project: `figma-taxonomy-gen`
 
-**One-line:** CLI + MCP tool that extracts interactive UI elements from Figma designs and generates an opinionated Amplitude event taxonomy - with optional AI-powered event naming and property inference.
+**One-line:** CLI + MCP tool that pulls interactive UI elements out of a Figma file and generates an Amplitude event taxonomy, with optional AI-powered property inference.
 
 ---
 
 ## Problem
 
-Every fintech/e-commerce team building an Amplitude (or Mixpanel/PostHog) tracking plan goes through the same painful cycle:
+Tracking plans for Amplitude (or Mixpanel, PostHog, etc.) tend to follow the same pattern on every team:
 
 1. Designer creates screens in Figma
-2. Product manager manually writes a tracking plan spreadsheet
+2. Product manager writes a tracking-plan spreadsheet by hand
 3. Analyst maps events to business metrics
-4. Developer implements tracking code
-5. Nobody keeps the spreadsheet in sync - taxonomy drifts
+4. Developer implements the tracking
+5. Nobody keeps the spreadsheet in sync, so the taxonomy drifts
 
-Existing tools (Amplitude Event Planner plugin, Tracking Plan Companion, Avo) address pieces of this, but none automate the initial extraction. They all require manual annotation of Figma designs. The Amplitude Taxonomy API exists but is Enterprise-only and doesn't connect to design files.
+Existing tools (Amplitude Event Planner plugin, Tracking Plan Companion, Avo) cover pieces of this but none automate the initial extraction - they all need manual annotation of the design, and the Amplitude Taxonomy API is Enterprise-only with no design-file integration.
 
-**This tool closes the gap between "design is done" and "tracking plan exists."**
+**The goal here is to generate that first spreadsheet straight from the Figma file, and keep it in sync after.**
 
 ---
 
@@ -51,7 +51,7 @@ Figma file URL
 
 ### Naming convention engine
 
-The tool applies an opinionated, configurable naming convention:
+The tool applies a configurable naming convention with sensible defaults:
 
 ```
 {object}_{action}
@@ -580,7 +580,7 @@ uv run python -m mcp.server
 | Tracking Plan Companion (Glazed) | AI suggestions from uploaded designs | Proprietary SaaS, no CLI, no Amplitude integration, no config |
 | Avo | Full tracking plan lifecycle management | Heavy SaaS product ($$$). No Figma extraction. Requires manual plan creation. |
 | Iteratively (now Amplitude) | Type-safe tracking code generation | Requires existing tracking plan. Doesn't generate from design. |
-| This tool | Auto-extract from Figma -> opinionated taxonomy -> multi-format output | Fills the "design to initial tracking plan" gap. Open source. CLI-first. Configurable. |
+| This tool | Auto-extract from Figma -> taxonomy with configurable naming rules -> multi-format output | Fills the "design to initial tracking plan" gap. Open source. CLI-first. Configurable. |
 
 ---
 
