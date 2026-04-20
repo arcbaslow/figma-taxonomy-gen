@@ -26,7 +26,6 @@ def _get_token() -> str:
 
 
 def _parse_file_key(url_or_key: str) -> str:
-    """Extract file key from a Figma URL or return raw key."""
     match = re.search(r"figma\.com/(?:file|design)/([a-zA-Z0-9]+)", url_or_key)
     if match:
         return match.group(1)
@@ -45,10 +44,11 @@ def _cache_path(file_key: str, version: str) -> Path:
 
 def _read_cache(file_key: str, version: str) -> dict | None:
     path = _cache_path(file_key, version)
-    if path.exists():
+    try:
         with open(path) as f:
             return json.load(f)
-    return None
+    except FileNotFoundError:
+        return None
 
 
 def _write_cache(file_key: str, version: str, data: dict) -> None:
