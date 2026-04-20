@@ -90,32 +90,45 @@ figma-taxonomy-gen/
 │   └── figma_taxonomy/
 │       ├── __init__.py
 │       ├── cli.py               # CLI entrypoint (click)
-│       ├── figma_client.py      # Figma REST API wrapper
+│       ├── config.py            # Config loader + typed dataclasses
+│       ├── models.py            # ScreenElement, TaxonomyEvent, EventProperty
+│       ├── figma_client.py      # Figma REST API wrapper with file-version cache
 │       ├── extractor.py         # Node tree walker + interactive element filter
 │       ├── taxonomy_engine.py   # Naming convention engine + event generator
 │       ├── ai_enricher.py       # Claude API integration for property inference
-│       ├── output/
-│       │   ├── amplitude_csv.py # Amplitude Data CSV format
-│       │   ├── json_schema.py   # JSON Schema output
-│       │   ├── markdown.py      # Human-readable tracking plan
-│       │   └── amplitude_api.py # Direct push via Taxonomy API (Enterprise)
-│       └── config.py            # Config loader
-│
-├── mcp/
-│   ├── server.py                # MCP server for Claude Desktop / Claude.ai
-│   └── tools.py                 # MCP tool definitions
+│       ├── validate.py          # Drift detection (taxonomy vs Figma)
+│       ├── amplitude_push.py    # Amplitude Taxonomy API push (Enterprise)
+│       ├── mcp_server.py        # MCP server entrypoint (figma-taxonomy-mcp)
+│       ├── mcp_tools.py         # Pure-function MCP tool implementations
+│       └── output/
+│           ├── amplitude_csv.py # Amplitude Data CSV format
+│           ├── excel.py         # .xlsx matching tracking-plan template
+│           ├── json_schema.py   # JSON Schema output
+│           └── markdown.py      # Human-readable tracking plan
 │
 ├── tests/
 │   ├── fixtures/                # Sample Figma API responses
+│   ├── conftest.py
 │   ├── test_extractor.py
 │   ├── test_taxonomy_engine.py
-│   └── test_output.py
+│   ├── test_output.py
+│   ├── test_config.py
+│   ├── test_models.py
+│   ├── test_ai_enricher.py
+│   ├── test_amplitude_push.py
+│   ├── test_validate.py
+│   ├── test_mcp_tools.py
+│   └── test_diff.py
 │
 └── examples/
     ├── banking-app/             # Example: fintech app taxonomy
     ├── ecommerce/               # Example: e-commerce taxonomy
     └── saas-dashboard/          # Example: SaaS product taxonomy
 ```
+
+The MCP server lives inside the package (`src/figma_taxonomy/mcp_server.py`) rather than
+a separate top-level `mcp/` directory, so it ships with `pip install figma-taxonomy-gen[mcp]`
+and is exposed as the `figma-taxonomy-mcp` console script declared in `pyproject.toml`.
 
 ---
 
