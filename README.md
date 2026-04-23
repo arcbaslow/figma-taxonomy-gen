@@ -278,14 +278,6 @@ uv run pytest -v
 uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 ```
 
-## Roadmap
-
-- [x] **v0.1**: Core extraction pipeline, CLI, 4 output formats
-- [x] **v0.2**: Full config support, `validate` command (taxonomy drift detection)
-- [x] **v0.3**: AI enrichment via Anthropic models
-- [x] **v0.4**: MCP server support, Amplitude API push, `diff` command
-- [x] **v1.0**: CI workflows, drop-in drift-check action, MkDocs site, PyPI publish (ready to tag)
-
 ## License
 
 MIT
