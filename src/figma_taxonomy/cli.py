@@ -16,6 +16,9 @@ from figma_taxonomy.taxonomy_engine import generate_taxonomy
 from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 
 
+SUPPORTED_OUTPUT_FORMATS = ("excel", "csv", "json", "markdown")
+
+
 @click.group()
 @click.version_option()
 def main():
@@ -28,7 +31,13 @@ def main():
 @click.option("--fixture", type=click.Path(exists=True, path_type=Path), help="Use a local JSON fixture instead of Figma API")
 @click.option("--config", "-c", "config_path", type=click.Path(exists=True, path_type=Path), help="Path to taxonomy.config.yaml")
 @click.option("--output", "-o", "output_dir", type=click.Path(path_type=Path), default="./output", help="Output directory")
-@click.option("--format", "-f", "formats", default="excel,csv,json,markdown", help="Comma-separated output formats")
+@click.option(
+    "--format",
+    "-f",
+    "formats",
+    default=None,
+    help="Comma-separated output formats (defaults to output.formats from config)",
+)
 @click.option("--page", help="Extract only a specific page by name")
 @click.option("--no-cache", is_flag=True, help="Skip Figma API cache")
 @click.option("--ai", "use_ai", is_flag=True, help="Enrich events with Claude-suggested properties")
@@ -42,6 +51,7 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         raise click.UsageError("Provide a Figma URL or use --fixture with a local JSON file.")
 
     config = load_config(config_path)
+    format_list = _parse_formats(formats, config.output.formats)
 
     if fixture:
         click.echo(f"Loading fixture: {fixture}")
@@ -76,8 +86,6 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    format_list = [f.strip() for f in formats.split(",")]
-
     if "excel" in format_list:
         from figma_taxonomy.output.excel import write_excel
         path = output_dir / "taxonomy.xlsx"
@@ -103,6 +111,29 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         click.echo(f"  Markdown: {path}")
 
     click.echo(f"\nDone! {len(events)} events written to {output_dir}/")
+
+
+def _parse_formats(raw_formats: str | None, config_formats: list[str]) -> list[str]:
+    requested = config_formats if raw_formats is None else raw_formats.split(",")
+    normalized: list[str] = []
+
+    for format_name in requested:
+        cleaned = format_name.strip().lower()
+        if cleaned and cleaned not in normalized:
+            normalized.append(cleaned)
+
+    if not normalized:
+        raise click.UsageError("At least one output format must be specified.")
+
+    invalid = [format_name for format_name in normalized if format_name not in SUPPORTED_OUTPUT_FORMATS]
+    if invalid:
+        supported = ", ".join(SUPPORTED_OUTPUT_FORMATS)
+        invalid_names = ", ".join(invalid)
+        raise click.UsageError(
+            f"Unknown output format(s): {invalid_names}. Supported formats: {supported}."
+        )
+
+    return normalized
 
 
 @main.command()
