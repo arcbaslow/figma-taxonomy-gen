@@ -1,12 +1,14 @@
 # figma-taxonomy-gen
 
-CLI that pulls interactive elements out of a Figma file and generates an [Amplitude](https://amplitude.com) event taxonomy.
+Generate an [Amplitude](https://amplitude.com) event taxonomy straight from a Figma file.
 
 **Docs:** [arcbaslow.github.io/figma-taxonomy-gen](https://arcbaslow.github.io/figma-taxonomy-gen/)
 
 ## Why
 
-Tracking plans usually live in a spreadsheet that the PM wrote by hand after staring at Figma for an afternoon. Then the spreadsheet drifts. This tool generates the first version of that spreadsheet straight from the design file, so at least the starting point stays in sync.
+Most tracking plans start the same way: someone reads through Figma, writes a spreadsheet by hand, and the spreadsheet goes stale a week later.
+
+This tool skips that first manual pass. It pulls the interactive parts out of a design file, turns them into event names and properties, and writes the outputs teams usually want to review or import.
 
 ## What it does
 
@@ -14,12 +16,12 @@ Tracking plans usually live in a spreadsheet that the PM wrote by hand after sta
 Figma file → extract interactive elements → apply naming rules → write outputs
 ```
 
-1. Reads the Figma file via the REST API (or a local JSON fixture).
-2. Walks the node tree and keeps the interactive bits: buttons, inputs, toggles, tabs, cards, modals, etc.
-3. Groups elements by page/frame into screens.
-4. Generates event names from a configurable pattern (default `{screen}_{element}_{action}`).
-5. Applies property rules (e.g. every `*_fail` event gets `error_description`).
-6. Writes Excel, Amplitude CSV, JSON Schema, and Markdown.
+1. Read a Figma file through the REST API, or load a local JSON fixture.
+2. Keep the parts that matter for analytics: buttons, inputs, toggles, tabs, cards, modals, and similar UI.
+3. Group those elements into screens based on page and frame structure.
+4. Build event names from a configurable pattern. The default is `{screen}_{element}_{action}`.
+5. Add properties from simple rules. For example, every `*_fail` event can get `error_description`.
+6. Write the result as Excel, Amplitude CSV, JSON, or Markdown.
 
 ## Install
 
@@ -54,7 +56,7 @@ From a fixture, if you want to try it without a token:
 figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 ```
 
-Four files land in `./output/`:
+By default the command writes four files to `./output/`:
 
 | File | Format | What it's for |
 |------|--------|---------------|
@@ -93,7 +95,7 @@ figma-taxonomy validate ./output/taxonomy.json --fixture ./figma.json --exit-cod
 
 ## Drift detection
 
-Once `taxonomy.json` is committed to your repo, `validate` compares it against the current Figma file. Events are matched by Figma `node_id`, so a renamed component shows up as a rename instead of an add plus a remove. The report covers:
+Once `taxonomy.json` is in your repo, `validate` compares it against the current Figma file. Events are matched by Figma `node_id`, so a renamed component shows up as a rename instead of a fake add/remove pair. The report covers:
 
 - **Added**: elements that exist in Figma but not in the stored taxonomy
 - **Removed**: events in the taxonomy that no longer map to any Figma node
@@ -104,7 +106,7 @@ Add `--exit-code` to fail CI when the design and the tracking plan disagree.
 
 ## AI enrichment (optional)
 
-With `--ai`, the tool sends one prompt per flow to an Anthropic model and merges the suggested properties into the generated events. Useful for things the rule engine can't guess: enum values from component variants, contextual IDs, state flags.
+With `--ai`, the tool sends one prompt per flow to an Anthropic model and merges the suggested properties back into the generated events. This helps with things the rule engine cannot infer cleanly on its own, like enum values from variants, contextual IDs, or state flags.
 
 ```bash
 uv pip install 'figma-taxonomy-gen[ai]'
@@ -112,13 +114,13 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 figma-taxonomy extract --fixture tests/fixtures/banking_app.json --ai
 ```
 
-Before calling the API, the CLI prints an estimated cost and asks you to confirm. Pass `--yes` to skip the prompt in scripts. Haiku is the default; set `ai.model` in the config to use Sonnet for screens with a lot of variants.
+Before calling the API, the CLI prints a cost estimate and asks for confirmation. Use `--yes` to skip that prompt in scripts. Haiku is the default; set `ai.model` in the config if you want Sonnet for screens with a lot of variants.
 
-The banking-app fixture (6 flows, Haiku) costs about $0.001. A real 30–50 screen fintech app usually runs $0.01 to $0.10.
+The banking-app fixture (6 flows, Haiku) costs about $0.001. A real 30-50 screen fintech app usually lands somewhere between $0.01 and $0.10.
 
 ## MCP server
 
-The package ships an MCP server so any MCP-compatible client can call the tool directly. Three tools are exposed:
+The package also ships with an MCP server, so you can call the extractor from any MCP-compatible client. It exposes three tools:
 
 | Tool | Description |
 |------|-------------|
@@ -163,11 +165,11 @@ figma-taxonomy push ./output/taxonomy.json --dry-run  # preview only
 figma-taxonomy diff ./v1/taxonomy.json ./v2/taxonomy.json --exit-code
 ```
 
-Handy for reviewing taxonomy changes in a PR before they go to Amplitude.
+Useful when you want to review taxonomy changes in a pull request before pushing anything to Amplitude.
 
 ## CI drift check
 
-There's a composite action in the repo for failing pull requests when the Figma design and the committed taxonomy disagree. Drop this in `.github/workflows/taxonomy-drift.yml`:
+The repo includes a composite action that fails a pull request when the Figma design and the committed taxonomy no longer match. Drop this into `.github/workflows/taxonomy-drift.yml`:
 
 ```yaml
 name: Taxonomy drift check
@@ -188,11 +190,11 @@ jobs:
           figma-token: ${{ secrets.FIGMA_TOKEN }}
 ```
 
-The job exits non-zero with a readable diff when events are added, removed, renamed, or their properties change.
+The job exits non-zero and prints a readable diff when events are added, removed, renamed, or their properties change.
 
 ## Configuration
 
-Drop a `taxonomy.config.yaml` in your project to tweak naming:
+Add a `taxonomy.config.yaml` to change naming rules and output defaults:
 
 ```yaml
 app:
@@ -220,17 +222,17 @@ output:
   directory: "./output"
 ```
 
-See [`taxonomy.config.yaml`](taxonomy.config.yaml) for every option with its default.
+See [`taxonomy.config.yaml`](taxonomy.config.yaml) for the full set of options and defaults.
 
 ## How element detection works
 
-The tool identifies interactive elements in three ways:
+The extractor decides whether a node is interactive in three ways:
 
 1. **Name patterns**: matches component names against known patterns (`button`, `input`, `toggle`, `dropdown`, etc.).
 2. **Prototype interactions**: any node with a Figma interaction (click, hover, drag) counts as interactive.
 3. **Component types**: only `COMPONENT`, `COMPONENT_SET`, and `INSTANCE` nodes are considered.
 
-Icons, dividers, loaders, and placeholders are filtered out.
+It skips icons, dividers, loaders, and other decorative placeholders.
 
 ## Naming convention
 
@@ -242,7 +244,7 @@ Events follow the pattern `{screen}_{element}_{action}`:
 | Page "Home" → Frame "Home - Default" → Tab "Accounts" | `home_accounts_viewed` |
 | Page "Payments" → Frame "Payment Form" → Input "Amount" | `payment_form_amount_entered` |
 
-Screen names are cleaned on the way in: numbered prefixes stripped, variant suffixes collapsed.
+Screen names are cleaned before event generation: numbered prefixes are stripped and common variant suffixes are collapsed.
 
 ## Property rules
 
@@ -280,7 +282,7 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 
 - [x] **v0.1**: Core extraction pipeline, CLI, 4 output formats
 - [x] **v0.2**: Full config support, `validate` command (taxonomy drift detection)
-- [x] **v0.3**: AI enrichment via Anthropic models (property inference from screen context)
+- [x] **v0.3**: AI enrichment via Anthropic models
 - [x] **v0.4**: MCP server support, Amplitude API push, `diff` command
 - [x] **v1.0**: CI workflows, drop-in drift-check action, MkDocs site, PyPI publish (ready to tag)
 
