@@ -104,7 +104,7 @@ Add `--exit-code` to fail CI when the design and the tracking plan disagree.
 
 ## AI enrichment (optional)
 
-With `--ai`, the tool sends one prompt per flow to Claude and merges the suggested properties into the generated events. Useful for things the rule engine can't guess: enum values from component variants, contextual IDs, state flags.
+With `--ai`, the tool sends one prompt per flow to an Anthropic model and merges the suggested properties into the generated events. Useful for things the rule engine can't guess: enum values from component variants, contextual IDs, state flags.
 
 ```bash
 uv pip install 'figma-taxonomy-gen[ai]'
@@ -118,7 +118,7 @@ The banking-app fixture (6 flows, Haiku) costs about $0.001. A real 30–50 scre
 
 ## MCP server
 
-The package ships an MCP server so Claude Desktop or claude.ai can call the tool directly. Three tools are exposed:
+The package ships an MCP server so any MCP-compatible client can call the tool directly. Three tools are exposed:
 
 | Tool | Description |
 |------|-------------|
@@ -133,7 +133,7 @@ uv pip install 'figma-taxonomy-gen[mcp]'
 figma-taxonomy-mcp
 ```
 
-In Claude Desktop `claude_desktop_config.json`:
+Example MCP client config:
 
 ```json
 {
@@ -280,8 +280,8 @@ uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
 
 - [x] **v0.1**: Core extraction pipeline, CLI, 4 output formats
 - [x] **v0.2**: Full config support, `validate` command (taxonomy drift detection)
-- [x] **v0.3**: AI enrichment via Claude (property inference from screen context)
-- [x] **v0.4**: MCP server for Claude Desktop, Amplitude API push, `diff` command
+- [x] **v0.3**: AI enrichment via Anthropic models (property inference from screen context)
+- [x] **v0.4**: MCP server support, Amplitude API push, `diff` command
 - [x] **v1.0**: CI workflows, drop-in drift-check action, MkDocs site, PyPI publish (ready to tag)
 
 ## License
