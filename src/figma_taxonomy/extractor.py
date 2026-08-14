@@ -7,7 +7,6 @@ import re
 from figma_taxonomy.config import TaxonomyConfig
 from figma_taxonomy.models import ScreenElement
 
-
 INTERACTIVE_PATTERNS = [
     (re.compile(p, re.IGNORECASE), element_type)
     for p, element_type in [

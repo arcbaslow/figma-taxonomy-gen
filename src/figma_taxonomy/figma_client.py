@@ -10,7 +10,6 @@ from pathlib import Path
 
 import httpx
 
-
 FIGMA_API_BASE = "https://api.figma.com/v1"
 CACHE_DIR = Path(".figma-taxonomy-cache")
 

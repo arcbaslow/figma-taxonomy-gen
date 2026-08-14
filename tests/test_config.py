@@ -1,7 +1,6 @@
 import textwrap
-from pathlib import Path
 
-from figma_taxonomy.config import TaxonomyConfig, load_config
+from figma_taxonomy.config import load_config
 
 
 def test_load_default_config():

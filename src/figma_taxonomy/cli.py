@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 
 import click
-
-import json
-import os
 
 from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
 from figma_taxonomy.figma_client import fetch_file, load_fixture
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
 from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
-
 
 SUPPORTED_OUTPUT_FORMATS = ("excel", "csv", "json", "markdown")
 
@@ -222,7 +220,7 @@ def push(taxonomy_path, dry_run, base_url):
     if dry_run:
         categories = sorted({e.flow for e in events if e.flow})
         properties = sorted({p.name for e in events for p in e.properties})
-        click.echo(f"\nDry run - would push:")
+        click.echo("\nDry run - would push:")
         click.echo(f"  {len(categories)} categories: {categories}")
         click.echo(f"  {len(properties)} properties")
         click.echo(f"  {len(events)} events")

@@ -13,7 +13,7 @@ from typing import Any
 from figma_taxonomy.config import TaxonomyConfig, load_config
 from figma_taxonomy.extractor import extract_elements
 from figma_taxonomy.figma_client import fetch_file, load_fixture
-from figma_taxonomy.models import EventProperty, TaxonomyEvent
+from figma_taxonomy.models import TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
 from figma_taxonomy.validate import diff_taxonomies
 

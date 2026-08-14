@@ -18,7 +18,6 @@ import httpx
 
 from figma_taxonomy.models import TaxonomyEvent
 
-
 AMPLITUDE_BASE_URL = "https://amplitude.com"
 
 

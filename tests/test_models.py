@@ -1,4 +1,4 @@
-from figma_taxonomy.models import ScreenElement, TaxonomyEvent, EventProperty
+from figma_taxonomy.models import EventProperty, ScreenElement, TaxonomyEvent
 
 
 def test_screen_element_creation():

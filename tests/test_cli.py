@@ -9,7 +9,6 @@ from click.testing import CliRunner
 
 from figma_taxonomy.cli import main
 
-
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 TMP_ROOT = Path(__file__).parent / ".tmp"
 
