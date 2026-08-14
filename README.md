@@ -3,7 +3,7 @@
 [![CI](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/figma-taxonomy-gen.svg)](https://pypi.org/project/figma-taxonomy-gen/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![version](https://img.shields.io/badge/version-0.4.0-blue.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.4.1-blue.svg)](CHANGELOG.md)
 
 Generate an [Amplitude](https://amplitude.com) event taxonomy straight from a Figma file.
 
