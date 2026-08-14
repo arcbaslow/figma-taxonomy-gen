@@ -7,7 +7,6 @@ from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
 from figma_taxonomy.models import ScreenElement
 
-
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 

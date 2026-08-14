@@ -1,0 +1,102 @@
+name: Bug report
+description: Something in the tool doesn't work the way the docs say it does.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear, factual description.
+      placeholder: "`figma-taxonomy extract https://figma.com/design/...` produced ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: >
+        For a naming or detection issue, give the event name you got and the
+        one you wanted.
+      placeholder: "Got `home_button_clicked`, expected `home_offer_viewed`"
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: Exact command
+      description: Redact the Figma file key if you'd rather not share it.
+      placeholder: "figma-taxonomy extract https://figma.com/design/XXXX/App --page Onboarding"
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output
+      description: >
+        Full stderr / stack trace if there was one. Scrub the Figma token and
+        any API keys before pasting.
+      render: shell
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which part?
+      options:
+        - extract (element detection / screen mapping)
+        - naming convention engine
+        - output formats (JSON / CSV / markdown / xlsx)
+        - AI enrichment (--ai)
+        - validate (drift detection)
+        - diff
+        - push (Amplitude Taxonomy API)
+        - MCP server
+        - config loading (taxonomy.config.yaml)
+        - other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: node-shape
+    attributes:
+      label: Relevant Figma node
+      description: >
+        For a detection or naming bug this is the single most useful thing you
+        can give us. Layer name, node type, parent frame name, and any text
+        content. A trimmed snippet of the API response is ideal - it can go
+        straight into tests/fixtures/.
+      render: json
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Your taxonomy.config.yaml
+      description: Strip any api_key values first.
+      render: yaml
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`figma-taxonomy --version`, or the installed package version"
+      placeholder: "0.4.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 14.5 / Ubuntu 22.04 / Windows 11"
+    validations:
+      required: true

@@ -5,9 +5,8 @@ import pytest
 
 from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
-from figma_taxonomy.models import ScreenElement, TaxonomyEvent, EventProperty
+from figma_taxonomy.models import ScreenElement, TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
-
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 

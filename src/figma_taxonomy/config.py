@@ -8,7 +8,6 @@ from typing import Any
 
 import yaml
 
-
 # --- Defaults ---
 
 _DEFAULT_ACTIONS = {

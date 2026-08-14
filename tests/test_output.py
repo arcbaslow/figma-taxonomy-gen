@@ -7,9 +7,8 @@ import pytest
 
 from figma_taxonomy.config import load_config
 from figma_taxonomy.extractor import extract_elements
-from figma_taxonomy.models import TaxonomyEvent, EventProperty
+from figma_taxonomy.models import EventProperty, TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
-
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -77,8 +76,9 @@ class TestExcelOutput:
         assert output_path.stat().st_size > 0
 
     def test_has_events_sheet(self, sample_events, config, tmp_path):
-        from figma_taxonomy.output.excel import write_excel
         import openpyxl
+
+        from figma_taxonomy.output.excel import write_excel
 
         output_path = tmp_path / "taxonomy.xlsx"
         write_excel(sample_events, config, output_path)
@@ -87,8 +87,9 @@ class TestExcelOutput:
         assert "Events" in wb.sheetnames
 
     def test_has_parameters_sheet(self, sample_events, config, tmp_path):
-        from figma_taxonomy.output.excel import write_excel
         import openpyxl
+
+        from figma_taxonomy.output.excel import write_excel
 
         output_path = tmp_path / "taxonomy.xlsx"
         write_excel(sample_events, config, output_path)
@@ -97,8 +98,9 @@ class TestExcelOutput:
         assert "Parameters" in wb.sheetnames
 
     def test_events_sheet_headers(self, sample_events, config, tmp_path):
-        from figma_taxonomy.output.excel import write_excel
         import openpyxl
+
+        from figma_taxonomy.output.excel import write_excel
 
         output_path = tmp_path / "taxonomy.xlsx"
         write_excel(sample_events, config, output_path)
@@ -112,8 +114,9 @@ class TestExcelOutput:
         assert headers[3] == "Parameter Set"
 
     def test_events_sheet_data_rows(self, sample_events, config, tmp_path):
-        from figma_taxonomy.output.excel import write_excel
         import openpyxl
+
+        from figma_taxonomy.output.excel import write_excel
 
         output_path = tmp_path / "taxonomy.xlsx"
         write_excel(sample_events, config, output_path)
@@ -127,8 +130,9 @@ class TestExcelOutput:
         assert ws.cell(row=3, column=4).value == "User views login screen"
 
     def test_parameters_sheet_has_global_params(self, sample_events, config, tmp_path):
-        from figma_taxonomy.output.excel import write_excel
         import openpyxl
+
+        from figma_taxonomy.output.excel import write_excel
 
         output_path = tmp_path / "taxonomy.xlsx"
         write_excel(sample_events, config, output_path)
@@ -140,8 +144,9 @@ class TestExcelOutput:
         assert "platform" in param_names
 
     def test_full_taxonomy_output(self, taxonomy, config, tmp_path):
-        from figma_taxonomy.output.excel import write_excel
         import openpyxl
+
+        from figma_taxonomy.output.excel import write_excel
 
         output_path = tmp_path / "taxonomy.xlsx"
         write_excel(taxonomy, config, output_path)
