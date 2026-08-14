@@ -15,7 +15,6 @@ from figma_taxonomy.mcp_tools import (
     validate_taxonomy_tool,
 )
 
-
 FIXTURE = Path(__file__).parent / "fixtures" / "banking_app.json"
 
 
@@ -129,6 +128,7 @@ def test_export_taxonomy_tool_markdown(tmp_path):
         output_path=str(output_path),
     )
 
+    assert result == {"output_path": str(output_path), "format": "markdown"}
     assert output_path.exists()
     content = output_path.read_text()
     assert "home_viewed" in content
