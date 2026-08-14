@@ -34,4 +34,10 @@ jobs:
         run: uv build
 
       - name: Publish to PyPI
+        if: vars.PUBLISH_TO_PYPI == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
+
+# Publishing is opt-in. Set the repository variable PUBLISH_TO_PYPI to "true"
+# (Settings > Secrets and variables > Actions > Variables) once a Trusted
+# Publisher is registered on PyPI for this project. Until then a release
+# builds and verifies the artifact but does not push it anywhere.
