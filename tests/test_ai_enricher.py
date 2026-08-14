@@ -7,10 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import pytest
-
 from figma_taxonomy.ai_enricher import (
-    EnrichmentSuggestion,
     build_prompt,
     enrich_events,
     estimate_cost,

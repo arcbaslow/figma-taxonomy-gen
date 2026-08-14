@@ -6,6 +6,25 @@
 
 ---
 
+## Status and asset role (2026-08)
+
+Shipped: v0.4 on PyPI, MkDocs docs site, CI with drift-check. The build spec
+below (architecture, milestones) is the original plan and is kept as
+reference - do not treat unchecked milestone boxes as a todo list.
+
+**Mode: maintenance.** Bugfixes, Figma/Amplitude API changes, and docs only.
+The active OSS build slot belongs to capi-kit; new features here need an
+explicit owner decision.
+
+Role of the asset: flagship proof of competence for the tracking-plan /
+taxonomy practice. Its users are implementers, not buyers - the README's job
+is to route readers to Good Labs services (taxonomy design, tracking-plan
+audit). Keep that link present and current. Planned loop: taxonomy generated
+here gets validated against runtime by the Tracking Spy Extension and linted
+by tracking-plan-lint (see vault, projects/).
+
+---
+
 ## Problem
 
 Tracking plans for Amplitude (or Mixpanel, PostHog, etc.) tend to follow the same pattern on every team:

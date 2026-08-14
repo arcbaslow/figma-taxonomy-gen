@@ -43,5 +43,8 @@ jobs:
       - name: Check pyproject.toml is valid
         run: uv sync --extra dev --extra ai --extra mcp
 
+      - name: Lint
+        run: uv run ruff check src/ tests/
+
       - name: Verify package builds
         run: uv build

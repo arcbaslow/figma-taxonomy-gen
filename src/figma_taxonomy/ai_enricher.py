@@ -15,7 +15,6 @@ from typing import Any
 from figma_taxonomy.config import TaxonomyConfig
 from figma_taxonomy.models import EventProperty, TaxonomyEvent
 
-
 # Approximate per-1M-token pricing in USD, as of 2025. Update when Anthropic pricing changes.
 # Kept intentionally conservative.
 _MODEL_PRICING = {
