@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="figma-taxonomy-gen - Event taxonomy from a Figma file" width="880">
+</p>
+
 # figma-taxonomy-gen
 
 [![CI](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml)
