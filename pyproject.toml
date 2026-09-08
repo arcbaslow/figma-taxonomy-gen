@@ -1,6 +1,6 @@
 [project]
 name = "figma-taxonomy-gen"
-version = "0.4.1"
+version = "0.4.2"
 description = "Extract interactive UI elements from Figma designs and generate Amplitude event taxonomies"
 readme = "README.md"
 license = "MIT"
@@ -39,7 +39,7 @@ ai = [
     "anthropic>=0.40",
 ]
 mcp = [
-    "mcp>=1.0",
+    "mcp>=1.0,<2",
 ]
 docs = [
     "mkdocs-material>=9.5",
