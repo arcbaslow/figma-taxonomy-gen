@@ -101,7 +101,8 @@ def test_export_taxonomy_tool_writes_json(tmp_path):
 def test_mcp_server_builds_with_all_tools():
     """Server construction should register extract, validate, and export tools."""
     import pytest
-    mcp = pytest.importorskip("mcp.server.fastmcp")  # noqa: F841
+    # Missing optional SDK may skip; an installed incompatible SDK must fail.
+    pytest.importorskip("mcp")
 
     from figma_taxonomy.mcp_server import build_server
 

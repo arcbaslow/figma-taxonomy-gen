@@ -1,292 +1,209 @@
 <p align="center">
-  <img src="assets/banner.png" alt="figma-taxonomy-gen - Event taxonomy from a Figma file" width="880">
+  <img src="assets/banner.svg" alt="Figma Taxonomy Gen — Turn interactive designs into a reviewable tracking plan." width="100%">
 </p>
 
-# figma-taxonomy-gen
+# Figma Taxonomy Gen
 
-[![CI](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/figma-taxonomy-gen.svg)](https://pypi.org/project/figma-taxonomy-gen/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![version](https://img.shields.io/badge/version-0.4.1-blue.svg)](CHANGELOG.md)
+Turn interactive designs into a reviewable tracking plan.
 
-Generate an [Amplitude](https://amplitude.com) event taxonomy straight from a Figma file.
+[![Tests](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/arcbaslow/figma-taxonomy-gen/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/arcbaslow/figma-taxonomy-gen?color=db2777&label=release)](https://github.com/arcbaslow/figma-taxonomy-gen/releases)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-db2777?logo=python&logoColor=white)](#installation)
+[![MIT license](https://img.shields.io/badge/license-MIT-475569)](LICENSE)
 
-**Docs:** [arcbaslow.github.io/figma-taxonomy-gen](https://arcbaslow.github.io/figma-taxonomy-gen/)
+[Quick start](#quick-start) · [Example output](#example-output) · [Tests](#tests) · [Releases](#releases) · [Contributing](CONTRIBUTING.md)
 
-## Why
+A CLI and optional MCP server that extracts interactive elements from a Figma file and generates a first-pass event taxonomy. Review the output as a tracking plan, then detect drift when the design changes.
 
-Most tracking plans start the same way: someone reads through Figma, writes a spreadsheet by hand, and the spreadsheet goes stale a week later.
-
-This tool skips that first manual pass. It pulls the interactive parts out of a design file, turns them into event names and properties, and writes the outputs teams usually want to review or import.
-
-## What it does
-
-```
-Figma file → extract interactive elements → apply naming rules → write outputs
+```text
+Figma REST API or local fixture
+  → interactive elements and screen context
+  → configurable event names and properties
+  → Excel · CSV · JSON · Markdown
 ```
 
-1. Read a Figma file through the REST API, or load a local JSON fixture.
-2. Keep the parts that matter for analytics: buttons, inputs, toggles, tabs, cards, modals, and similar UI.
-3. Group those elements into screens based on page and frame structure.
-4. Build event names from a configurable pattern. The default is `{screen}_{element}_{action}`.
-5. Add properties from simple rules. For example, every `*_fail` event can get `error_description`.
-6. Write the result as Excel, Amplitude CSV, JSON, or Markdown.
+## What you can do
 
-## Install
+| Capability | Result |
+| --- | --- |
+| Extract | Detect buttons, inputs, toggles, tabs and other interactive nodes |
+| Name | Apply configurable patterns, styles and action verbs |
+| Enrich | Attach global properties and name-matching rules; optionally infer properties with Anthropic |
+| Export | Excel review sheet, Amplitude-oriented CSV, structured JSON and Markdown |
+| Validate | Compare a saved taxonomy with a Figma file or local fixture |
+| Diff | Compare two taxonomy files; return a failing CI exit code on changes |
+| Integrate | Optional MCP tools and an Amplitude Taxonomy API push command |
+
+## Installation
+
+Requires **Python 3.11+**. Install the published CLI with `python -m pip install figma-taxonomy-gen`, or clone the repository to use the bundled fixtures and current source:
 
 ```bash
-# uv
-uv pip install figma-taxonomy-gen
-
-# pip
-pip install figma-taxonomy-gen
-```
-
-From source:
-
-```bash
-git clone https://github.com/arcbaslow/figma-taxonomy-gen
+git clone https://github.com/arcbaslow/figma-taxonomy-gen.git
 cd figma-taxonomy-gen
-uv sync
+python -m venv .venv
 ```
+
+Activate with `source .venv/bin/activate` on macOS/Linux or `.venv\Scripts\Activate.ps1` in Windows PowerShell, then:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+For uv, use `uv sync --extra dev` and prefix commands with `uv run`. AI and MCP are optional extras; the core extractor needs neither an LLM nor an API key when using a fixture.
 
 ## Quick start
 
-From a real Figma file:
+Try the included banking-app fixture with **no credentials**:
 
 ```bash
-export FIGMA_TOKEN="your-figma-personal-access-token"
-figma-taxonomy extract https://figma.com/file/ABC123/MyApp
+figma-taxonomy extract --fixture tests/fixtures/banking_app.json --format excel,csv,json,markdown --output output
+figma-taxonomy validate output/taxonomy.json --fixture tests/fixtures/banking_app.json --exit-code
 ```
 
-From a fixture, if you want to try it without a token:
+For a live design, set `FIGMA_TOKEN` to a Figma personal access token in your environment, then:
 
 ```bash
-figma-taxonomy extract --fixture tests/fixtures/banking_app.json
+figma-taxonomy extract https://www.figma.com/design/YOUR_FILE_KEY/MyApp --output output
 ```
 
-By default the command writes four files to `./output/`:
+| Output | Purpose |
+| --- | --- |
+| `taxonomy.xlsx` | Tracking-plan review in a spreadsheet |
+| `taxonomy.csv` | Amplitude-oriented event/property import |
+| `taxonomy.json` | Structured taxonomy with Figma node IDs for validation and tooling |
+| `taxonomy.md` | Human-readable plan for a pull request or wiki |
 
-| File | Format | What it's for |
-|------|--------|---------------|
-| `taxonomy.xlsx` | Excel | Team review, matches common tracking-plan templates |
-| `taxonomy.csv` | Amplitude CSV | Direct import into Amplitude Data |
-| `taxonomy.json` | JSON Schema | Validation, CI/CD, custom tooling |
-| `taxonomy.md` | Markdown | PR review, wiki, docs |
+## Example output
 
-## CLI
+![Tracking-plan Markdown generated from the bundled banking-app Figma fixture](assets/screenshot.png)
 
-```bash
-# Basic extraction
-figma-taxonomy extract https://figma.com/file/ABC123/MyApp
-
-# Custom output directory
-figma-taxonomy extract https://figma.com/file/ABC123/MyApp --output ./my-output
-
-# Specific formats only
-figma-taxonomy extract ... --format excel,csv
-
-# One page
-figma-taxonomy extract ... --page "Onboarding"
-
-# Custom config
-figma-taxonomy extract ... --config ./my-config.yaml
-
-# Skip API cache
-figma-taxonomy extract ... --no-cache
-
-# Check whether a stored taxonomy still matches the current Figma file
-figma-taxonomy validate ./output/taxonomy.json --figma https://figma.com/file/ABC123/MyApp
-
-# CI mode: validate against a fixture, exit non-zero if anything drifted
-figma-taxonomy validate ./output/taxonomy.json --fixture ./figma.json --exit-code
-```
-
-## Drift detection
-
-Once `taxonomy.json` is in your repo, `validate` compares it against the current Figma file. Events are matched by Figma `node_id`, so a renamed component shows up as a rename instead of a fake add/remove pair. The report covers:
-
-- **Added**: elements that exist in Figma but not in the stored taxonomy
-- **Removed**: events in the taxonomy that no longer map to any Figma node
-- **Renamed**: same node, different event name
-- **Property changes**: properties added or removed on an existing event
-
-Add `--exit-code` to fail CI when the design and the tracking plan disagree.
-
-## AI enrichment (optional)
-
-With `--ai`, the tool sends one prompt per flow to an Anthropic model and merges the suggested properties back into the generated events. This helps with things the rule engine cannot infer cleanly on its own, like enum values from variants, contextual IDs, or state flags.
-
-```bash
-uv pip install 'figma-taxonomy-gen[ai]'
-export ANTHROPIC_API_KEY="sk-ant-..."
-figma-taxonomy extract --fixture tests/fixtures/banking_app.json --ai
-```
-
-Before calling the API, the CLI prints a cost estimate and asks for confirmation. Use `--yes` to skip that prompt in scripts. Haiku is the default; set `ai.model` in the config if you want Sonnet for screens with a lot of variants.
-
-The banking-app fixture (6 flows, Haiku) costs about $0.001. A real 30-50 screen fintech app usually lands somewhere between $0.01 and $0.10.
-
-## MCP server
-
-The package also ships with an MCP server, so you can call the extractor from any MCP-compatible client. It exposes three tools:
-
-| Tool | Description |
-|------|-------------|
-| `extract_taxonomy` | Extract a taxonomy from a Figma file or local fixture |
-| `validate_taxonomy` | Diff a stored taxonomy JSON against the current Figma file |
-| `export_taxonomy` | Write a taxonomy to disk as json / csv / markdown / excel |
-
-Install and run:
-
-```bash
-uv pip install 'figma-taxonomy-gen[mcp]'
-figma-taxonomy-mcp
-```
-
-Example MCP client config:
-
-```json
-{
-  "mcpServers": {
-    "figma-taxonomy": {
-      "command": "figma-taxonomy-mcp",
-      "env": { "FIGMA_TOKEN": "your-figma-pat" }
-    }
-  }
-}
-```
-
-## Push to Amplitude (Enterprise)
-
-If your Amplitude plan gives you access to the Taxonomy API:
-
-```bash
-export AMPLITUDE_API_KEY="..."
-export AMPLITUDE_SECRET_KEY="..."
-figma-taxonomy push ./output/taxonomy.json            # real push
-figma-taxonomy push ./output/taxonomy.json --dry-run  # preview only
-```
-
-## Diff two taxonomy files
-
-```bash
-figma-taxonomy diff ./v1/taxonomy.json ./v2/taxonomy.json --exit-code
-```
-
-Useful when you want to review taxonomy changes in a pull request before pushing anything to Amplitude.
-
-## CI drift check
-
-The repo includes a composite action that fails a pull request when the Figma design and the committed taxonomy no longer match. Drop this into `.github/workflows/taxonomy-drift.yml`:
-
-```yaml
-name: Taxonomy drift check
-on:
-  pull_request:
-    paths:
-      - "tracking/taxonomy.json"
-
-jobs:
-  drift:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
-        with:
-          taxonomy-path: tracking/taxonomy.json
-          figma-url: https://figma.com/design/ABC123/MyApp
-          figma-token: ${{ secrets.FIGMA_TOKEN }}
-```
-
-The job exits non-zero and prints a readable diff when events are added, removed, renamed, or their properties change.
+The screenshot shows the **actual generated Markdown**, rendered for documentation. It uses the synthetic [banking-app fixture](tests/fixtures/banking_app.json), not a private Figma file. Explore the [generated example](examples/demo/taxonomy.md), [JSON](examples/demo/taxonomy.json) and [CSV](examples/demo/taxonomy.csv).
 
 ## Configuration
 
-Add a `taxonomy.config.yaml` to change naming rules and output defaults:
+The default naming pattern is `{screen}_{element}_{action}`. Adjust [taxonomy.config.yaml](taxonomy.config.yaml), or pass a different file:
 
 ```yaml
-app:
-  type: fintech
-  name: "MyApp"
-
 naming:
   style: snake_case
   pattern: "{screen}_{element}_{action}"
   max_event_length: 64
-
   actions:
-    button: "clicked"
-    input: "entered"
-    toggle: "toggled"
-    tab: "viewed"
-    screen: "pageview"
+    button: clicked
+    input: entered
+    toggle: toggled
+    tab: viewed
 
-  screen_name:
-    strip_prefixes: true
-    strip_suffixes: ["- Default", "- Light", "- Dark"]
-
-output:
-  formats: ["excel", "csv", "json", "markdown"]
-  directory: "./output"
-```
-
-See [`taxonomy.config.yaml`](taxonomy.config.yaml) for the full set of options and defaults.
-
-## How element detection works
-
-The extractor decides whether a node is interactive in three ways:
-
-1. **Name patterns**: matches component names against known patterns (`button`, `input`, `toggle`, `dropdown`, etc.).
-2. **Prototype interactions**: any node with a Figma interaction (click, hover, drag) counts as interactive.
-3. **Component types**: only `COMPONENT`, `COMPONENT_SET`, and `INSTANCE` nodes are considered.
-
-It skips icons, dividers, loaders, and other decorative placeholders.
-
-## Naming convention
-
-Events follow the pattern `{screen}_{element}_{action}`:
-
-| Figma structure | Generated event |
-|----------------|----------------|
-| Page "Login" → Frame "01 - Login Screen" → Button "Log In" | `login_screen_log_in_clicked` |
-| Page "Home" → Frame "Home - Default" → Tab "Accounts" | `home_accounts_viewed` |
-| Page "Payments" → Frame "Payment Form" → Input "Amount" | `payment_form_amount_entered` |
-
-Screen names are cleaned before event generation: numbered prefixes are stripped and common variant suffixes are collapsed.
-
-## Property rules
-
-You can attach properties to events by name pattern:
-
-```yaml
 property_rules:
   - match: "*_clicked"
     add:
-      - name: "element_text"
-        type: "string"
-  - match: "*_fail"
-    add:
-      - name: "error_description"
-        type: "string"
+      - name: element_text
+        type: string
+
+output:
+  formats: [excel, csv, json, markdown]
 ```
-
-Global properties like `screen_name` and `platform` are attached to every event.
-
-## Development
 
 ```bash
-git clone https://github.com/arcbaslow/figma-taxonomy-gen
-cd figma-taxonomy-gen
-uv sync
-
-# Tests
-uv run pytest -v
-
-# CLI
-uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json
+figma-taxonomy extract --fixture tests/fixtures/banking_app.json --config taxonomy.config.yaml --format json,markdown
 ```
+
+Detection uses component names, node types and prototype interactions. Decorative nodes are excluded by the configured heuristics. Review the output against the product's real behavior: design files cannot establish whether an event is implemented or fires correctly.
+
+## Drift checks
+
+```bash
+# Compare the plan with the current design.
+figma-taxonomy validate output/taxonomy.json --figma https://www.figma.com/design/YOUR_FILE_KEY/MyApp --exit-code
+
+# Compare two saved taxonomy versions.
+figma-taxonomy diff previous/taxonomy.json output/taxonomy.json --exit-code
+```
+
+Node IDs preserve the link to Figma so the comparison can report additions, removals, renames and property changes. `--exit-code` returns a nonzero status for drift. The repository includes a [composite drift-check action](.github/actions/drift-check/action.yml); pin the action to a reviewed release or commit in your workflow. Schedule a check as well if you need to detect design edits that do not modify a file in Git.
+
+## Optional integrations
+
+### AI property enrichment
+
+```bash
+python -m pip install -e ".[ai]"
+# Set ANTHROPIC_API_KEY in your environment before using --ai.
+figma-taxonomy extract --fixture tests/fixtures/banking_app.json --ai
+```
+
+The CLI estimates the request cost and asks for confirmation. `--yes` skips that prompt. AI sends design context to Anthropic and may incur API charges; estimates depend on the configured model and input. The core rule engine remains usable without this extra.
+
+### MCP server
+
+```bash
+python -m pip install -e ".[mcp]"
+figma-taxonomy-mcp
+```
+
+| Tool | Purpose |
+| --- | --- |
+| `extract_taxonomy` | Extract from a Figma URL or local fixture |
+| `validate_taxonomy` | Compare a saved taxonomy with a design |
+| `export_taxonomy` | Write JSON, CSV, Markdown or Excel |
+
+Set the client's command to `figma-taxonomy-mcp`, or the absolute path to that executable in the virtual environment. Supply `FIGMA_TOKEN` through the environment for live extraction. See [mcp_server.py](src/figma_taxonomy/mcp_server.py) for tool registration.
+
+### Amplitude push
+
+```bash
+figma-taxonomy push output/taxonomy.json --dry-run
+```
+
+A real push requires Amplitude Taxonomy API access and `AMPLITUDE_API_KEY` / `AMPLITUDE_SECRET_KEY`. Check access for your Amplitude project. **Removing `--dry-run` performs writes immediately**; there is no extra confirmation prompt. CSV export remains available independently of Taxonomy API access.
+
+## Tests
+
+```bash
+python -m pip install -e ".[dev,ai,mcp]"
+python -m pytest -q
+python -m ruff check src/ tests/
+python -m pip install build
+python -m build
+```
+
+With uv: `uv sync --extra dev --extra ai --extra mcp`, then `uv run pytest -q`, `uv run ruff check src/ tests/` and `uv build`.
+
+Tests use local fixtures and mocked services. They cover extraction, naming, configuration, all output formats, drift, CLI handling, AI response merging, Amplitude push and MCP tool functions. CI tests **Python 3.11–3.13 on Ubuntu and Windows**, with a separate lint/build job. See the [release verification](docs/VERIFICATION.md).
+
+## Repository map
+
+| Path | Purpose |
+| --- | --- |
+| [src/figma_taxonomy/](src/figma_taxonomy/) | CLI, extraction, naming, exporters and integrations |
+| [tests/](tests/) | Tests and sample Figma responses |
+| [examples/demo/](examples/demo/) | Reproducible generated tracking plan |
+| [taxonomy.config.yaml](taxonomy.config.yaml) | Naming, detection and property rules |
+| [docs/](docs/) | Usage documentation, release notes and verification |
+
+## Releases
+
+**[v0.4.2](https://github.com/arcbaslow/figma-taxonomy-gen/releases/tag/v0.4.2)** — see the [release notes](docs/RELEASE_NOTES.md) for this release and the [changelog](CHANGELOG.md) for project history.
+
+GitHub Releases include downloadable artifacts and checksums. Package-registry publication is a separate, opt-in workflow; a GitHub release does not imply that the same version is available on PyPI or npm. Maintainers can follow the [release guide](docs/RELEASING.md).
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md), run the checks above, and include a minimal reproduction for bugs. Report vulnerabilities through [SECURITY.md](SECURITY.md).
+
+## Related tools
+
+| Project | Use it for |
+| --- | --- |
+| [Google Ads Agents](https://github.com/arcbaslow/google-ads-agents) | Paid media audits, tracking checks and reviewed changes. |
+| [Google Analytics Agent](https://github.com/arcbaslow/google-analytics-agent) | GA4 data quality, funnels and property management. |
+| [Search Console Agent](https://github.com/arcbaslow/google-search-console-agent) | Search performance, indexing and page experience. |
+| [Meta Ads Agents](https://github.com/arcbaslow/meta-ads-agents) | Campaign performance, creative fatigue and event health. |
+| [GTM Diff](https://github.com/arcbaslow/gtm-diff) | Review the changes in your Google Tag Manager exports. |
+
+Maintained by [Good Labs](https://goodlabs.kz) — measurement implementation, tracking plans and analytics audits.
 
 ## License
 
-MIT
+[MIT](LICENSE) © Dilshat Rakhimov. This is an independent project; it is not an official product of the platform vendors.
