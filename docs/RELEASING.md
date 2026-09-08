@@ -30,6 +30,6 @@ Attach the reviewed source bundle and its `SHA256SUMS.txt`; attach installable p
 
 Pushing a matching version tag triggers `release.yml`. The workflow builds distributions; PyPI publication runs only when `PUBLISH_TO_PYPI` is `true`. Create the GitHub Release after pushing the tag.
 
-The repository's [release workflow](../.github/workflows/release.yml) is the source of truth. Preserve existing publishing settings unless a registry release is explicitly intended. Wait for the default-branch CI run to pass before creating a stable release.
+The repository's [release workflow](https://github.com/arcbaslow/figma-taxonomy-gen/blob/master/.github/workflows/release.yml) is the source of truth. Preserve existing publishing settings unless a registry release is explicitly intended. Wait for the default-branch CI run to pass before creating a stable release.
 
 For workflows that expose `workflow_dispatch`, the `tag` input is checked against the dispatched branch's package version. Dispatch from the intended release ref when retrying a build. Do not assume that typing an old tag selects its source in every workflow.

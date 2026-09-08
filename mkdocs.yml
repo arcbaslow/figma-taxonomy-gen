@@ -52,6 +52,10 @@ nav:
     - Amplitude push: amplitude.md
     - MCP server: mcp.md
   - Cookbook: cookbook.md
+  - Releases:
+    - Release notes: RELEASE_NOTES.md
+    - Verification: VERIFICATION.md
+    - Maintainer guide: RELEASING.md
 
 markdown_extensions:
   - admonition
