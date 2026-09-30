@@ -88,6 +88,10 @@ The screenshot shows the **actual generated Markdown**, rendered for documentati
 
 The default naming pattern is `{screen}_{element}_{action}`. Adjust [taxonomy.config.yaml](taxonomy.config.yaml), or pass a different file:
 
+Both `snake_case` and `camelCase` are supported. Pageviews use the same pattern
+with an empty element and `actions.screen` (default `pageview`). All generated
+names obey `max_event_length`, including pageviews.
+
 ```yaml
 naming:
   style: snake_case
