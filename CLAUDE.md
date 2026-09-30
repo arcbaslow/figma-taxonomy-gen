@@ -85,7 +85,12 @@ Amplitude event names are limited to 64 characters (`max_event_length: 64` in `t
 
 ## Amplitude Taxonomy API integration
 
-**Note:** The Taxonomy API is Enterprise-only and was built for the older "Govern" product. As of 2024-2025, it has limited support with the newer "Amplitude Data" tracking plans. The tool primarily outputs CSV for import, but supports direct API push for Enterprise users.
+The current [Taxonomy API reference](https://amplitude.com/docs/apis/analytics/taxonomy)
+describes planned schemas; confirm entitlement for the target project. Push is
+create-only and scopes property reads/writes to each event. Matching definitions
+are reused; category/description/schema conflicts require manual review. It never
+updates shared definitions or restores/deletes events. See `docs/amplitude.md`
+for supported types, partial-failure behavior and the separate Data CSV profile.
 
 ### Auth
 - Basic auth: `{api_key}:{secret_key}` base64-encoded

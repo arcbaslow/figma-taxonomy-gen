@@ -99,6 +99,30 @@ now explicitly uses UTF-8. Import notes explain that blank owners clear existing
 owners, and that blank action creates/updates entities. Remote metadata is not
 preserved by this initial-plan profile; review the import branch before merging.
 
+## Completed follow-up: repeatable Amplitude API push
+
+Push now reads categories, events and event-scoped property inventories before
+writing. It creates only missing definitions, with events before their property
+associations. Property requests always include `event_type`, including the form
+body on scoped GETs documented by the [Taxonomy API](https://amplitude.com/docs/apis/analytics/taxonomy).
+The same property name can have different schemas on different events. Supported
+string enums retain their values, and local unsupported types/constraints fail
+before requests, including offline previews.
+
+The update policy is create-only: matching definitions are reused, while event
+category/description and property type/description/enum conflicts are reported
+without overwriting them. No shared-definition updates, lifecycle operations or
+automatic retries of failed writes were added. A 409 gets one inventory read and
+is accepted only when a matching definition is visible. Initial inventory errors
+block all writes; later failures block dependent writes and permit independent
+events to continue. Reruns fill missing associations after partial failures.
+
+Migration: existing plans pushed by the earlier global-property implementation
+may need missing associations. Review conflicts manually. CLI counts now report
+event/property associations; the Python result retains legacy unique property
+names and adds precise association lists. Unmodeled remote metadata is left
+untouched. Live account acceptance remains unverified.
+
 ## Next
 
 These proposals remain unfinished, in priority order. The provenance and import
@@ -107,7 +131,6 @@ real-account import acceptance are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Make Amplitude push safely repeatable and event-specific | Current property POSTs deduplicate by property name globally, do not associate properties with events, and repeat category creation. Enum constraints are omitted. [Taxonomy API](https://amplitude.com/docs/apis/analytics/taxonomy) | 2–3 | Medium: decide shared-property versus event override semantics; do not guess about intended update behavior or add lifecycle management |
 | Reduce Figma Tier 1 requests and add bounded retry policy | Cache hits still call `GET /files/:key?depth=1`; misses call that endpoint twice. This is not the distinct metadata endpoint. [Endpoints](https://developers.figma.com/docs/rest-api/file-endpoints/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1–2 | Medium: metadata requires a separate scope; TTL/offline cache freshness and long retry waits need explicit semantics |
 | Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
 | Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
@@ -248,3 +271,14 @@ and offline drift checks pass. The new `examples/amplitude-data` pair is generat
 from the synthetic variant fixture and validates without drift. No account import
 or remote write was performed; the runtime lockfile and package version remain
 unchanged.
+
+Amplitude push verification: **254 tests pass**, up from 209. Seventeen initial
+regressions failed against the earlier implementation. The 45 added cases cover
+event-specific schemas, enums, repeat runs without writes, partial-failure
+recovery, conflicts, one-read 409 reconciliation, malformed/failed inventories,
+dependent-write blocking, local schema rejection, source preservation and CLI
+preview/result counts. The inventory fixture is synthetic and every API request
+is mocked. Ruff, package builds, strict MkDocs, fixture extraction and offline
+drift checks pass. The banking fixture remains at 18 controls and 21 events; its
+offline push preview reports 77 event/property associations. No live push,
+dependency upgrade or package version change was made.
