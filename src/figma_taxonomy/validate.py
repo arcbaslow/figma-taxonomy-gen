@@ -16,10 +16,12 @@ class ValidationReport:
     renamed: list[tuple[str, str]] = field(default_factory=list)
     property_changes: list[dict] = field(default_factory=list)
     source_changes: list[dict] = field(default_factory=list)
+    category_changes: list[dict] = field(default_factory=list)
 
     def is_clean(self) -> bool:
         return not (
-            self.added or self.removed or self.renamed or self.property_changes or self.source_changes
+            self.added or self.removed or self.renamed or self.property_changes
+            or self.source_changes or self.category_changes
         )
 
 
@@ -86,6 +88,12 @@ def diff_taxonomies(
 
         if match_name != event.event_name:
             report.renamed.append((match_name, event.event_name))
+
+        old_category = match_body.get("category", "")
+        if old_category != event.flow:
+            report.category_changes.append({
+                "event_name": event.event_name, "from": old_category, "to": event.flow,
+            })
 
         current_sources = set(event.source_node_ids)
         added_sources = sorted(current_sources - old_sources[match_name])

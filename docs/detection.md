@@ -72,7 +72,7 @@ Page: "Home"
 
 The `- With Offer` example requires adding that suffix to the configured list;
 it is not a default suffix. Every variant frame is visited. Controls that generate
-the same full event name share one event with all their source node IDs; controls
+the same full event name within a page share one event with all their source node IDs; controls
 unique to later variants create additional events. The first control supplies the
 description and legacy primary source. This also applies to repeated labels in
 one frame and names intentionally combined by a custom naming pattern.
@@ -91,8 +91,35 @@ and removals, rather than guessing renames.
 
 Names that differ before truncation but collide at `max_event_length` cause an
 actionable error before output is written. Increase the limit, adjust the naming
-pattern, or rename the controls. Synthetic pageviews still have no frame sources;
-cross-page screen identity remains a separate [roadmap item](ROADMAP.md#next).
+pattern, or rename the controls.
+
+### Pages and pageviews
+
+The owning page supplies each event's flow/category. Page IDs distinguish pages
+even when their display names match. Controls from different pages cannot share
+an event name: add `{page}` to `naming.pattern` or rename the screens. `{page}` is
+the normalized page name; if page names normalize identically, rename the pages
+as well. The default pattern remains unchanged, and qualification is explicit so
+filtering to one page does not rename its events.
+
+CLI and MCP inventory every screen frame on included pages, even frames with no
+detected controls. Pageviews use the screen frame IDs as sources, combining all
+variants within that page. A frame organized inside a section is included; layout
+frames inside a screen are not separate screens. Page exclusion and explicit page
+selection apply equally to controls and pageviews. Control events retain control
+IDs rather than replacing them with frame IDs.
+
+When upgrading an older baseline, expect added pageview sources and new pageviews
+for empty screens. Frame IDs allow unambiguous pageview renames to be recognized.
+Moving a screen or renaming its page also reports category changes when event
+names stay unchanged. Review these changes before accepting the new baseline.
+
+Python callers can pass `screens=extract_screens(figma_file, config)` to
+`generate_taxonomy(elements, config, screens=...)` to include the full inventory.
+The existing two-argument call still works, deriving known screens from elements;
+it cannot discover empty frames. Hand-built elements without frame IDs retain
+source-less pageviews rather than inventing IDs. Missing page IDs fall back to
+the page name for legacy hand-built inputs.
 
 ## Text content vs component name
 

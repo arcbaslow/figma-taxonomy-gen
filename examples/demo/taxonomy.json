@@ -521,8 +521,10 @@
     "home_pageview": {
       "description": "User views home screen",
       "category": "Home",
-      "source": "",
-      "sources": [],
+      "source": "figma:node_id:2:1",
+      "sources": [
+        "figma:node_id:2:1"
+      ],
       "properties": {
         "screen_name": {
           "type": "string",
@@ -546,8 +548,11 @@
     "login_screen_pageview": {
       "description": "User views login screen screen",
       "category": "Login",
-      "source": "",
-      "sources": [],
+      "source": "figma:node_id:1:1",
+      "sources": [
+        "figma:node_id:1:1",
+        "figma:node_id:1:2"
+      ],
       "properties": {
         "screen_name": {
           "type": "string",
@@ -571,8 +576,10 @@
     "payment_form_pageview": {
       "description": "User views payment form screen",
       "category": "Payments",
-      "source": "",
-      "sources": [],
+      "source": "figma:node_id:3:1",
+      "sources": [
+        "figma:node_id:3:1"
+      ],
       "properties": {
         "screen_name": {
           "type": "string",
@@ -596,8 +603,10 @@
     "payment_success_pageview": {
       "description": "User views payment success screen",
       "category": "Payments",
-      "source": "",
-      "sources": [],
+      "source": "figma:node_id:3:2",
+      "sources": [
+        "figma:node_id:3:2"
+      ],
       "properties": {
         "screen_name": {
           "type": "string",

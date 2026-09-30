@@ -82,11 +82,10 @@ CSV includes `Source Node ID` and `Source Node IDs`; Excel uses columns N and O
 of the Events sheet. The plural column contains a JSON array of all contributing
 IDs. JSON retains the primary `source` and adds a `sources` array; MCP exposes
 `source_node_id` and `source_node_ids`. Controls with the same full event name
-share an event, including controls in variant frames, without losing their IDs.
+share an event within a page, including controls in variant frames, without losing their IDs.
 The CSV is a review format, not Amplitude Data's current import template. Use the
-[Amplitude guide](docs/amplitude.md) for integration limits. Synthetic pageviews
-still have no source ID; pageview provenance and cross-page screen identity are
-listed in the [roadmap](docs/ROADMAP.md#next).
+[Amplitude guide](docs/amplitude.md) for integration limits. Pageviews include all
+contributing screen frame IDs, including variants and screens without controls.
 
 ## Example output
 
@@ -101,6 +100,10 @@ The default naming pattern is `{screen}_{element}_{action}`. Adjust [taxonomy.co
 Both `snake_case` and `camelCase` are supported. Pageviews use the same pattern
 with an empty element and `actions.screen` (default `pageview`). All generated
 names obey `max_event_length`, including pageviews.
+Add `{page}` to the pattern (for example, `{page}_{screen}_{element}_{action}`)
+when different pages contain identically named screens. Cross-page event-name
+collisions produce an error instead of merging flows. Existing names stay the
+same when the default pattern has no collisions.
 
 ```yaml
 naming:

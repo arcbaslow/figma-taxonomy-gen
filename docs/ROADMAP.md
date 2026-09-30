@@ -59,17 +59,36 @@ event once and preserves its sources. Drift compares source membership and uses
 any shared ID for unambiguous renames; ambiguous splits/merges are not guessed.
 
 Migration: regenerate and review new events and source additions before updating
-the stored baseline. Legacy single-source files still load. Screen identity across
-pages and frame provenance for pageviews remain the next separate task.
+the stored baseline. Legacy single-source files still load.
+
+## Completed follow-up: screen identity and pageview provenance
+
+Controls retain their owning page ID and frame ID. Categories come from each
+control's page, removing the last-page-wins screen-name map. Existing naming stays
+the default; `{page}` is an optional normalized page-name placeholder. If different
+pages generate the same event name, extraction fails with guidance to qualify the
+pattern or rename screens/pages. Distinct page IDs never merge just because page
+names match. Control/pageview name collisions also fail with naming guidance.
+
+CLI and MCP use a separate screen inventory to emit pageviews for empty screens
+and retain every variant frame's ID. Included pages and section traversal follow
+the same rules as control extraction. Existing two-argument Python generation is
+compatible but cannot discover empty frames; callers pass `screens=extract_screens(...)`
+for the full inventory. Missing IDs in hand-built inputs are not fabricated.
+
+Migration: expect new pageview sources and empty-screen events. Review those
+additions before accepting a regenerated baseline. Frame sources support pageview
+rename detection, and category-only changes now fail drift checks. Naming patterns
+with cross-page collisions need `{page}` or distinct design names; no automatic
+prefix is added based on the current page filter.
 
 ## Next
 
-These proposals remain unfinished, in priority order. The multi-source task above
-is complete; pageviews and excluded/undetected nodes are not claimed as covered.
+These proposals remain unfinished, in priority order. The two provenance tasks
+above are complete. Excluded/undetected controls are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Define screen identity across pages and pageview provenance | `screen_flow_map` keys only by cleaned frame name, so two pages named Settings can acquire the last flow; synthetic pageviews have empty source IDs and empty screens produce no pageview | 2–3 | Medium: settle page-qualified names and frame provenance with backward compatibility; the docs and historical examples disagree |
 | Add a separate Amplitude Data CSV import profile | Current review CSV is not the required entity-oriented template. The [official schema](https://amplitude.com/docs/data/csv-import-export) requires exact headers and supports an import branch for review | 2–3 | Medium: obtain a sanitized current template, pin fixture expectations and preserve node IDs in a supported metadata field or companion artifact. No real-project import in tests |
 | Make Amplitude push safely repeatable and event-specific | Current property POSTs deduplicate by property name globally, do not associate properties with events, and repeat category creation. Enum constraints are omitted. [Taxonomy API](https://amplitude.com/docs/apis/analytics/taxonomy) | 2–3 | Medium: decide shared-property versus event override semantics; do not guess about intended update behavior or add lifecycle management |
 | Reduce Figma Tier 1 requests and add bounded retry policy | Cache hits still call `GET /files/:key?depth=1`; misses call that endpoint twice. This is not the distinct metadata endpoint. [Endpoints](https://developers.figma.com/docs/rest-api/file-endpoints/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1–2 | Medium: metadata requires a separate scope; TTL/offline cache freshness and long retry waits need explicit semantics |
@@ -190,3 +209,13 @@ only synthetic nodes. Twelve new tests failed against the prior implementation
 before the fix. Ruff, package builds, strict MkDocs, fixture extraction and offline
 drift validation also pass. The banking fixture now retains 18 controls in the
 same 21 events, including the second login button's ID.
+
+Screen-identity verification: **181 tests pass**, with 21 additional regression
+cases for cross-page conflicts, page-qualified snake/camel names, page filtering,
+empty screens/variants, all export formats, pageview renames, legacy source-less
+baselines, and category drift through CLI/MCP. Eight initial cases and the category
+drift case failed against the previous behavior before their fixes. The synthetic
+`screen_identity.json` fixture includes same-named screens on two pages, an empty
+variant, a text-only screen in a section, and an excluded page. Ruff, package
+builds, strict MkDocs and offline extraction/drift checks pass. The banking demo
+still has 18 controls and 21 events, now with frame sources on every pageview.

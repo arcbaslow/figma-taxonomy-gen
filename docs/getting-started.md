@@ -78,8 +78,9 @@ Either produces four files in `./output/`:
 | `taxonomy.json` | Canonical, validation, CI/CD                   |
 | `taxonomy.md`   | PR reviews, wiki, documentation                |
 
-CSV's final column and column N of Excel's Events sheet contain `Source Node ID`.
-Synthetic pageviews have no source ID. CSV import into Amplitude requires adapting
+CSV contains `Source Node ID` and `Source Node IDs`; Excel uses columns N and O.
+The plural column is a JSON array. Pageview sources are screen frame IDs, including
+empty screens and variants. CSV import into Amplitude requires adapting
 to its current template; this review format is not a direct import file.
 
 ## Commit the JSON

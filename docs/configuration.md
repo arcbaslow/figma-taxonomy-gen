@@ -104,16 +104,30 @@ If that exceeds `max_event_length`, it's truncated (trailing underscores trimmed
 If two different full names truncate to the same name, generation stops with an
 error identifying both names and available node IDs. Increase the cap or adjust
 the pattern/control names. Identical full names instead merge their source IDs
-into one event, including matches across variant frames.
+into one event within a page, including matches across variant frames.
 
 `style` supports `snake_case` and `camelCase`. The configured `pattern` can reorder
-`{screen}`, `{element}` and `{action}`. Pageviews use that pattern with an empty
+`{page}`, `{screen}`, `{element}` and `{action}`. Pageviews use that pattern with an empty
 element and `actions.screen`; the default remains `{screen}_pageview`. The length
 cap must be positive and applies after styling. Patterns and styles with invalid
 values produce an error. Property-rule patterns must match the resulting style.
 The default 64-character cap is a project policy, not a verified universal
-Amplitude API limit. Truncation can still collide with another event name; see
-the [roadmap's provenance decision](ROADMAP.md#next).
+Amplitude API limit.
+
+To distinguish Settings screens on Account and Admin pages, use:
+
+```yaml
+naming:
+  pattern: "{page}_{screen}_{element}_{action}"
+```
+
+Their pageviews become `account_settings_pageview` and `admin_settings_pageview`.
+The page placeholder uses the normalized page name; it does not add a prefix to
+`{screen}` itself. The default pattern stays `{screen}_{element}_{action}`.
+Cross-page name collisions require a pattern or design-name change; they never
+silently merge categories. Pages whose names normalize identically must be
+renamed if their events still collide. A control and a pageview also cannot share
+an event name: include `{action}` and keep their configured actions distinct.
 
 ## Property rules
 
@@ -123,7 +137,8 @@ duplicate property names on a single event.
 
 Rule properties currently take precedence over globals with the same name; among
 rules, the first matching definition wins. The page supplies the flow/category,
-not a prefix in the screen name. `screen_name.max_depth`,
+not an automatic prefix in the screen name. Use `{page}` for an explicit prefix.
+`screen_name.max_depth`,
 `element_name.fallback_to_component_name`, and `output.directory` are currently
 unused; pass `--output` to select the output directory. These configuration gaps
 remain [open decisions](ROADMAP.md#next).

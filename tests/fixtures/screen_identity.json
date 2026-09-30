@@ -1,0 +1,34 @@
+{
+  "document": {
+    "children": [
+      {
+        "id": "1:0", "type": "CANVAS", "name": "Account",
+        "children": [
+          {
+            "id": "1:1", "type": "FRAME", "name": "Settings - Default",
+            "children": [{"id": "1:11", "type": "INSTANCE", "name": "Button/Save"}]
+          },
+          {"id": "1:2", "type": "FRAME", "name": "Settings - Dark", "children": []},
+          {
+            "id": "1:9", "type": "SECTION", "name": "Receipts",
+            "children": [{
+              "id": "1:3", "type": "FRAME", "name": "Receipt",
+              "children": [{"id": "1:31", "type": "TEXT", "name": "Title", "characters": "Done"}]
+            }]
+          }
+        ]
+      },
+      {
+        "id": "2:0", "type": "CANVAS", "name": "Admin",
+        "children": [{
+          "id": "2:1", "type": "FRAME", "name": "Settings",
+          "children": [{"id": "2:11", "type": "INSTANCE", "name": "Button/Save"}]
+        }]
+      },
+      {
+        "id": "9:0", "type": "CANVAS", "name": "Archive",
+        "children": [{"id": "9:1", "type": "FRAME", "name": "Old", "children": []}]
+      }
+    ]
+  }
+}

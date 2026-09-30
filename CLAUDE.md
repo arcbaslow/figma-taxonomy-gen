@@ -47,17 +47,23 @@ The tool builds a screen map from the Figma frame hierarchy:
 
 ```
 Page: "Onboarding"
-  Frame: "01 - Welcome"        -> screen: onboarding_welcome
-  Frame: "02 - Phone Input"    -> screen: onboarding_phone
-  Frame: "03 - OTP"            -> screen: onboarding_otp
-  Frame: "04 - Success"        -> screen: onboarding_success
+  Frame: "01 - Welcome"        -> screen: welcome
+  Frame: "02 - Phone Input"    -> screen: phone_input
+  Frame: "03 - OTP"            -> screen: otp
+  Frame: "04 - Success"        -> screen: success
 
 Page: "Home"
   Frame: "Home - Default"      -> screen: home
   Frame: "Home - With Offer"   -> screen: home (variant, not separate screen)
 ```
 
-Frame naming conventions are configurable. The tool detects variant frames (same screen, different states) and collapses them.
+Frame naming conventions are configurable. Add `- With Offer` to the suffix list
+for that example. Every variant is visited; matching event names within a page
+merge their sources. The owning page supplies the category. Use `{page}` in the
+naming pattern for page-qualified names; cross-page event-name collisions are
+errors. Pageviews preserve frame IDs and include empty screens through the screen
+inventory. Python callers should pass `screens=extract_screens(...)` to include
+empty frames when calling `generate_taxonomy` directly.
 
 ### 3. Naming convention engine
 

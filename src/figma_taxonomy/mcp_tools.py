@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from figma_taxonomy.config import TaxonomyConfig, load_config
-from figma_taxonomy.extractor import extract_elements
+from figma_taxonomy.extractor import extract_elements, extract_screens
 from figma_taxonomy.figma_client import fetch_file, load_fixture
 from figma_taxonomy.models import TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
@@ -110,7 +110,7 @@ def extract_taxonomy_tool(
         figma_file = _filter_to_page(figma_file, page)
 
     elements = extract_elements(figma_file, config)
-    events = generate_taxonomy(elements, config)
+    events = generate_taxonomy(elements, config, screens=extract_screens(figma_file, config))
 
     return {
         "count": len(events),
@@ -128,7 +128,7 @@ def validate_taxonomy_tool(
     figma_file = _load_figma_source(figma_url_or_path)
 
     elements = extract_elements(figma_file, config)
-    current_events = generate_taxonomy(elements, config)
+    current_events = generate_taxonomy(elements, config, screens=extract_screens(figma_file, config))
 
     existing = _normalize_taxonomy(taxonomy_json).get("events", {})
     report = diff_taxonomies(existing, current_events)
@@ -140,6 +140,7 @@ def validate_taxonomy_tool(
         "renamed": [{"from": old, "to": new} for old, new in report.renamed],
         "property_changes": list(report.property_changes),
         "source_changes": list(report.source_changes),
+        "category_changes": list(report.category_changes),
     }
 
 

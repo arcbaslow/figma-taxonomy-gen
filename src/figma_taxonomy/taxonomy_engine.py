@@ -6,7 +6,7 @@ import fnmatch
 import re
 
 from figma_taxonomy.config import TaxonomyConfig
-from figma_taxonomy.models import EventProperty, ScreenElement, TaxonomyEvent
+from figma_taxonomy.models import EventProperty, Screen, ScreenElement, TaxonomyEvent
 
 
 def _to_snake_case(text: str) -> str:
@@ -36,14 +36,17 @@ def _build_event_name(
     config: TaxonomyConfig,
     *,
     truncate: bool = True,
+    page: str = "",
 ) -> str:
     if config.naming.max_event_length <= 0:
         raise ValueError("naming.max_event_length must be a positive integer.")
     try:
-        name = config.naming.pattern.format(screen=screen, element=element_name, action=action)
+        name = config.naming.pattern.format(
+            page=_to_snake_case(page), screen=screen, element=element_name, action=action,
+        )
     except (KeyError, ValueError, IndexError, AttributeError) as exc:
         raise ValueError(
-            "naming.pattern must use {screen}, {element} and/or {action} placeholders."
+            "naming.pattern must use {page}, {screen}, {element} and/or {action} placeholders."
         ) from exc
     name = _to_snake_case(name)
     if config.naming.style == "camelCase":
@@ -110,21 +113,27 @@ def _get_global_properties(config: TaxonomyConfig) -> list[EventProperty]:
 
 
 def generate_taxonomy(
-    elements: list[ScreenElement], config: TaxonomyConfig
+    elements: list[ScreenElement], config: TaxonomyConfig,
+    *, screens: list[Screen] | None = None,
 ) -> list[TaxonomyEvent]:
     """Generate taxonomy events from extracted screen elements.
 
     Merge identical full event names without losing contributing node IDs,
-    plus one pageview event per unique screen. Reject truncation collisions.
+    plus pageviews with frame provenance. Pass the screen inventory to include
+    empty screens. Reject truncation collisions and events shared across pages.
     """
     events: list[TaxonomyEvent] = []
     events_by_name: dict[str, TaxonomyEvent] = {}
     full_names: dict[str, str] = {}
-    screens_seen: set[str] = set()
+    event_pages: dict[str, tuple[str, str]] = {}
+    event_kinds: dict[str, str] = {}
     global_props = _get_global_properties(config)
 
-    def add_event(event: TaxonomyEvent, full_name: str) -> None:
+    def add_event(
+        event: TaxonomyEvent, full_name: str, page_id: str, kind: str,
+    ) -> None:
         name = event.event_name
+        page_key = ("id", page_id) if page_id else ("name", event.flow)
         if name in events_by_name:
             previous = events_by_name[name]
             if full_names[name] != full_name:
@@ -133,28 +142,48 @@ def generate_taxonomy(
                     f"and '{full_name}' (nodes {event.source_node_ids}) truncate to '{name}'. "
                     "Increase naming.max_event_length, change naming.pattern, or rename the controls."
                 )
+            if event_pages[name] != page_key:
+                raise ValueError(
+                    f"Event '{name}' belongs to different Figma pages: "
+                    f"'{previous.flow}' ({event_pages[name][1]}) and '{event.flow}' ({page_key[1]}). "
+                    "Add {page} to naming.pattern or rename the screens. "
+                    "If page names normalize identically, rename the pages too."
+                )
+            if event_kinds[name] != kind:
+                raise ValueError(
+                    f"Event '{name}' combines a control and a pageview. "
+                    "Include {action} in naming.pattern and use distinct control and screen actions."
+                )
             previous.source_node_ids.extend(
                 node for node in event.source_node_ids if node not in previous.source_node_ids
             )
+            if not previous.source_node_id and previous.source_node_ids:
+                previous.source_node_id = previous.source_node_ids[0]
             return
         events_by_name[name] = event
         full_names[name] = full_name
+        event_pages[name] = page_key
+        event_kinds[name] = kind
         events.append(event)
 
-    screen_flow_map: dict[str, str] = {}
-    for elem in elements:
-        if elem.parent_path:
-            screen_flow_map[elem.screen_name] = elem.parent_path[0]
+    screen_inventory = list(screens or [])
+    screen_inventory.extend(
+        Screen(
+            node_id=elem.screen_node_id, screen_name=elem.screen_name,
+            page_name=elem.parent_path[0] if elem.parent_path else "", page_id=elem.page_id,
+        )
+        for elem in elements
+    )
 
     for elem in elements:
         action = config.naming.actions.get(elem.element_type, "clicked")
         element_name = _clean_element_name(elem, config)
-        event_name = _build_event_name(elem.screen_name, element_name, action, config)
+        flow = elem.parent_path[0] if elem.parent_path else ""
+        event_name = _build_event_name(elem.screen_name, element_name, action, config, page=flow)
 
         full_name = _build_event_name(
-            elem.screen_name, element_name, action, config, truncate=False,
+            elem.screen_name, element_name, action, config, truncate=False, page=flow,
         )
-        screens_seen.add(elem.screen_name)
 
         rule_props = _get_matching_properties(event_name, config)
 
@@ -165,7 +194,6 @@ def generate_taxonomy(
                 prop_names_seen.add(p.name)
                 all_props.append(p)
 
-        flow = screen_flow_map.get(elem.screen_name, "")
         description = _build_description(elem, action)
 
         add_event(
@@ -177,25 +205,33 @@ def generate_taxonomy(
                 source_node_id=elem.node_id,
             ),
             full_name,
+            elem.page_id,
+            "control",
         )
 
-    for screen_name in sorted(screens_seen):
+    unique_screens = {
+        (s.page_id, s.page_name, s.screen_name, s.node_id): s for s in screen_inventory
+    }
+    for screen in sorted(unique_screens.values(), key=lambda s: (s.screen_name, s.page_name, s.page_id)):
         pv_name = _build_event_name(
-            screen_name, "", config.naming.actions.get("screen", "pageview"), config,
+            screen.screen_name, "", config.naming.actions.get("screen", "pageview"),
+            config, page=screen.page_name,
         )
         full_name = _build_event_name(
-            screen_name, "", config.naming.actions.get("screen", "pageview"),
-            config, truncate=False,
+            screen.screen_name, "", config.naming.actions.get("screen", "pageview"),
+            config, truncate=False, page=screen.page_name,
         )
-        flow = screen_flow_map.get(screen_name, "")
         add_event(
             TaxonomyEvent(
                 event_name=pv_name,
-                flow=flow,
-                description=f"User views {screen_name.replace('_', ' ')} screen",
+                flow=screen.page_name,
+                description=f"User views {screen.screen_name.replace('_', ' ')} screen",
                 properties=list(global_props),
+                source_node_id=screen.node_id,
             ),
             full_name,
+            screen.page_id,
+            "pageview",
         )
 
     return events

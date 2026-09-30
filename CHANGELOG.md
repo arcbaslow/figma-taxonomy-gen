@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Support `{page}` in naming patterns and include all screen frame IDs in pageviews, including empty screens and variants. Report category changes in CLI/MCP drift results.
+
 - Add all contributing Figma node IDs to JSON (`sources`), MCP (`source_node_ids`), Markdown, and CSV/Excel (`Source Node IDs`), while keeping the legacy primary fields. Report source membership changes in CLI/MCP drift checks.
 
 - Discover screen frames inside nested Figma sections while keeping page flow names and source node IDs.
@@ -18,6 +20,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 - Document the researched roadmap, remaining provenance/configuration limits, actual screen naming and property precedence, and valid composite-action CI examples.
 
 ### Fixed
+
+- Use each control's owning page for its category; reject cross-page event-name collisions and control/pageview collisions instead of silently combining their identities.
 
 - Visit every variant frame and merge identical full event names without discarding nodes or variant-only controls. Reject truncation collisions with actionable errors; match renames through any unambiguous shared source.
 

@@ -17,6 +17,18 @@ class ScreenElement:
     has_interaction: bool
     variants: list[str] = field(default_factory=list)
     parent_path: list[str] = field(default_factory=list)
+    page_id: str = ""
+    screen_node_id: str = ""
+
+
+@dataclass
+class Screen:
+    """A Figma screen frame, whether or not it contains interactive controls."""
+
+    node_id: str
+    screen_name: str
+    page_name: str
+    page_id: str = ""
 
 
 @dataclass

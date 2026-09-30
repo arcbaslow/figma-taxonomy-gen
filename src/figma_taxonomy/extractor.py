@@ -6,7 +6,7 @@ import re
 from collections.abc import Iterator
 
 from figma_taxonomy.config import TaxonomyConfig
-from figma_taxonomy.models import ScreenElement
+from figma_taxonomy.models import Screen, ScreenElement
 
 INTERACTIVE_PATTERNS = [
     (re.compile(p, re.IGNORECASE), element_type)
@@ -160,39 +160,40 @@ def _walk_node(
     return elements
 
 
-def extract_elements(figma_file: dict, config: TaxonomyConfig) -> list[ScreenElement]:
-    """Extract all interactive elements from a Figma file tree.
-
-    Args:
-        figma_file: Parsed JSON response from Figma GET /v1/files/:key
-        config: Taxonomy configuration
-
-    Returns:
-        List of ScreenElement instances grouped by screen
-    """
+def _page_frames(figma_file: dict, config: TaxonomyConfig) -> Iterator[tuple[dict, dict]]:
+    """Apply the same page scope to controls and screen inventory."""
     document = figma_file.get("document", figma_file)
-    pages = [
-        child
-        for child in document.get("children", [])
-        if child.get("type") in ("CANVAS", "PAGE")
+    for page in document.get("children", []):
+        if page.get("type") not in ("CANVAS", "PAGE"):
+            continue
+        if page.get("name", "") in config.figma.exclude_pages:
+            continue
+        for frame in _screen_frames(page):
+            yield page, frame
+
+
+def extract_screens(figma_file: dict, config: TaxonomyConfig) -> list[Screen]:
+    """Inventory every in-scope screen frame, including empty variants/screens."""
+    return [
+        Screen(
+            node_id=frame.get("id", ""),
+            screen_name=_clean_screen_name(frame["name"], config),
+            page_name=page.get("name", ""),
+            page_id=page.get("id", ""),
+        )
+        for page, frame in _page_frames(figma_file, config)
     ]
 
-    exclude = set(config.figma.exclude_pages)
 
+def extract_elements(figma_file: dict, config: TaxonomyConfig) -> list[ScreenElement]:
+    """Extract interactive controls, retaining their page and screen frame IDs."""
     all_elements: list[ScreenElement] = []
-
-    for page in pages:
+    for page, frame in _page_frames(figma_file, config):
         page_name = page.get("name", "")
-        if page_name in exclude:
-            continue
-
-        # Visit every variant; merge shared event names only after extracting IDs.
-        for frame in _screen_frames(page):
-            screen_name = _clean_screen_name(frame["name"], config)
-            parent_path = [page_name, frame["name"]]
-
-            all_elements.extend(
-                _walk_node(frame, screen_name, page_name, parent_path, config)
-            )
-
+        screen_name = _clean_screen_name(frame["name"], config)
+        elements = _walk_node(frame, screen_name, page_name, [page_name, frame["name"]], config)
+        for element in elements:
+            element.page_id = page.get("id", "")
+            element.screen_node_id = frame.get("id", "")
+        all_elements.extend(elements)
     return all_elements

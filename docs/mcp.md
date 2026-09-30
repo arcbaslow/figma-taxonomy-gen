@@ -63,7 +63,10 @@ Extract a taxonomy from a Figma file or local fixture.
 
 Returns: `{"count": int, "events": [...]}` with every event's name, category,
 description, properties, legacy primary `source_node_id`, and all contributing
-`source_node_ids`. Shared event names retain every contributing control ID.
+`source_node_ids`. Shared event names within a page retain every contributing
+control ID. Pageviews carry screen frame IDs and include screens with no controls.
+Use `{page}` in the configured naming pattern to distinguish matching screen names
+on different pages. Cross-page event-name collisions raise an actionable error.
 
 Pass that entire result directly to `export_taxonomy` or `validate_taxonomy`.
 Both accept either this extraction list or the stored JSON event map. JSON export
@@ -86,7 +89,9 @@ Diff a stored taxonomy against the current Figma file.
 | `config_path` (opt.)   | `str \| null`  | Path to a custom `taxonomy.config.yaml`           |
 
 Returns: `{"is_clean": bool, "added": [...], "removed": [...], "renamed": [...],
-"property_changes": [...], "source_changes": [...]}`. Each source change includes
+"property_changes": [...], "source_changes": [...], "category_changes": [...]}`.
+Category changes include `event_name`, `from`, and `to` flow names and make
+`is_clean` false. Each source change includes
 `event_name`, `added`, and `removed` node-ID lists. Any source membership change
 makes `is_clean` false; reordering sources does not. Older single-source inputs
 remain valid, but newly discovered variant sources are reported as additions.
