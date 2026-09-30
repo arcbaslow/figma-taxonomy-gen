@@ -70,6 +70,11 @@ Page: "Home"
   Frame: "Home - Skeleton"          → screen: home  (variant, collapses)
 ```
 
+The `- With Offer` example requires adding that suffix to the configured list;
+it is not a default suffix. Collapsing currently retains only the first frame for
+a base name, so controls unique to later variants are lost. This tested behavior
+needs a provenance decision before it changes; see the [roadmap](ROADMAP.md#next).
+
 Variant collapsing uses `naming.screen_name.strip_suffixes`. Numbered prefixes like
 `01 - Welcome` strip to `welcome` when `naming.screen_name.strip_prefixes: true`.
 
@@ -87,8 +92,9 @@ With text content, you get `..._apply_now_clicked` (matches the user's mental mo
 Without, you'd get `..._button_primary_large_clicked` (bound to the design system,
 breaks when the component is restyled).
 
-Fall back to component name when there's no text, controlled by
-`element_name.fallback_to_component_name`.
+When there is no immediate child label, extraction falls back to the component
+name. `element_name.fallback_to_component_name` is loaded but currently unused.
+Nested labels are not searched recursively.
 
 ## When detection goes wrong
 
@@ -97,7 +103,7 @@ If an event you expected isn't showing up:
 1. Check the component name in Figma against the pattern list
 2. Check for an exclusion (`icon` is a common false-negative trigger)
 3. Check that the element is a `COMPONENT`/`INSTANCE`, not a raw `FRAME`
-4. Add a prototype interaction to force inclusion
+4. Add a prototype interaction to include a raw node that is not excluded
 5. Or override by renaming the component to include a keyword like `button`
 
 The fastest debugging path is `figma-taxonomy extract --page "Your Page" -f json` and

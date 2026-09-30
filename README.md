@@ -123,7 +123,7 @@ output:
 figma-taxonomy extract --fixture tests/fixtures/banking_app.json --config taxonomy.config.yaml --format json,markdown
 ```
 
-Detection uses component names, node types and prototype interactions. Decorative nodes are excluded by the configured heuristics. Review the output against the product's real behavior: design files cannot establish whether an event is implemented or fires correctly.
+Detection uses component names, node types and prototype interactions. Decorative nodes are excluded by built-in heuristics. Review the output against the product's real behavior: design files cannot establish whether an event is implemented or fires correctly.
 
 Prototype interactions also include raw frames, groups, text and rectangles, even
 when their names match a control type such as `Button` or `Link`. Exclusion rules

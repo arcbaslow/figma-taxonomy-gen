@@ -17,7 +17,7 @@ figma-taxonomy extract --fixture <path> [OPTIONS]
 | `--fixture PATH`   |                    | Read a local Figma JSON dump instead of the API  |
 | `-c, --config PATH`|                    | Path to a custom `taxonomy.config.yaml`          |
 | `-o, --output DIR` | `./output`         | Directory for generated files                    |
-| `-f, --format`     | `excel,csv,json,markdown` | Comma-separated format list               |
+| `-f, --format`     | `output.formats` from config | Comma-separated format list            |
 | `--page NAME`      |                    | Limit extraction to one Figma page               |
 | `--no-cache`       | `false`            | Disable design-cache reads and writes          |
 | `--ai`             | `false`            | Enrich events with Claude-suggested properties   |
@@ -39,7 +39,7 @@ figma-taxonomy extract https://figma.com/design/ABC/App --no-cache
 ## `validate`
 
 Diffs a stored taxonomy JSON against the current Figma file. Matches events by
-`source.node_id`, so renames are reported as renames rather than add+remove.
+the `source` value (`figma:node_id:...`), so renames are reported as renames rather than add+remove.
 
 ```bash
 figma-taxonomy validate <taxonomy.json> --figma <url>  [OPTIONS]
