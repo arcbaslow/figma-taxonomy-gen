@@ -76,6 +76,7 @@ def test_validate_taxonomy_tool_clean():
                 "description": e["description"],
                 "category": e["category"],
                 "source": f"figma:node_id:{e['source_node_id']}" if e["source_node_id"] else "",
+                "sources": [f"figma:node_id:{node}" for node in e["source_node_ids"]],
                 "properties": {p["name"]: {"type": p["type"]} for p in e["properties"]},
             }
             for e in extracted["events"]

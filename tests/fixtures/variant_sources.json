@@ -1,0 +1,50 @@
+{
+  "document": {
+    "children": [
+      {
+        "type": "CANVAS",
+        "name": "Account",
+        "children": [
+          {
+            "id": "1:0",
+            "type": "FRAME",
+            "name": "Settings - Default",
+            "children": [
+              {
+                "id": "1:1",
+                "type": "INSTANCE",
+                "name": "Button/Save",
+                "children": [{"type": "TEXT", "name": "Label", "characters": "Save"}]
+              },
+              {
+                "id": "1:2",
+                "type": "INSTANCE",
+                "name": "Button/Save",
+                "children": [{"type": "TEXT", "name": "Label", "characters": "Save"}]
+              }
+            ]
+          },
+          {
+            "id": "2:0",
+            "type": "FRAME",
+            "name": "Settings - Dark",
+            "children": [
+              {
+                "id": "2:1",
+                "type": "INSTANCE",
+                "name": "Button/Save",
+                "children": [{"type": "TEXT", "name": "Label", "characters": "Save"}]
+              },
+              {
+                "id": "2:2",
+                "type": "INSTANCE",
+                "name": "Button/Cancel",
+                "children": [{"type": "TEXT", "name": "Label", "characters": "Cancel"}]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

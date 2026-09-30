@@ -62,7 +62,8 @@ Extract a taxonomy from a Figma file or local fixture.
 | `page` (opt.)          | `str \| null`  | Limit to a single Figma page                      |
 
 Returns: `{"count": int, "events": [...]}` with every event's name, category,
-description, properties, and source node id.
+description, properties, legacy primary `source_node_id`, and all contributing
+`source_node_ids`. Shared event names retain every contributing control ID.
 
 Pass that entire result directly to `export_taxonomy` or `validate_taxonomy`.
 Both accept either this extraction list or the stored JSON event map. JSON export
@@ -85,7 +86,10 @@ Diff a stored taxonomy against the current Figma file.
 | `config_path` (opt.)   | `str \| null`  | Path to a custom `taxonomy.config.yaml`           |
 
 Returns: `{"is_clean": bool, "added": [...], "removed": [...], "renamed": [...],
-"property_changes": [...]}`.
+"property_changes": [...], "source_changes": [...]}`. Each source change includes
+`event_name`, `added`, and `removed` node-ID lists. Any source membership change
+makes `is_clean` false; reordering sources does not. Older single-source inputs
+remain valid, but newly discovered variant sources are reported as additions.
 
 ### `export_taxonomy`
 

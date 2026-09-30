@@ -44,16 +44,31 @@ implementation commit received regression coverage and the full local CI check s
 | N7. Carry source node IDs into CSV and Excel review exports; correct import claims | Reviewers need the source design in every output, not only JSON/Markdown | `output/amplitude_csv.py`, `output/excel.py` omit IDs. Current six-column CSV differs from the [Data import schema](https://amplitude.com/docs/data/csv-import-export) | 0.5 | Medium; additive columns affect positional consumers |
 | N8. Discover screen frames inside Figma sections | Teams organize screens in sections; those screens currently vanish | Baseline `_find_screens` reads direct page frames only. [SECTION node](https://developers.figma.com/docs/rest-api/file-node-types/). Add a nested-section fixture; retain current variant semantics | 0.5 | Low; additional screens appear |
 
+## Completed follow-up: multiple-source provenance
+
+Implemented after the owner's request to start the roadmap tasks. Every variant
+frame is now visited, identical full event names retain all contributing control
+IDs, and variant-only controls produce events. Names that collide only after
+truncation fail with instructions to change the cap, pattern or control names.
+
+The compatibility contract is additive: `source`/`source_node_id` remains the
+first contributing ID, with `sources`/`source_node_ids` storing the full list.
+CSV/Excel append a JSON-array `Source Node IDs` column; Markdown lists all IDs.
+Description/category selection remains unchanged. Optional AI groups each shared
+event once and preserves its sources. Drift compares source membership and uses
+any shared ID for unambiguous renames; ambiguous splits/merges are not guessed.
+
+Migration: regenerate and review new events and source additions before updating
+the stored baseline. Legacy single-source files still load. Screen identity across
+pages and frame provenance for pageviews remain the next separate task.
+
 ## Next
 
-These are proposals, not completed work. Full preservation of all variant and
-collision node IDs is still unresolved in the existing event model. The changes
-above retain source IDs for emitted events and add them to review exports; they
-do not claim to solve the pre-existing discarded-node policy.
+These proposals remain unfinished, in priority order. The multi-source task above
+is complete; pageviews and excluded/undetected nodes are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Preserve multiple sources when collapsing variants and event-name collisions | `_find_screens` keeps only the first variant and `generate_taxonomy` skips duplicate names. `tests/test_extractor.py::test_collapses_variant_frames` explicitly demands that behavior. A second variant can contain unique controls, and truncated names can collide. Implementers need every contributing node | 3–5 | High: decide one event with multiple sources versus configurable disambiguated names; update model, all outputs, MCP, AI grouping and drift together. Do not silently change this tested policy in this run |
 | Define screen identity across pages and pageview provenance | `screen_flow_map` keys only by cleaned frame name, so two pages named Settings can acquire the last flow; synthetic pageviews have empty source IDs and empty screens produce no pageview | 2–3 | Medium: settle page-qualified names and frame provenance with backward compatibility; the docs and historical examples disagree |
 | Add a separate Amplitude Data CSV import profile | Current review CSV is not the required entity-oriented template. The [official schema](https://amplitude.com/docs/data/csv-import-export) requires exact headers and supports an import branch for review | 2–3 | Medium: obtain a sanitized current template, pin fixture expectations and preserve node IDs in a supported metadata field or companion artifact. No real-project import in tests |
 | Make Amplitude push safely repeatable and event-specific | Current property POSTs deduplicate by property name globally, do not associate properties with events, and repeat category creation. Enum constraints are omitted. [Taxonomy API](https://amplitude.com/docs/apis/analytics/taxonomy) | 2–3 | Medium: decide shared-property versus event override semantics; do not guess about intended update behavior or add lifecycle management |
@@ -61,7 +76,7 @@ do not claim to solve the pre-existing discarded-node policy.
 | Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
 | Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
 | Validate config and expose unsupported options honestly | `screen_name.max_depth`, `fallback_to_component_name` and `output.directory` are loaded but unused. Property-rule precedence differs from the prose, and raw YAML errors are not actionable | 1–2 | Medium: intended fallback/depth behavior is unspecified; document and decide rather than invent it |
-| Compare property schemas in drift reports | `validate.py` compares only property names, so type/enum/description changes are invisible; same-name replacement nodes can be matched despite changed IDs | 1–2 | Medium: define drift categories and matching policy with fixtures |
+| Compare property schemas in drift reports | `validate.py` compares only property names, so type/enum/description changes are invisible. Source membership changes are now reported separately | 1–2 | Medium: define property drift categories with fixtures |
 | Harden optional enrichment against malformed and oversized responses | `parse_suggestions` assumes iterable properties, the merger searches all flows, and one call per flow can exceed the output budget | 1–2 | Medium: add hostile/malformed mock responses, per-flow merge boundaries and reviewed batching; keep AI disabled by default |
 | Harden review exports and Windows text I/O | Excel stores arbitrary design strings as cell values and only renders four property pairs; JSON output and fixture/config readers omit explicit UTF-8. Formula-like labels and non-ASCII Windows round trips need dedicated fixtures | 1–2 | Medium: suspected spreadsheet interpretation/encoding risks from code review, not exercised in this run; avoid altering cell semantics without tests |
 
@@ -124,8 +139,8 @@ Sources accessed 2026-09-30; vendor docs describe contracts, not a live-account 
 
 Rejected for this run: a Figma plugin, tracking-plan lifecycle/branching service,
 code generation, real-time synchronization, and automatic AI enrichment. These
-cross explicit non-goals or introduce unsolicited paid calls. A new importer,
-multi-source event model and MCP 2 migration remain proposals because they need
+cross explicit non-goals or introduce unsolicited paid calls. A new importer
+and MCP 2 migration remain proposals because they need
 contract decisions and broader tests. Competing on unverified vendor shortcomings
 is also rejected. Small correctness and handoff improvements are the useful gap.
 
@@ -152,7 +167,7 @@ the section fixture also failed against the previous discovery code. The banking
 fixture remains at 17 elements and 21 events with no drift. New fixtures cover
 named prototype nodes and nested sections.
 
-Final verification: **139 tests pass** on Windows/Python 3.12.14. Ruff, source and
+Initial-run verification: **139 tests pass** on Windows/Python 3.12.14. Ruff, source and
 wheel builds, strict MkDocs and offline drift checks pass. The initial temporary
 directory errors were environmental; no test expectations were weakened to fix
 them. Runs used `PYTEST_ADDOPTS` to select fresh `tests/.tmp/...` paths and a
@@ -166,3 +181,12 @@ Planner plugin's current maintenance. Vendor contract checks used public web
 documentation, not authenticated API calls. The runtime lockfile was not upgraded.
 The larger and ambiguous changes remain in Next/Later for the reasons in their
 risk columns. No credential-bearing config or design cache was read or staged.
+
+Follow-up verification: **160 tests pass**, including 21 provenance regressions
+covering shared/unique variant controls, all exports, legacy inputs, optional
+mocked AI enrichment, source-only drift, renames, ambiguous splits/merges, and
+truncation errors before writes. The new `variant_sources.json` fixture contains
+only synthetic nodes. Twelve new tests failed against the prior implementation
+before the fix. Ruff, package builds, strict MkDocs, fixture extraction and offline
+drift validation also pass. The banking fixture now retains 18 controls in the
+same 21 events, including the second login button's ID.

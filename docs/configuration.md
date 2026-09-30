@@ -101,6 +101,10 @@ Event:    phone_input_phone_number_entered
 ```
 
 If that exceeds `max_event_length`, it's truncated (trailing underscores trimmed).
+If two different full names truncate to the same name, generation stops with an
+error identifying both names and available node IDs. Increase the cap or adjust
+the pattern/control names. Identical full names instead merge their source IDs
+into one event, including matches across variant frames.
 
 `style` supports `snake_case` and `camelCase`. The configured `pattern` can reorder
 `{screen}`, `{element}` and `{action}`. Pageviews use that pattern with an empty

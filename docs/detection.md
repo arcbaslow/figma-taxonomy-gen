@@ -71,12 +71,28 @@ Page: "Home"
 ```
 
 The `- With Offer` example requires adding that suffix to the configured list;
-it is not a default suffix. Collapsing currently retains only the first frame for
-a base name, so controls unique to later variants are lost. This tested behavior
-needs a provenance decision before it changes; see the [roadmap](ROADMAP.md#next).
+it is not a default suffix. Every variant frame is visited. Controls that generate
+the same full event name share one event with all their source node IDs; controls
+unique to later variants create additional events. The first control supplies the
+description and legacy primary source. This also applies to repeated labels in
+one frame and names intentionally combined by a custom naming pattern.
 
 Variant collapsing uses `naming.screen_name.strip_suffixes`. Numbered prefixes like
 `01 - Welcome` strip to `welcome` when `naming.screen_name.strip_prefixes: true`.
+
+JSON includes both the original `source` field and a `sources` array containing
+all `figma:node_id:...` references. Older single-source files still load. When
+upgrading, regenerate the taxonomy and review newly discovered variant controls
+and source additions before accepting the new baseline. Validation and diff report
+source additions/removals as drift; source ordering alone is ignored. A rename
+can match through any shared node when both events have a unique correspondence.
+Ambiguous splits/merges use unchanged names where possible, otherwise additions
+and removals, rather than guessing renames.
+
+Names that differ before truncation but collide at `max_event_length` cause an
+actionable error before output is written. Increase the limit, adjust the naming
+pattern, or rename the controls. Synthetic pageviews still have no frame sources;
+cross-page screen identity remains a separate [roadmap item](ROADMAP.md#next).
 
 ## Text content vs component name
 

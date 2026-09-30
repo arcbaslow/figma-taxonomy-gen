@@ -114,14 +114,14 @@ def test_excludes_archive_page(elements):
     assert "9:10" not in node_ids  # Button in Archive
 
 
-def test_collapses_variant_frames(elements):
-    """Dark variant of Login screen should not produce duplicate elements."""
+def test_preserves_elements_from_variant_frames(elements):
+    """Default and dark controls share a screen name without losing either node."""
     login_buttons = [
         e for e in elements
         if e.screen_name == "login_screen" and e.element_type == "button"
     ]
-    # Should have exactly 1 button from login (not 2 from default + dark)
-    assert len(login_buttons) == 1
+    assert len(login_buttons) == 2
+    assert len({e.node_id for e in login_buttons}) == 2
 
 
 def test_screen_names_cleaned(elements):

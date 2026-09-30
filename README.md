@@ -78,10 +78,14 @@ errors report the server's retry interval; quotas depend on your seat and file p
 | `taxonomy.json` | Structured taxonomy with Figma node IDs for validation and tooling |
 | `taxonomy.md` | Human-readable plan for a pull request or wiki |
 
-CSV appends `Source Node ID`; Excel includes it in column N of the Events sheet.
+CSV includes `Source Node ID` and `Source Node IDs`; Excel uses columns N and O
+of the Events sheet. The plural column contains a JSON array of all contributing
+IDs. JSON retains the primary `source` and adds a `sources` array; MCP exposes
+`source_node_id` and `source_node_ids`. Controls with the same full event name
+share an event, including controls in variant frames, without losing their IDs.
 The CSV is a review format, not Amplitude Data's current import template. Use the
 [Amplitude guide](docs/amplitude.md) for integration limits. Synthetic pageviews
-still have no source ID; variant and duplicate-name provenance decisions are
+still have no source ID; pageview provenance and cross-page screen identity are
 listed in the [roadmap](docs/ROADMAP.md#next).
 
 ## Example output

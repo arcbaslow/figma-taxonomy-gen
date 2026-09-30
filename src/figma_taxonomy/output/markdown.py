@@ -27,8 +27,9 @@ def write_markdown(
         for event in flow_events:
             lines.append(f"### {event.event_name}")
             lines.append(f"- **Trigger:** {event.description}")
-            if event.source_node_id:
-                lines.append(f"- **Source:** Figma node `{event.source_node_id}`")
+            if event.source_node_ids:
+                sources = ", ".join(f"`{node}`" for node in event.source_node_ids)
+                lines.append(f"- **Sources:** Figma nodes {sources}")
 
             if event.properties:
                 lines.append("- **Properties:**")
