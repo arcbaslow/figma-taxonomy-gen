@@ -52,6 +52,7 @@ nav:
     - Amplitude push: amplitude.md
     - MCP server: mcp.md
   - Cookbook: cookbook.md
+  - Roadmap: ROADMAP.md
   - Releases:
     - Release notes: RELEASE_NOTES.md
     - Verification: VERIFICATION.md

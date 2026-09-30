@@ -1,0 +1,124 @@
+# Roadmap
+
+Reviewed 2026-09-30 against `dd79a4a` (v0.4.2). This run has owner authorization
+for bounded feature work. Estimates are engineering days including tests and docs,
+not delivery dates. Evidence below distinguishes code findings from vendor claims.
+
+## Baseline
+
+Read `CLAUDE.md`, `CONTRIBUTING.md`, README, changelog, security policy, published
+guides, historical design documents, package code, tests and GitHub workflows.
+The `~/.gemini/GEMINI.md` referenced by AGENTS.md was absent.
+
+Windows, Python 3.12.14; `uv sync --extra dev --extra ai --extra mcp` succeeded
+with uv 0.12.21 installed locally for this audit. Added the docs extra for its CI
+check. Locked SDKs: Anthropic 0.89.0 and MCP 1.27.0.
+
+| Check | Baseline result |
+| --- | --- |
+| `uv run ruff check src/ tests/` | Passed |
+| `uv run pytest -v` | Initially 85 passed / 21 temp-directory permission errors; 106 passed with fresh workspace temp paths |
+| `uv build` | Wheel and source distribution built |
+| `uv run mkdocs build --strict` | Passed |
+| Fixture extraction and `validate --exit-code` | 17 elements, 21 events, no drift |
+
+`ci.yml` runs lint, build and tests on Ubuntu/Windows with Python 3.11–3.13.
+`docs.yml` runs the strict docs build. No repository workflow invokes the composite
+drift action; its offline CLI equivalent was run additionally. Hosted matrix jobs,
+live authentication, paid inference and Amplitude writes were not exercised.
+No design cache or credential-bearing config was opened.
+
+## Now
+
+Implement these in order, bugs before the final small detection feature. Each
+implementation commit gets regression coverage and the full local CI check set.
+
+| Item | Why it matters | Evidence | Effort | Risk |
+| --- | --- | --- | --- | --- |
+| N1. Correct Figma URL parsing, disable both cache reads and writes with `--no-cache`, and explain auth/rate errors | Fetch the selected branch and avoid persisting private designs when explicitly disabled | Baseline `figma_client.py:33–43` matches the parent before the branch; `:119` writes unconditionally; no client tests. [Authentication](https://developers.figma.com/docs/rest-api/authentication/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1 | Low; malformed inputs become errors |
+| N2. Detect named non-component nodes with prototype interactions | A frame called Button must not disappear when a generic clickable frame is detected | Baseline `extractor.py:156–158` requires a missing name match for non-components. Add a synthetic interaction fixture | 0.5 | Low; more expected events |
+| N3. Honor naming pattern/style and apply the configured cap and screen action to pageviews | Config must govern generated names, including long screen names | Baseline `taxonomy_engine.py:43` hardcodes the pattern; `:157` bypasses the cap and screen action; `test_config.py` already accepts camelCase | 1 | Medium; previously ignored settings change names; collision policy remains an open question |
+| N4. Make Amplitude dry runs offline and correct event category payloads | Preview must work without credentials; categories must arrive on the event | Baseline `amplitude_push.py:78` GETs before dry-run; event POST uses `category_name` instead of documented `category`. [API](https://amplitude.com/docs/apis/analytics/taxonomy) | 0.5 | Low; mock exact bodies and reject API-declared failures |
+| N5. Make MCP extraction results usable by export and validate; align page filtering | An implementer should be able to connect the advertised tools without rewriting JSON | Baseline `mcp_tools.py` returns an event list but consumers require a map; tests manually convert it. Missing/excluded page behavior differs from CLI | 1 | Low; accept both existing shapes |
+| N6. Correct AI price estimates and the added-property count | Users need a credible billable-run preview and accurate result | Baseline `ai_enricher.py:26` overprices Opus 4.6; unknown models silently use Haiku rates; CLI counts after mutation. [Pricing](https://platform.claude.com/docs/en/about-claude/pricing) | 0.5 | Low; preserve opt-in behavior |
+| N7. Carry source node IDs into CSV and Excel review exports; correct import claims | Reviewers need the source design in every output, not only JSON/Markdown | `output/amplitude_csv.py`, `output/excel.py` omit IDs. Current six-column CSV differs from the [Data import schema](https://amplitude.com/docs/data/csv-import-export) | 0.5 | Medium; additive columns affect positional consumers |
+| N8. Discover screen frames inside Figma sections | Teams organize screens in sections; those screens currently vanish | Baseline `_find_screens` reads direct page frames only. [SECTION node](https://developers.figma.com/docs/rest-api/file-node-types/). Add a nested-section fixture; retain current variant semantics | 0.5 | Low; additional screens appear |
+
+## Next
+
+| Proposal | Why / evidence | Effort | Risk / decision needed |
+| --- | --- | --- | --- |
+| Preserve multiple sources when collapsing variants and event-name collisions | `_find_screens` keeps only the first variant and `generate_taxonomy` skips duplicate names. `tests/test_extractor.py::test_collapses_variant_frames` explicitly demands that behavior. A second variant can contain unique controls, and truncated names can collide. Implementers need every contributing node | 3–5 | High: decide one event with multiple sources versus configurable disambiguated names; update model, all outputs, MCP, AI grouping and drift together. Do not silently change this tested policy in this run |
+| Define screen identity across pages and pageview provenance | `screen_flow_map` keys only by cleaned frame name, so two pages named Settings can acquire the last flow; synthetic pageviews have empty source IDs and empty screens produce no pageview | 2–3 | Medium: settle page-qualified names and frame provenance with backward compatibility; the docs and historical examples disagree |
+| Add a separate Amplitude Data CSV import profile | Current review CSV is not the required entity-oriented template. The [official schema](https://amplitude.com/docs/data/csv-import-export) requires exact headers and supports an import branch for review | 2–3 | Medium: obtain a sanitized current template, pin fixture expectations and preserve node IDs in a supported metadata field or companion artifact. No real-project import in tests |
+| Make Amplitude push safely repeatable and event-specific | Current property POSTs deduplicate by property name globally, do not associate properties with events, and repeat category creation. Enum constraints are omitted. [Taxonomy API](https://amplitude.com/docs/apis/analytics/taxonomy) | 2–3 | Medium: decide shared-property versus event override semantics; do not guess about intended update behavior or add lifecycle management |
+| Reduce Figma Tier 1 requests and add bounded retry policy | Cache hits still call `GET /files/:key?depth=1`; misses call that endpoint twice. This is not the distinct metadata endpoint. [Endpoints](https://developers.figma.com/docs/rest-api/file-endpoints/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1–2 | Medium: metadata requires a separate scope; TTL/offline cache freshness and long retry waits need explicit semantics |
+| Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
+| Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
+| Validate config and expose unsupported options honestly | `screen_name.max_depth`, `fallback_to_component_name` and `output.directory` are loaded but unused. Property-rule precedence differs from the prose, and raw YAML errors are not actionable | 1–2 | Medium: intended fallback/depth behavior is unspecified; document and decide rather than invent it |
+| Compare property schemas in drift reports | `validate.py` compares only property names, so type/enum/description changes are invisible; same-name replacement nodes can be matched despite changed IDs | 1–2 | Medium: define drift categories and matching policy with fixtures |
+| Harden optional enrichment against malformed and oversized responses | `parse_suggestions` assumes iterable properties, the merger searches all flows, and one call per flow can exceed the output budget | 1–2 | Medium: add hostile/malformed mock responses, per-flow merge boundaries and reviewed batching; keep AI disabled by default |
+
+## Later
+
+| Proposal | Why / evidence | Effort | Risk |
+| --- | --- | --- | --- |
+| Explain detection decisions in an optional report | Implementers could inspect why a node was included/excluded without reading regexes; current `_walk_node` silently skips nodes | 2–3 | Medium: define a stable report without changing event output |
+| Configurable detection overrides | Teams could map their own design-system names without a fork; current patterns are module constants | 2–3 | Medium: precedence, validation and false-positive fixtures needed |
+| OAuth or plan-token authentication | PAT-only `X-FIGMA-TOKEN` currently matches documented PAT authentication. OAuth uses bearer tokens; organization/enterprise plan tokens became available in July 2026. [Authentication](https://developers.figma.com/docs/rest-api/authentication/), [changelog](https://developers.figma.com/docs/rest-api/changelog/) | 3–5 | High: credential lifecycle and distribution change project scope; proposal only |
+
+## Research notes
+
+Sources accessed 2026-09-30; vendor docs describe contracts, not a live-account test.
+
+- **Figma:** `file_content:read` is the relevant scope; legacy OAuth `file_read`
+  is deprecated ([scopes](https://developers.figma.com/docs/rest-api/scopes/)).
+  File/tree and node endpoints remain Tier 1. Limits depend on seat and resource
+  plan, not a universal 60/min. The current rate-limit page's table and prose
+  disagree on low-seat monthly quotas (20 versus 6); report `Retry-After` rather
+  than hardcode either number. Dev/Full table entries reach 10/15/20 requests per
+  minute on paid plans ([limits](https://developers.figma.com/docs/rest-api/rate-limits/)).
+  The repo does not use the nodes endpoint; its claimed universal 50-ID maximum
+  was not established by the current [endpoint reference](https://developers.figma.com/docs/rest-api/file-endpoints/).
+  `interactions`, `SECTION` and `transitionNodeID` remain documented
+  ([node types](https://developers.figma.com/docs/rest-api/file-node-types/)).
+  Recent color/stroke additions do not affect fields consumed here. Deprecated
+  project endpoints were replaced by folder endpoints, which this client does
+  not call ([changelog](https://developers.figma.com/docs/rest-api/changelog/)).
+- **Amplitude:** the current reference covers planned schemas, Basic auth and
+  the existing US/EU hosts. The old assertion that this is only an obsolete
+  Govern API is unsupported. Current documentation does not establish universal
+  plan entitlement; confirm access for the target project. A 2025
+  [release note](https://amplitude.com/releases/support-activity-tags-visibility-ops-taxonomy-api)
+  mentions Enterprise customers, which is not proof of current exclusivity.
+  The 64-character setting remains this project's default naming policy; a
+  universal Amplitude event-name cap of 64 was not verified.
+- **Claude:** default Haiku ID `claude-haiku-4-5-20251001` remains listed.
+  Current model overview also lists Sonnet 5.5 and Opus 5.5; do not silently
+  upgrade paid runs ([models](https://platform.claude.com/docs/en/models/overview)).
+  Standard input/output USD per million tokens: Haiku 4.5 1/5, Sonnet 4.6 3/15,
+  Opus 4.6 5/25 ([pricing](https://platform.claude.com/docs/en/about-claude/pricing)).
+  Calls are per flow, not screen; six calls at 800 output tokens already cost
+  $0.024 on Haiku before input. Per-screen/app-size price promises are unreliable.
+  `Anthropic().messages.create(model, max_tokens, messages)` remains documented
+  ([SDK](https://github.com/anthropics/anthropic-sdk-python)). Model quality and
+  actual token use were not tested with paid calls.
+- **MCP:** the server uses 1.x `FastMCP`; 2.x is a separate migration, not a
+  version-bound edit. The existing upper bound is appropriate pending that work
+  ([upstream guidance](https://github.com/modelcontextprotocol/python-sdk)).
+
+## Comparable tools and rejected directions
+
+| Tool | Verified public description | Implication here |
+| --- | --- | --- |
+| Avo | Direct Figma frame/section/file import into Journeys, source links and reload, announced May 2026 ([announcement](https://www.avo.app/blog/your-designs-your-tracking-plan-now-connected)) | The old “no Figma extraction” comparison is stale; focus on an inspectable local pipeline |
+| Glazed | Figma-based AI suggestions and taxonomy reuse ([product](https://www.glazedanalytics.com/)); describes Amplitude/Segment/Mixpanel integration ([introduction](https://glazedanalytics.com/blog/introducing-glazed-tracking-tool/)) | Do not claim it lacks Amplitude integration; improve fixture-backed extraction and traceable exports here |
+| Amplitude Event Planner | Amplitude's [article](https://amplitude.com/blog/analytics-tracking-process) describes the Figma planning workflow | Current plugin maintenance/features were not independently verified; do not claim a current feature gap from an old table |
+| Ampli | Pulls a tracking plan into typed instrumentation and checks implementation ([CLI](https://amplitude.com/docs/sdks/ampli/ampli-cli)) | Complement the downstream workflow; do not build a code generator |
+
+Rejected for this run: a Figma plugin, tracking-plan lifecycle/branching service,
+code generation, real-time synchronization, and automatic AI enrichment. These
+cross explicit non-goals or introduce unsolicited paid calls. A new importer,
+multi-source event model and MCP 2 migration remain proposals because they need
+contract decisions and broader tests. Competing on unverified vendor shortcomings
+is also rejected. Small correctness and handoff improvements are the useful gap.
