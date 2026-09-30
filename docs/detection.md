@@ -55,6 +55,12 @@ Even if a name matches layer 1, these exclusions drop it:
 
 ## Screen name derivation
 
+Screens are frames directly under a page or nested inside `SECTION` containers.
+Discovery stops at each screen frame, so its internal layout frames do not become
+additional screens. Section names do not enter event names; the Figma page still
+supplies the flow. This traversal does not use `screen_name.max_depth`, which is
+currently a reserved, unused setting.
+
 The "screen" for each event comes from the Figma hierarchy, not the element. Given:
 
 ```

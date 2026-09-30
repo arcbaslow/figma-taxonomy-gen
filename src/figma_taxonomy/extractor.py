@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 
 from figma_taxonomy.config import TaxonomyConfig
 from figma_taxonomy.models import ScreenElement
@@ -108,17 +109,21 @@ def _get_variant_base(frame_name: str, config: TaxonomyConfig) -> str:
     return name.strip()
 
 
+def _screen_frames(container: dict) -> Iterator[dict]:
+    """Sections organize screens; frames contain screen layout, so stop there."""
+    for child in container.get("children", []):
+        if child.get("type") == "FRAME":
+            yield child
+        elif child.get("type") == "SECTION":
+            yield from _screen_frames(child)
+
+
 def _find_screens(page_node: dict, config: TaxonomyConfig) -> list[dict]:
-    """Return deduplicated screen frames (collapse variants)."""
-    frames = [
-        child
-        for child in page_node.get("children", [])
-        if child.get("type") == "FRAME"
-    ]
+    """Return deduplicated screen frames, including those organized in sections."""
 
     seen_bases: dict[str, dict] = {}
     result = []
-    for frame in frames:
+    for frame in _screen_frames(page_node):
         base = _get_variant_base(frame["name"], config)
         if base not in seen_bases:
             seen_bases[base] = frame

@@ -1,0 +1,22 @@
+{
+  "document": {"type": "DOCUMENT", "children": [
+    {"id": "0:1", "type": "CANVAS", "name": "Checkout", "children": [
+      {"id": "1:1", "type": "SECTION", "name": "Purchase journey", "children": [
+        {"id": "1:2", "type": "FRAME", "name": "01 - Cart", "children": [
+          {"id": "1:3", "type": "INSTANCE", "name": "Button/Continue"},
+          {"id": "1:4", "type": "FRAME", "name": "Layout", "children": [
+            {"id": "1:5", "type": "INSTANCE", "name": "Input/Coupon"}
+          ]}
+        ]},
+        {"id": "2:1", "type": "SECTION", "name": "Payment methods", "children": [
+          {"id": "2:2", "type": "FRAME", "name": "Payment - Default", "children": [
+            {"id": "2:3", "type": "INSTANCE", "name": "Button/Pay"}
+          ]}
+        ]}
+      ]},
+      {"id": "3:1", "type": "FRAME", "name": "Receipt", "children": [
+        {"id": "3:2", "type": "INSTANCE", "name": "Button/Done"}
+      ]}
+    ]}
+  ]}
+}
