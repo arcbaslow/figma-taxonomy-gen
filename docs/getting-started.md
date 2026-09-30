@@ -74,9 +74,13 @@ Either produces four files in `./output/`:
 | File            | Purpose                                        |
 |-----------------|------------------------------------------------|
 | `taxonomy.xlsx` | Team review; matches common tracking templates |
-| `taxonomy.csv`  | Direct import into Amplitude Data              |
+| `taxonomy.csv`  | Event/property review rows with source node IDs |
 | `taxonomy.json` | Canonical, validation, CI/CD                   |
 | `taxonomy.md`   | PR reviews, wiki, documentation                |
+
+CSV's final column and column N of Excel's Events sheet contain `Source Node ID`.
+Synthetic pageviews have no source ID. CSV import into Amplitude requires adapting
+to its current template; this review format is not a direct import file.
 
 ## Commit the JSON
 

@@ -1,4 +1,4 @@
-"""Amplitude Data CSV output formatter."""
+"""CSV review output; not the current Amplitude Data import template."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ def write_csv(
         writer.writerow([
             "Event Type", "Category", "Description",
             "Property Name", "Property Type", "Property Description",
+            "Source Node ID",
         ])
 
         for event in events:
@@ -27,9 +28,11 @@ def write_csv(
                     writer.writerow([
                         event.event_name, event.flow, event.description,
                         prop.name, prop.type, prop.description,
+                        event.source_node_id,
                     ])
             else:
                 writer.writerow([
                     event.event_name, event.flow, event.description,
                     "", "", "",
+                    event.source_node_id,
                 ])

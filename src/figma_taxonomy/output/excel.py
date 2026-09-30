@@ -29,6 +29,7 @@ def write_excel(
         "Parameter Name", "Parameter Description",
         "Parameter Name", "Parameter Description",
     ]
+    headers.append("Source Node ID")
     for col, header in enumerate(headers, 1):
         cell = ws_events.cell(row=2, column=col, value=header)
         cell.font = Font(bold=True)
@@ -40,6 +41,7 @@ def write_excel(
         ws_events.cell(row=row, column=2, value=event.flow)
         ws_events.cell(row=row, column=3, value=event.event_name)
         ws_events.cell(row=row, column=4, value=event.description)
+        ws_events.cell(row=row, column=14, value=event.source_node_id)
 
         event_props = [p for p in event.properties if p.name not in global_names]
 

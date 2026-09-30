@@ -33,7 +33,9 @@ graph LR
   interactions, and component type. Builds a screen map from the page/frame hierarchy.
 - **Configurable naming.** Events follow `{screen}_{element}_{action}` with
   configurable action verbs, screen-name cleaning, and per-pattern property rules.
-- **Four output formats.** Excel, Amplitude-ready CSV, JSON Schema, and Markdown.
+- **Four output formats.** Excel and CSV review sheets, structured JSON and Markdown.
+  Each carries the event's source node ID. The CSV is not the current Amplitude
+  Data import template; see [integration limits](amplitude.md).
 - **Drift detection.** `validate` matches events by Figma `node_id`, so a component
   rename shows up as a rename instead of an add plus a remove.
 - **AI enrichment (optional).** `--ai` sends one prompt per flow to Claude;

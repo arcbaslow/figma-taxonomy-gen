@@ -29,7 +29,7 @@ Figma REST API or local fixture
 | Extract | Detect buttons, inputs, toggles, tabs and other interactive nodes |
 | Name | Apply configurable patterns, styles and action verbs |
 | Enrich | Attach global properties and name-matching rules; optionally infer properties with Anthropic |
-| Export | Excel review sheet, Amplitude-oriented CSV, structured JSON and Markdown |
+| Export | Excel and CSV review sheets, structured JSON and Markdown, with source node IDs |
 | Validate | Compare a saved taxonomy with a Figma file or local fixture |
 | Diff | Compare two taxonomy files; return a failing CI exit code on changes |
 | Integrate | Optional MCP tools and an Amplitude Taxonomy API push command |
@@ -74,9 +74,15 @@ errors report the server's retry interval; quotas depend on your seat and file p
 | Output | Purpose |
 | --- | --- |
 | `taxonomy.xlsx` | Tracking-plan review in a spreadsheet |
-| `taxonomy.csv` | Amplitude-oriented event/property import |
+| `taxonomy.csv` | Event/property review rows with source node IDs |
 | `taxonomy.json` | Structured taxonomy with Figma node IDs for validation and tooling |
 | `taxonomy.md` | Human-readable plan for a pull request or wiki |
+
+CSV appends `Source Node ID`; Excel includes it in column N of the Events sheet.
+The CSV is a review format, not Amplitude Data's current import template. Use the
+[Amplitude guide](docs/amplitude.md) for integration limits. Synthetic pageviews
+still have no source ID; variant and duplicate-name provenance decisions are
+listed in the [roadmap](docs/ROADMAP.md#next).
 
 ## Example output
 

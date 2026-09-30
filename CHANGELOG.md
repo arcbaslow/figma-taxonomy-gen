@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Preserve source node IDs in CSV and Excel review exports. Clarify that the review CSV is not the current Amplitude Data import template.
+
 - Correct Opus 4.6 price estimates, report unknown model prices as unavailable, and count AI-added properties before the in-place merge.
 
 - Accept MCP extraction results directly in export and validation, preserving node IDs and enum schemas; align explicit and missing page handling with the CLI.
