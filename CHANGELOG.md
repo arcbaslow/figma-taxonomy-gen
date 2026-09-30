@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Add an opt-in `amplitude-csv` profile for CLI/config/MCP with all 33 published Amplitude Data import columns, event-specific properties, string enums and a mandatory JSON provenance companion. Validate unsupported schemas before writing; retain the existing review CSV and default formats.
+
 - Support `{page}` in naming patterns and include all screen frame IDs in pageviews, including empty screens and variants. Report category changes in CLI/MCP drift results.
 
 - Add all contributing Figma node IDs to JSON (`sources`), MCP (`source_node_ids`), Markdown, and CSV/Excel (`Source Node IDs`), while keeping the legacy primary fields. Report source membership changes in CLI/MCP drift checks.
@@ -20,6 +22,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 - Document the researched roadmap, remaining provenance/configuration limits, actual screen naming and property precedence, and valid composite-action CI examples.
 
 ### Fixed
+
+- Write taxonomy JSON explicitly as UTF-8, including import companions; reject duplicate properties in MCP extraction results instead of silently overwriting them.
 
 - Use each control's owning page for its category; reject cross-page event-name collisions and control/pageview collisions instead of silently combining their identities.
 

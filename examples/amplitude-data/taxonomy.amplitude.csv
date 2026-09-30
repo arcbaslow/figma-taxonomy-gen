@@ -1,0 +1,12 @@
+Action,Array min items,Array max items,Array unique items,Const value,Enum values,Event activity,Event hidden from dropdowns,Event hidden from persona results,Event hidden from pathfinder,Event hidden from timeline,Event category,Event display name,Event property name,Event source,Number property value min,Number property value max,Number is integer,Object type,Object name,Object owner,Object description,Property type,Property group names,Property description,Property value type,Property required,Property visibility,Property is array,Property regex,String property value min length,String property value max length,Tags
+,,,,,,,,,,,Account,,element_text,,,,,Event,settings_save_clicked,,User clicks Save,Event Property,,Visible text of the clicked element,string,,,,,,,
+,,,,,,,,,,,Account,,screen_name,,,,,Event,settings_save_clicked,,User clicks Save,Event Property,,Screen where event occurred,string,,,,,,,
+,,,,,"ios,android,web",,,,,,Account,,platform,,,,,Event,settings_save_clicked,,User clicks Save,Event Property,,,enum,,,,,,,
+,,,,,,,,,,,Account,,app_version,,,,,Event,settings_save_clicked,,User clicks Save,Event Property,,Application version,string,,,,,,,
+,,,,,,,,,,,Account,,element_text,,,,,Event,settings_cancel_clicked,,User clicks Cancel,Event Property,,Visible text of the clicked element,string,,,,,,,
+,,,,,,,,,,,Account,,screen_name,,,,,Event,settings_cancel_clicked,,User clicks Cancel,Event Property,,Screen where event occurred,string,,,,,,,
+,,,,,"ios,android,web",,,,,,Account,,platform,,,,,Event,settings_cancel_clicked,,User clicks Cancel,Event Property,,,enum,,,,,,,
+,,,,,,,,,,,Account,,app_version,,,,,Event,settings_cancel_clicked,,User clicks Cancel,Event Property,,Application version,string,,,,,,,
+,,,,,,,,,,,Account,,screen_name,,,,,Event,settings_pageview,,User views settings screen,Event Property,,Screen where event occurred,string,,,,,,,
+,,,,,"ios,android,web",,,,,,Account,,platform,,,,,Event,settings_pageview,,User views settings screen,Event Property,,,enum,,,,,,,
+,,,,,,,,,,,Account,,app_version,,,,,Event,settings_pageview,,User views settings screen,Event Property,,Application version,string,,,,,,,

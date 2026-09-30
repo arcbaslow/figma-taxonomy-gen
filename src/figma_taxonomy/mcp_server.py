@@ -75,15 +75,16 @@ def build_server():
         format: str,
         output_path: str,
     ) -> dict[str, str]:
-        """Write a taxonomy to disk in one of: json, csv, markdown, excel.
+        """Write a taxonomy as json, csv, markdown, excel, or amplitude-csv.
 
         Args:
             taxonomy_json: Parsed taxonomy JSON.
-            format: Output format - json | csv | markdown | excel.
+            format: Output format - json | csv | markdown | excel | amplitude-csv.
             output_path: Destination file path.
 
         Returns:
-            {"output_path": str, "format": str}
+            {"output_path": str, "format": str}. amplitude-csv also returns
+            companion_path (JSON with provenance) and import notes. It requires a .csv path.
         """
         return export_taxonomy_tool(taxonomy_json, format, output_path)
 

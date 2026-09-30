@@ -82,6 +82,8 @@ def _normalize_taxonomy(taxonomy_json: dict) -> dict:
         node_id = node_ids[0] if node_ids else ""
         properties: dict[str, dict] = {}
         for prop in event.get("properties", []):
+            if prop["name"] in properties:
+                raise ValueError(f"Event '{name}': duplicate property '{prop['name']}'.")
             body = {"type": prop["type"], "description": prop.get("description", "")}
             if prop.get("enum_values") is not None:
                 body["enum"] = prop["enum_values"]
@@ -151,10 +153,28 @@ def export_taxonomy_tool(
 ) -> dict[str, str]:
     """Write a taxonomy to disk in one of the supported formats."""
     fmt = format.lower()
-    if fmt not in {"json", "csv", "markdown", "md", "excel", "xlsx"}:
-        raise ValueError(f"Unsupported format: {format}. Use json, csv, markdown or excel.")
+    if fmt not in {"json", "csv", "markdown", "md", "excel", "xlsx", "amplitude-csv"}:
+        raise ValueError(f"Unsupported format: {format}. Use json, csv, markdown, excel or amplitude-csv.")
+    if fmt == "amplitude-csv" and isinstance(taxonomy_json.get("events"), list):
+        from figma_taxonomy.output.amplitude_data_csv import validate_extraction_schema
+        validate_extraction_schema(taxonomy_json["events"])
     taxonomy_json = _normalize_taxonomy(taxonomy_json)
     path = Path(output_path)
+
+    if fmt == "amplitude-csv":
+        from figma_taxonomy.output.amplitude_data_csv import (
+            IMPORT_NOTES,
+            validate_stored_schema,
+            write_amplitude_csv,
+        )
+        validate_stored_schema(taxonomy_json.get("events", {}))
+        events = _hydrate_events(taxonomy_json.get("events", {}))
+        companion_path = write_amplitude_csv(events, TaxonomyConfig(), path)
+        return {
+            "output_path": str(path), "format": fmt,
+            "companion_path": str(companion_path), "notes": IMPORT_NOTES,
+        }
+
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if fmt == "json":

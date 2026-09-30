@@ -1,12 +1,58 @@
-# Amplitude push
+# Amplitude integration
+
+## Amplitude Data CSV import
+
+Generate the optional import profile using a local fixture or a Figma URL:
+
+```bash
+figma-taxonomy extract --fixture tests/fixtures/banking_app.json --format amplitude-csv --output output
+```
+
+This writes `taxonomy.amplitude.csv` and its mandatory companion,
+`taxonomy.amplitude.json`. The companion retains every control/frame source ID
+and the original property schemas. Use it with `validate` or `diff`; only the CSV
+is for the Amplitude importer. The existing `csv` format remains the review sheet.
+
+The profile follows the 33-column **Events and event properties** contract in
+[Amplitude's CSV documentation](https://amplitude.com/docs/data/csv-import-export),
+checked 2026-09-30. It emits one row per event/property association and a row with
+blank property fields for an event without properties. Event name, description,
+category, property name and description are mapped explicitly; shared property
+names on different events keep their individual schemas.
+
+Supported property types are `string`, `number`, `integer`, `boolean`, `any`, and
+non-empty string enums. Integers use `number` plus `Number is integer=True`.
+String enums use `enum` with comma-separated values. Enum members containing
+commas, line breaks, empty values or surrounding whitespace are rejected because
+the documented list format provides no escaping contract. Numeric/boolean enums,
+arrays, objects, constants and additional constraints are rejected before files
+are written. Keep those schemas in JSON or adapt them explicitly for import.
+
+Fields the model does not represent are blank, including owner, visibility,
+required/array flags, tags, activity and Amplitude event sources. Figma IDs live
+in the companion, not in `Event source`. **This is an initial-plan export, not a
+remote-metadata-preserving synchronization tool.** In particular, the documented
+blank `Object owner` clears an existing owner; blank property flags are optional
+and non-array. Blank `Action` creates or updates matching entities. Review updates
+to existing definitions carefully.
+
+In Amplitude Data, choose **Events → Import**, upload the CSV, and review the
+`import` branch before merging. No upload, credentials or remote request is part
+of local generation. The header fixture comes from the public schema, not an
+authenticated template download; real-project UI import acceptance remains
+unverified. Property groups and user properties are outside this profile.
+
+For MCP, use `export_taxonomy(..., format="amplitude-csv", output_path="plan.csv")`.
+It also writes `plan.json` and returns `companion_path` plus import notes.
+
+## Taxonomy API push
 
 The `push` command writes events, categories, and properties directly to
 Amplitude's Taxonomy API. Confirm API access for your project; current public docs
 do not establish a universal Enterprise-only restriction. The
 [API reference](https://amplitude.com/docs/apis/analytics/taxonomy) describes
 tracking-plan schema operations, rather than an obsolete Govern-only integration.
-The CSV export is a review format; it is not the current Amplitude Data import
-template. See the [roadmap](ROADMAP.md#next) for a dedicated import profile.
+The `amplitude-csv` profile above is independent of Taxonomy API access.
 
 ## Setup
 
