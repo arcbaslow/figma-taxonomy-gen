@@ -9,6 +9,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from figma_taxonomy.mcp_tools import (
     export_taxonomy_tool,
     extract_taxonomy_tool,
@@ -16,6 +18,33 @@ from figma_taxonomy.mcp_tools import (
 )
 
 FIXTURE = Path(__file__).parent / "fixtures" / "banking_app.json"
+
+
+@pytest.mark.parametrize('format', ['json', 'csv', 'markdown', 'excel'])
+def test_extraction_can_be_exported_directly(format: str, tmp_path: Path) -> None:
+    extracted = extract_taxonomy_tool(str(FIXTURE))
+    path = tmp_path / f'export.{format}'
+    export_taxonomy_tool(extracted, format, str(path))
+    assert path.stat().st_size > 0
+    if format == 'json':
+        stored = json.loads(path.read_text(encoding='utf-8'))
+        first = extracted['events'][0]
+        assert stored['events'][first['event_name']]['source'].endswith(first['source_node_id'])
+        assert validate_taxonomy_tool(stored, str(FIXTURE))['is_clean']
+
+
+def test_extraction_can_be_validated_directly() -> None:
+    extracted = extract_taxonomy_tool(str(FIXTURE))
+    assert validate_taxonomy_tool(extracted, str(FIXTURE))['is_clean']
+
+
+def test_missing_page_is_actionable() -> None:
+    with pytest.raises(ValueError, match='Available:'):
+        extract_taxonomy_tool(str(FIXTURE), page='Missing')
+
+
+def test_explicit_page_overrides_excluded_pages() -> None:
+    assert extract_taxonomy_tool(str(FIXTURE), page='Archive')['count'] > 0
 
 
 def test_extract_taxonomy_tool_from_fixture():

@@ -64,6 +64,16 @@ Extract a taxonomy from a Figma file or local fixture.
 Returns: `{"count": int, "events": [...]}` with every event's name, category,
 description, properties, and source node id.
 
+Pass that entire result directly to `export_taxonomy` or `validate_taxonomy`.
+Both accept either this extraction list or the stored JSON event map. JSON export
+normalizes to the stored map, retaining source IDs, property descriptions and enums.
+Explicit page selection overrides exclusions; a missing page raises an error
+listing available pages, matching CLI behavior.
+
+The package currently targets MCP SDK 1.x (`mcp>=1.0,<2`), with 1.27.0 in the
+lockfile. Current upstream 2.x requires a separate migration; see the
+[roadmap](ROADMAP.md#next).
+
 ### `validate_taxonomy`
 
 Diff a stored taxonomy against the current Figma file.

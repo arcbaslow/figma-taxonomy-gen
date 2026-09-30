@@ -56,7 +56,38 @@ def _filter_to_page(figma_file: dict, page_name: str) -> dict:
         child for child in document.get("children", [])
         if child.get("name") == page_name
     ]
+    if not matching:
+        available = [child.get("name") for child in document.get("children", [])]
+        raise ValueError(f"Page '{page_name}' not found. Available: {available}")
     return {"document": {"children": matching}}
+
+
+def _normalize_taxonomy(taxonomy_json: dict) -> dict:
+    """Accept stored JSON or an extract-tool result without losing provenance."""
+    raw_events = taxonomy_json.get("events", {})
+    if isinstance(raw_events, dict):
+        return taxonomy_json
+    if not isinstance(raw_events, list):
+        raise ValueError("events must be a stored event map or an extraction event list.")
+    events: dict[str, dict] = {}
+    for event in raw_events:
+        name = event["event_name"]
+        if name in events:
+            raise ValueError(f"Duplicate event name '{name}'; resolve it before exporting node IDs.")
+        node_id = event.get("source_node_id", "")
+        properties: dict[str, dict] = {}
+        for prop in event.get("properties", []):
+            body = {"type": prop["type"], "description": prop.get("description", "")}
+            if prop.get("enum_values") is not None:
+                body["enum"] = prop["enum_values"]
+            properties[prop["name"]] = body
+        events[name] = {
+            "category": event.get("category", ""),
+            "description": event.get("description", ""),
+            "source": f"figma:node_id:{node_id}" if node_id else "",
+            "properties": properties,
+        }
+    return {**taxonomy_json, "events": events}
 
 
 def extract_taxonomy_tool(
@@ -69,6 +100,7 @@ def extract_taxonomy_tool(
     figma_file = _load_figma_source(figma_url_or_path)
 
     if page:
+        config.figma.exclude_pages = []
         figma_file = _filter_to_page(figma_file, page)
 
     elements = extract_elements(figma_file, config)
@@ -92,7 +124,7 @@ def validate_taxonomy_tool(
     elements = extract_elements(figma_file, config)
     current_events = generate_taxonomy(elements, config)
 
-    existing = taxonomy_json.get("events", {})
+    existing = _normalize_taxonomy(taxonomy_json).get("events", {})
     report = diff_taxonomies(existing, current_events)
 
     return {
@@ -111,11 +143,14 @@ def export_taxonomy_tool(
 ) -> dict[str, str]:
     """Write a taxonomy to disk in one of the supported formats."""
     fmt = format.lower()
+    if fmt not in {"json", "csv", "markdown", "md", "excel", "xlsx"}:
+        raise ValueError(f"Unsupported format: {format}. Use json, csv, markdown or excel.")
+    taxonomy_json = _normalize_taxonomy(taxonomy_json)
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if fmt == "json":
-        path.write_text(json.dumps(taxonomy_json, indent=2, ensure_ascii=False))
+        path.write_text(json.dumps(taxonomy_json, indent=2, ensure_ascii=False), encoding="utf-8")
         return {"output_path": str(path), "format": "json"}
 
     # For non-JSON formats, rehydrate events and use the existing formatters.

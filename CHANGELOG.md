@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Accept MCP extraction results directly in export and validation, preserving node IDs and enum schemas; align explicit and missing page handling with the CLI.
+
 - Keep Amplitude dry runs entirely offline, send event categories under the documented API field, and report API-declared failures rather than counting them as successful writes.
 
 - Honor configured naming patterns and snake_case/camelCase styles; apply the configured screen action and event-name length cap to pageviews too.
