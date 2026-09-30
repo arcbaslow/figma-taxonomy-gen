@@ -88,9 +88,39 @@ def test_push_dry_run_makes_no_post_calls():
 
     result = push_taxonomy(events, client=client, dry_run=True)
 
-    assert "POST" not in calls
+    assert calls == []
     assert result.events_created == []  # nothing actually pushed
     assert result.dry_run is True
+
+
+def test_event_post_uses_documented_category_field() -> None:
+    from urllib.parse import parse_qs
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == 'GET':
+            return httpx.Response(200, json={'data': []})
+        if request.url.path == '/api/2/taxonomy/event':
+            assert parse_qs(request.content.decode()) == {
+                'event_type': ['pay_clicked'], 'category': ['Payments'],
+                'description': ['pay_clicked description'],
+            }
+        return httpx.Response(200, json={'success': True})
+
+    with _make_client(handler) as client:
+        result = push_taxonomy([_event('pay_clicked', 'Payments')], client)
+    assert result.events_created == ['pay_clicked']
+
+
+def test_api_declared_failure_is_not_counted_as_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == 'GET':
+            return httpx.Response(200, json={'data': []})
+        return httpx.Response(200, json={'success': False, 'errors': [{'message': 'invalid'}]})
+
+    with _make_client(handler) as client:
+        result = push_taxonomy([_event('pay_clicked')], client)
+    assert result.events_created == []
+    assert result.errors
 
 
 def test_push_collects_api_errors_without_aborting():

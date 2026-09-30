@@ -170,6 +170,9 @@ figma-taxonomy push output/taxonomy.json --dry-run
 
 A real push requires Amplitude Taxonomy API access and `AMPLITUDE_API_KEY` / `AMPLITUDE_SECRET_KEY`. Check access for your Amplitude project. **Removing `--dry-run` performs writes immediately**; there is no extra confirmation prompt. CSV export remains available independently of Taxonomy API access.
 
+`--dry-run` makes no API requests and needs no credentials. Its counts describe
+the input plan; they do not check which events already exist remotely.
+
 ## Tests
 
 ```bash

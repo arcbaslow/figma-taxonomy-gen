@@ -1,12 +1,12 @@
 # Amplitude push
 
 The `push` command writes events, categories, and properties directly to
-Amplitude's Taxonomy API. This requires an **Enterprise** plan — the Taxonomy API
-is not exposed on lower tiers.
-
-!!! warning "Enterprise only"
-    If you're on Growth or Scholarship tiers, use CSV import via the Amplitude Data UI
-    instead. `figma-taxonomy extract -f csv` produces a ready-to-import file.
+Amplitude's Taxonomy API. Confirm API access for your project; current public docs
+do not establish a universal Enterprise-only restriction. The
+[API reference](https://amplitude.com/docs/apis/analytics/taxonomy) describes
+tracking-plan schema operations, rather than an obsolete Govern-only integration.
+The CSV export is a review format; it is not the current Amplitude Data import
+template. See the [roadmap](ROADMAP.md#next) for a dedicated import profile.
 
 ## Setup
 
@@ -26,6 +26,9 @@ Always dry-run before a real push to see what would change:
 ```bash
 figma-taxonomy push output/taxonomy.json --dry-run
 ```
+
+Dry runs make no requests, including GETs, and require no credentials. Counts
+describe the local input and cannot predict which events already exist remotely.
 
 ```
 Loaded 21 events from output/taxonomy.json
@@ -49,6 +52,12 @@ The command:
 3. `POST`s unique event properties (`/api/2/taxonomy/event-property`)
 4. `POST`s new events, skipping any that already exist
 
+Event creation sends the documented `category` field. HTTP errors and API bodies
+declaring `success: false` are reported as failures. Properties are currently
+shared definitions, not event-specific overrides; enum constraints are not pushed.
+Repeated category/property creation may produce conflicts. Review these limits
+before a real push; the command is not a full tracking-plan synchronization tool.
+
 Errors from the API are collected in a report and printed at the end. A single
 failed event doesn't abort the whole push.
 
@@ -62,8 +71,8 @@ figma-taxonomy push output/taxonomy.json --base-url https://analytics.eu.amplitu
 
 ## One-way operations
 
-Events and properties created via the Taxonomy API show up in Amplitude Data as
-tracked artifacts. Deletes and renames must be done through the Amplitude UI —
+The Taxonomy API plans schema; creating a definition does not ingest an event.
+Deletes and renames must be done through the Amplitude UI —
 `push` only creates.
 
 Treat Amplitude as the downstream system. The Figma file + `taxonomy.json` is the

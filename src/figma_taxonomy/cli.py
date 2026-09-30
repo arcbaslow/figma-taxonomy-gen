@@ -203,7 +203,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
 @click.option("--dry-run", is_flag=True, help="Print what would be pushed without calling the API")
 @click.option("--base-url", default="https://amplitude.com", help="Amplitude base URL")
 def push(taxonomy_path, dry_run, base_url):
-    """Push a taxonomy JSON to Amplitude's Taxonomy API (Enterprise only)."""
+    """Push a taxonomy JSON to Amplitude's Taxonomy API (project access required)."""
     from figma_taxonomy.amplitude_push import make_client, push_taxonomy
     from figma_taxonomy.validate import _events_from_dict
 

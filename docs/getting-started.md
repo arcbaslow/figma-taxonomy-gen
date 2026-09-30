@@ -92,5 +92,5 @@ From here you can:
 
 - Run [`validate`](cli-reference.md#validate) in CI to catch drift between the JSON and the current Figma design
 - Use [`diff`](cli-reference.md#diff) to review taxonomy changes in PRs
-- [Push](amplitude.md) events to Amplitude via the Taxonomy API (Enterprise)
+- [Push](amplitude.md) events to Amplitude with project Taxonomy API access
 - Wire up the [drift-check action](ci.md) on your app repo

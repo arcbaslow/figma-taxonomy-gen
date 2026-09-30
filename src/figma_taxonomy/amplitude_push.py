@@ -1,4 +1,4 @@
-"""Push a taxonomy to Amplitude via the Taxonomy API (Enterprise-only).
+"""Push a taxonomy to Amplitude via the Taxonomy API (project access required).
 
 API reference: https://amplitude.com/docs/apis/analytics/taxonomy
 Endpoints:
@@ -42,7 +42,10 @@ def make_client(api_key: str, secret_key: str, base_url: str = AMPLITUDE_BASE_UR
 def _fetch_existing_events(client: httpx.Client) -> set[str]:
     response = client.get("/api/2/taxonomy/event")
     response.raise_for_status()
-    data = response.json().get("data", [])
+    body = response.json()
+    if body.get("success") is False:
+        raise RuntimeError("Amplitude could not list events. Check project Taxonomy API access.")
+    data = body.get("data", [])
     return {item.get("event_type") for item in data if item.get("event_type")}
 
 
@@ -57,6 +60,9 @@ def _post(client: httpx.Client, path: str, payload: dict, result: PushResult) ->
             {"path": path, "payload": payload, "status": response.status_code, "body": response.text}
         )
         return False
+    if response.json().get("success") is False:
+        result.errors.append({"path": path, "payload": payload, "body": response.text})
+        return False
     return True
 
 
@@ -67,10 +73,10 @@ def push_taxonomy(
 ) -> PushResult:
     """Push events, categories, and properties to Amplitude's Taxonomy API."""
     result = PushResult(dry_run=dry_run)
-    existing = _fetch_existing_events(client)
-
     if dry_run:
         return result
+
+    existing = _fetch_existing_events(client)
 
     seen_categories: set[str] = set()
     for event in events:
@@ -106,7 +112,7 @@ def push_taxonomy(
             continue
         payload = {
             "event_type": event.event_name,
-            "category_name": event.flow or "",
+            "category": event.flow or "",
             "description": event.description or "",
         }
         if _post(client, "/api/2/taxonomy/event", payload, result):
