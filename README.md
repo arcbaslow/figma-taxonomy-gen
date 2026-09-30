@@ -162,6 +162,10 @@ figma-taxonomy-mcp
 
 Set the client's command to `figma-taxonomy-mcp`, or the absolute path to that executable in the virtual environment. Supply `FIGMA_TOKEN` through the environment for live extraction. See [mcp_server.py](src/figma_taxonomy/mcp_server.py) for tool registration.
 
+Pass an `extract_taxonomy` result directly into `export_taxonomy` or
+`validate_taxonomy`; both also accept stored taxonomy JSON. Explicit page selection
+overrides page exclusions, and a missing page reports available names.
+
 ### Amplitude push
 
 ```bash
