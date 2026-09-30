@@ -76,7 +76,7 @@ two branches' tracking plans.
 ## `push`
 
 Pushes events, categories, and properties to Amplitude's Taxonomy API
-(Enterprise only).
+(project API access required).
 
 ```bash
 figma-taxonomy push <taxonomy.json> [OPTIONS]
@@ -84,7 +84,7 @@ figma-taxonomy push <taxonomy.json> [OPTIONS]
 
 | Option             | Default                    | Description                             |
 |--------------------|----------------------------|-----------------------------------------|
-| `--dry-run`        | `false`                    | Preview what would be pushed            |
+| `--dry-run`        | `false`                    | Preview local input without API requests or credentials |
 | `--base-url URL`   | `https://amplitude.com`    | Override the API host (EU, self-hosted) |
 
 Reads `AMPLITUDE_API_KEY` and `AMPLITUDE_SECRET_KEY` from env. Existing events are
