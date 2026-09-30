@@ -40,6 +40,10 @@ Only these Figma node types are considered:
 Plain `FRAME`, `GROUP`, `TEXT`, and `RECTANGLE` nodes are skipped unless they have a
 prototype interaction attached.
 
+Names such as `Button/Continue` and `Link/Terms` retain their inferred type even
+on raw frames or text. A node with an interaction and no type match uses
+`interactive`. Exclusions below still take precedence.
+
 ## Exclusion patterns
 
 Even if a name matches layer 1, these exclusions drop it:
