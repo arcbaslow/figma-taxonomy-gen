@@ -41,6 +41,16 @@ def test_named_prototype_nodes_preserve_types_and_ids() -> None:
     assert all(e.has_interaction for e in detected)
 
 
+def test_finds_screen_frames_inside_nested_sections() -> None:
+    fixture = json.loads((FIXTURES_DIR / "section_screens.json").read_text())
+    detected = extract_elements(fixture, load_config(None))
+    assert {e.node_id: e.screen_name for e in detected} == {
+        "1:3": "cart", "1:5": "cart", "2:3": "payment", "3:2": "receipt",
+    }
+    assert all(e.parent_path[0] == "Checkout" for e in detected)
+    assert len(detected) == 4  # Layout frames must not become extra screens.
+
+
 def test_detects_buttons(elements):
     buttons = [e for e in elements if e.element_type == "button"]
     names = [e.element_name for e in buttons]

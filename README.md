@@ -129,6 +129,9 @@ Prototype interactions also include raw frames, groups, text and rectangles, eve
 when their names match a control type such as `Button` or `Link`. Exclusion rules
 still apply.
 
+Screen discovery includes frames inside nested Figma sections. Section labels do
+not change event names; the page remains the flow and the frame supplies the screen.
+
 ## Drift checks
 
 ```bash

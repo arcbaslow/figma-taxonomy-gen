@@ -7,6 +7,10 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Discover screen frames inside nested Figma sections while keeping page flow names and source node IDs.
+
 ### Fixed
 
 - Preserve source node IDs in CSV and Excel review exports. Clarify that the review CSV is not the current Amplitude Data import template.
