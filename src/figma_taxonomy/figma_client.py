@@ -7,6 +7,7 @@ import json
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 
@@ -25,15 +26,34 @@ def _get_token() -> str:
 
 
 def _parse_file_key(url_or_key: str) -> str:
-    match = re.search(r"figma\.com/(?:file|design)/([a-zA-Z0-9]+)", url_or_key)
-    if match:
-        return match.group(1)
+    if re.fullmatch(r"[a-zA-Z0-9]+", url_or_key):
+        return url_or_key
+    parsed = urlparse(url_or_key)
+    if parsed.scheme == "https" and parsed.netloc in {"figma.com", "www.figma.com"}:
+        match = re.match(
+            r"^/(?:file|design)/([a-zA-Z0-9]+)(?:/branch/([a-zA-Z0-9]+))?(?:/|$)",
+            parsed.path,
+        )
+        if match:
+            return match.group(2) or match.group(1)
+    raise ValueError("Provide a Figma https://www.figma.com/design/... URL or alphanumeric file key.")
 
-    branch_match = re.search(r"figma\.com/(?:file|design)/[a-zA-Z0-9]+/branch/([a-zA-Z0-9]+)", url_or_key)
-    if branch_match:
-        return branch_match.group(1)
 
-    return url_or_key
+def _check_response(response: httpx.Response) -> None:
+    if response.status_code in {401, 403}:
+        raise RuntimeError(
+            "Figma denied access. Check FIGMA_TOKEN expiry, file_content:read scope, "
+            "and the token owner's access to the file."
+        )
+    if response.status_code == 404:
+        raise RuntimeError("Figma file not found. Check the file key or branch URL and file access.")
+    if response.status_code == 429:
+        retry_after = response.headers.get("Retry-After", "the indicated reset interval")
+        raise RuntimeError(
+            f"Figma rate limit reached. Retry after {retry_after} seconds; "
+            "limits depend on your seat and the file's plan."
+        )
+    response.raise_for_status()
 
 
 def _cache_path(file_key: str, version: str) -> Path:
@@ -79,7 +99,7 @@ def fetch_file(url_or_key: str, no_cache: bool = False) -> dict:
                 headers=headers,
                 params={"depth": 1},
             )
-            meta_resp.raise_for_status()
+            _check_response(meta_resp)
             meta = meta_resp.json()
             version = meta.get("version", "")
 
@@ -92,11 +112,12 @@ def fetch_file(url_or_key: str, no_cache: bool = False) -> dict:
             f"{FIGMA_API_BASE}/files/{file_key}",
             headers=headers,
         )
-        resp.raise_for_status()
+        _check_response(resp)
         data = resp.json()
 
     version = data.get("version", "unknown")
-    _write_cache(file_key, version, data)
+    if not no_cache:
+        _write_cache(file_key, version, data)
 
     return data
 

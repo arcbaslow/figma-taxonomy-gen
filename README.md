@@ -67,6 +67,10 @@ For a live design, set `FIGMA_TOKEN` to a Figma personal access token in your en
 figma-taxonomy extract https://www.figma.com/design/YOUR_FILE_KEY/MyApp --output output
 ```
 
+The token needs `file_content:read` and access to the file. Branch URLs select the
+branch. Use `--no-cache` to disable both design-cache reads and writes. Rate-limit
+errors report the server's retry interval; quotas depend on your seat and file plan.
+
 | Output | Purpose |
 | --- | --- |
 | `taxonomy.xlsx` | Tracking-plan review in a spreadsheet |

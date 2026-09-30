@@ -17,6 +17,13 @@ from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 SUPPORTED_OUTPUT_FORMATS = ("excel", "csv", "json", "markdown")
 
 
+def _fetch_file(url: str, no_cache: bool) -> dict:
+    try:
+        return fetch_file(url, no_cache=no_cache)
+    except (ValueError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
 @click.group()
 @click.version_option()
 def main():
@@ -56,7 +63,7 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         figma_file = load_fixture(fixture)
     else:
         click.echo(f"Fetching Figma file: {figma_url}")
-        figma_file = fetch_file(figma_url, no_cache=no_cache)
+        figma_file = _fetch_file(figma_url, no_cache=no_cache)
 
     if page:
         config.figma.exclude_pages = []
@@ -154,7 +161,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
     if fixture:
         figma_file = load_fixture(fixture)
     else:
-        figma_file = fetch_file(figma_url, no_cache=no_cache)
+        figma_file = _fetch_file(figma_url, no_cache=no_cache)
 
     elements = extract_elements(figma_file, config)
     current_events = generate_taxonomy(elements, config)

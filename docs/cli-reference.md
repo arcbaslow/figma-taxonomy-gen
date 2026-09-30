@@ -19,7 +19,7 @@ figma-taxonomy extract --fixture <path> [OPTIONS]
 | `-o, --output DIR` | `./output`         | Directory for generated files                    |
 | `-f, --format`     | `excel,csv,json,markdown` | Comma-separated format list               |
 | `--page NAME`      |                    | Limit extraction to one Figma page               |
-| `--no-cache`       | `false`            | Skip the `.figma-taxonomy-cache/` lookup         |
+| `--no-cache`       | `false`            | Disable design-cache reads and writes          |
 | `--ai`             | `false`            | Enrich events with Claude-suggested properties   |
 | `-y, --yes`        | `false`            | Skip AI cost-estimate confirmation prompt        |
 

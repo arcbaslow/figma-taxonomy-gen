@@ -49,6 +49,12 @@ uv pip install 'figma-taxonomy-gen[ai,mcp]'
 The token is read from the `FIGMA_TOKEN` environment variable on every API call.
 It's never logged or written to disk.
 
+Use `--no-cache` to disable both reads and writes of the design cache. Branch URLs
+fetch the branch rather than its parent file. Access failures report the required
+scope and file-access checks; rate-limit failures report `Retry-After`.
+See the [current Figma quotas](https://developers.figma.com/docs/rest-api/rate-limits/)
+for your seat and file plan.
+
 ## First extraction
 
 Point it at a real Figma file:
