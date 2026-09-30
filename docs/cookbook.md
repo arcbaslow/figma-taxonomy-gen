@@ -28,11 +28,12 @@ figma-taxonomy extract https://figma.com/design/WEB/Web -c configs/web.yaml -o t
 
 ## Per-pattern descriptions, not just properties
 
-`property_rules` only adds properties. For event-level descriptions by pattern, use
-AI enrichment — Claude rewrites descriptions to be domain-specific.
+`property_rules` and AI enrichment only add properties. Event descriptions are
+rule-generated; AI does not rewrite them. Review and edit exported descriptions
+manually, keeping source node IDs. Regeneration overwrites those edits.
 
 ```bash
-figma-taxonomy extract https://figma.com/design/ABC/App --ai --yes
+figma-taxonomy extract https://figma.com/design/ABC/App -f json,markdown
 ```
 
 ## Blocking renames

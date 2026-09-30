@@ -8,9 +8,10 @@ from pathlib import Path
 
 import click
 
-from figma_taxonomy.config import load_config
+from figma_taxonomy.config import TaxonomyConfig, load_config
 from figma_taxonomy.extractor import extract_elements
 from figma_taxonomy.figma_client import fetch_file, load_fixture
+from figma_taxonomy.models import TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
 from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 
@@ -286,7 +287,9 @@ def diff_cmd(old_path, new_path, exit_code):
         raise SystemExit(1)
 
 
-def _run_enrichment(events, config, assume_yes: bool):
+def _run_enrichment(
+    events: list[TaxonomyEvent], config: TaxonomyConfig, assume_yes: bool,
+) -> list[TaxonomyEvent]:
     from figma_taxonomy.ai_enricher import (
         build_prompt,
         enrich_events,
@@ -311,10 +314,12 @@ def _run_enrichment(events, config, assume_yes: bool):
         for flow, flow_events in grouped.items()
     ]
     estimate = estimate_cost(prompts, model=config.ai.model)
+    cost = estimate['est_cost_usd']
+    cost_label = f"${cost:.4f}" if cost is not None else "unavailable (unknown model pricing)"
     click.echo(
         f"\nAI enrichment: {estimate['num_calls']} call(s), "
         f"~{estimate['est_input_tokens']} input tokens, "
-        f"est. cost ${estimate['est_cost_usd']:.4f} ({estimate['model']})"
+        f"est. cost {cost_label} ({estimate['model']})"
     )
     if not assume_yes and not click.confirm("Proceed?", default=True):
         click.echo("Skipping enrichment.")
@@ -322,10 +327,14 @@ def _run_enrichment(events, config, assume_yes: bool):
 
     client = anthropic.Anthropic(api_key=api_key)
     click.echo("Calling Claude for property suggestions...")
-    enriched = enrich_events(
-        events, config, client=client,
-        model=config.ai.model, max_tokens=config.ai.max_tokens,
-    )
-    new_prop_count = sum(len(e.properties) for e in enriched) - sum(len(e.properties) for e in events)
+    original_prop_count = sum(len(e.properties) for e in events)
+    try:
+        enriched = enrich_events(
+            events, config, client=client,
+            model=config.ai.model, max_tokens=config.ai.max_tokens,
+        )
+    finally:
+        client.close()
+    new_prop_count = sum(len(e.properties) for e in enriched) - original_prop_count
     click.echo(f"Enrichment added {max(new_prop_count, 0)} new properties across {len(enriched)} events.")
     return enriched

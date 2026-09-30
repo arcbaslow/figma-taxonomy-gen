@@ -15,14 +15,13 @@ from typing import Any
 from figma_taxonomy.config import TaxonomyConfig
 from figma_taxonomy.models import EventProperty, TaxonomyEvent
 
-# Approximate per-1M-token pricing in USD, as of 2025. Update when Anthropic pricing changes.
-# Kept intentionally conservative.
+# Standard per-1M-token USD pricing checked 2026-09-30:
+# https://platform.claude.com/docs/en/about-claude/pricing
 _MODEL_PRICING = {
     "claude-haiku-4-5-20251001": {"input": 1.00, "output": 5.00},
     "claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
-    "claude-opus-4-6": {"input": 15.00, "output": 75.00},
+    "claude-opus-4-6": {"input": 5.00, "output": 25.00},
 }
-_DEFAULT_PRICING = _MODEL_PRICING["claude-haiku-4-5-20251001"]
 _CHARS_PER_TOKEN = 4  # rough heuristic for English + code
 _EST_OUTPUT_TOKENS_PER_CALL = 800
 
@@ -170,20 +169,23 @@ def parse_suggestions(response_text: str) -> list[EnrichmentSuggestion]:
 
 def estimate_cost(prompts: list[str], model: str) -> dict:
     """Rough cost estimate for a batch of prompts. Output tokens are estimated."""
-    pricing = _MODEL_PRICING.get(model, _DEFAULT_PRICING)
+    pricing = _MODEL_PRICING.get(model)
     input_chars = sum(len(p) for p in prompts)
     est_input_tokens = input_chars // _CHARS_PER_TOKEN
     est_output_tokens = _EST_OUTPUT_TOKENS_PER_CALL * len(prompts)
 
-    input_cost = (est_input_tokens / 1_000_000) * pricing["input"]
-    output_cost = (est_output_tokens / 1_000_000) * pricing["output"]
+    cost = None
+    if pricing is not None:
+        input_cost = (est_input_tokens / 1_000_000) * pricing["input"]
+        output_cost = (est_output_tokens / 1_000_000) * pricing["output"]
+        cost = round(input_cost + output_cost, 4)
 
     return {
         "num_calls": len(prompts),
         "input_chars": input_chars,
         "est_input_tokens": est_input_tokens,
         "est_output_tokens": est_output_tokens,
-        "est_cost_usd": round(input_cost + output_cost, 4),
+        "est_cost_usd": cost,
         "model": model,
     }
 

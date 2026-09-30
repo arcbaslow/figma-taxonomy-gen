@@ -147,6 +147,9 @@ figma-taxonomy extract --fixture tests/fixtures/banking_app.json --ai
 
 The CLI estimates the request cost and asks for confirmation. `--yes` skips that prompt. AI sends design context to Anthropic and may incur API charges; estimates depend on the configured model and input. The core rule engine remains usable without this extra.
 
+Estimates are per flow, use approximate token counts, and are not spending limits.
+For models without a known price, the CLI reports the estimate as unavailable.
+
 ### MCP server
 
 ```bash

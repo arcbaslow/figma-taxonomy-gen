@@ -130,9 +130,15 @@ def test_estimate_cost_empty():
     assert estimate["est_cost_usd"] == 0.0
 
 
-def test_estimate_cost_unknown_model_falls_back_to_haiku_pricing():
+def test_estimate_cost_unknown_model_reports_unavailable() -> None:
     estimate = estimate_cost(["x" * 1000], model="some-unknown-model")
-    assert estimate["est_cost_usd"] > 0
+    assert estimate["est_cost_usd"] is None
+
+
+def test_opus_46_standard_token_prices() -> None:
+    estimate = estimate_cost(['x' * 4000], model='claude-opus-4-6')
+    # 1000 input tokens at $5/M + 800 output tokens at $25/M.
+    assert estimate['est_cost_usd'] == 0.025
 
 
 # ---- End-to-end enrichment with stub client ----
