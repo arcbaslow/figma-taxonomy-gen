@@ -82,14 +82,31 @@ rename detection, and category-only changes now fail drift checks. Naming patter
 with cross-page collisions need `{page}` or distinct design names; no automatic
 prefix is added based on the current page filter.
 
+## Completed follow-up: Amplitude Data CSV profile
+
+Added opt-in `amplitude-csv` to CLI/config/MCP, keeping the review `csv` and
+default formats unchanged. The profile pins all 33 public import headers in a
+synthetic fixture derived from the [published schema](https://amplitude.com/docs/data/csv-import-export)
+on 2026-09-30. No authenticated template was downloaded and no real project was
+imported; account/UI acceptance remains unverified.
+
+Rows preserve event-specific property associations, categories and descriptions.
+Simple types, integers and non-empty string enums are supported; unrepresentable
+constraints and ambiguous enum delimiters fail before writes. Each CSV has a
+mandatory sibling JSON with full Figma sources and original supported schemas.
+The import does not misuse Amplitude's `Event source` for node IDs. JSON writing
+now explicitly uses UTF-8. Import notes explain that blank owners clear existing
+owners, and that blank action creates/updates entities. Remote metadata is not
+preserved by this initial-plan profile; review the import branch before merging.
+
 ## Next
 
-These proposals remain unfinished, in priority order. The two provenance tasks
-above are complete. Excluded/undetected controls are not claimed as covered.
+These proposals remain unfinished, in priority order. The provenance and import
+profile implementations above are complete. Excluded/undetected controls and
+real-account import acceptance are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Add a separate Amplitude Data CSV import profile | Current review CSV is not the required entity-oriented template. The [official schema](https://amplitude.com/docs/data/csv-import-export) requires exact headers and supports an import branch for review | 2–3 | Medium: obtain a sanitized current template, pin fixture expectations and preserve node IDs in a supported metadata field or companion artifact. No real-project import in tests |
 | Make Amplitude push safely repeatable and event-specific | Current property POSTs deduplicate by property name globally, do not associate properties with events, and repeat category creation. Enum constraints are omitted. [Taxonomy API](https://amplitude.com/docs/apis/analytics/taxonomy) | 2–3 | Medium: decide shared-property versus event override semantics; do not guess about intended update behavior or add lifecycle management |
 | Reduce Figma Tier 1 requests and add bounded retry policy | Cache hits still call `GET /files/:key?depth=1`; misses call that endpoint twice. This is not the distinct metadata endpoint. [Endpoints](https://developers.figma.com/docs/rest-api/file-endpoints/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1–2 | Medium: metadata requires a separate scope; TTL/offline cache freshness and long retry waits need explicit semantics |
 | Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
@@ -97,7 +114,7 @@ above are complete. Excluded/undetected controls are not claimed as covered.
 | Validate config and expose unsupported options honestly | `screen_name.max_depth`, `fallback_to_component_name` and `output.directory` are loaded but unused. Property-rule precedence differs from the prose, and raw YAML errors are not actionable | 1–2 | Medium: intended fallback/depth behavior is unspecified; document and decide rather than invent it |
 | Compare property schemas in drift reports | `validate.py` compares only property names, so type/enum/description changes are invisible. Source membership changes are now reported separately | 1–2 | Medium: define property drift categories with fixtures |
 | Harden optional enrichment against malformed and oversized responses | `parse_suggestions` assumes iterable properties, the merger searches all flows, and one call per flow can exceed the output budget | 1–2 | Medium: add hostile/malformed mock responses, per-flow merge boundaries and reviewed batching; keep AI disabled by default |
-| Harden review exports and Windows text I/O | Excel stores arbitrary design strings as cell values and only renders four property pairs; JSON output and fixture/config readers omit explicit UTF-8. Formula-like labels and non-ASCII Windows round trips need dedicated fixtures | 1–2 | Medium: suspected spreadsheet interpretation/encoding risks from code review, not exercised in this run; avoid altering cell semantics without tests |
+| Harden review exports and Windows text I/O | Excel stores arbitrary design strings as cell values and only renders four property pairs; fixture/config readers omit explicit UTF-8. JSON writing is now UTF-8 with a Unicode regression. Formula-like labels and remaining Windows round trips need fixtures | 1–2 | Medium: spreadsheet interpretation risks remain untested; avoid altering cell semantics without tests |
 
 ## Later
 
@@ -158,9 +175,9 @@ Sources accessed 2026-09-30; vendor docs describe contracts, not a live-account 
 
 Rejected for this run: a Figma plugin, tracking-plan lifecycle/branching service,
 code generation, real-time synchronization, and automatic AI enrichment. These
-cross explicit non-goals or introduce unsolicited paid calls. A new importer
-and MCP 2 migration remain proposals because they need
-contract decisions and broader tests. Competing on unverified vendor shortcomings
+cross explicit non-goals or introduce unsolicited paid calls. MCP 2 migration
+remains a proposal requiring contract decisions and broader tests. The separate
+CSV importer was implemented in an owner-authorized follow-up. Competing on unverified vendor shortcomings
 is also rejected. Small correctness and handoff improvements are the useful gap.
 
 ## Execution report
@@ -219,3 +236,15 @@ drift case failed against the previous behavior before their fixes. The syntheti
 variant, a text-only screen in a section, and an excluded page. Ruff, package
 builds, strict MkDocs and offline extraction/drift checks pass. The banking demo
 still has 18 controls and 21 events, now with frame sources on every pageview.
+
+Amplitude CSV verification: **209 tests pass**, including 28 new profile cases.
+Fifteen initial tests failed before implementation. Coverage pins the published
+headers, per-event property schemas, enum serialization, integer flags, empty
+events/plans, Unicode/quoted/multiline text, both MCP input shapes, companion IDs,
+and rejection of unsupported constraints/duplicates before writes. CLI tests
+cover configuration and explicit format selection, coexistence with the review
+CSV, and no partial output on schema errors. Ruff, package builds, strict MkDocs
+and offline drift checks pass. The new `examples/amplitude-data` pair is generated
+from the synthetic variant fixture and validates without drift. No account import
+or remote write was performed; the runtime lockfile and package version remain
+unchanged.

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MyApp Event Taxonomy",
+  "events": {
+    "settings_save_clicked": {
+      "description": "User clicks Save",
+      "category": "Account",
+      "source": "figma:node_id:1:1",
+      "sources": [
+        "figma:node_id:1:1",
+        "figma:node_id:1:2",
+        "figma:node_id:2:1"
+      ],
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "settings_cancel_clicked": {
+      "description": "User clicks Cancel",
+      "category": "Account",
+      "source": "figma:node_id:2:2",
+      "sources": [
+        "figma:node_id:2:2"
+      ],
+      "properties": {
+        "element_text": {
+          "type": "string",
+          "description": "Visible text of the clicked element"
+        },
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    },
+    "settings_pageview": {
+      "description": "User views settings screen",
+      "category": "Account",
+      "source": "figma:node_id:1:0",
+      "sources": [
+        "figma:node_id:1:0",
+        "figma:node_id:2:0"
+      ],
+      "properties": {
+        "screen_name": {
+          "type": "string",
+          "description": "Screen where event occurred"
+        },
+        "platform": {
+          "type": "string",
+          "description": "",
+          "enum": [
+            "ios",
+            "android",
+            "web"
+          ]
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        }
+      }
+    }
+  }
+}

@@ -77,14 +77,16 @@ errors report the server's retry interval; quotas depend on your seat and file p
 | `taxonomy.csv` | Event/property review rows with source node IDs |
 | `taxonomy.json` | Structured taxonomy with Figma node IDs for validation and tooling |
 | `taxonomy.md` | Human-readable plan for a pull request or wiki |
+| `taxonomy.amplitude.csv` + `.json` | Optional Amplitude Data import CSV with a provenance companion (`--format amplitude-csv`) |
 
 CSV includes `Source Node ID` and `Source Node IDs`; Excel uses columns N and O
 of the Events sheet. The plural column contains a JSON array of all contributing
 IDs. JSON retains the primary `source` and adds a `sources` array; MCP exposes
 `source_node_id` and `source_node_ids`. Controls with the same full event name
 share an event within a page, including controls in variant frames, without losing their IDs.
-The CSV is a review format, not Amplitude Data's current import template. Use the
-[Amplitude guide](docs/amplitude.md) for integration limits. Pageviews include all
+The default CSV is a review format. Use `--format amplitude-csv` for the separate
+Amplitude Data import profile; it always writes a JSON provenance companion.
+See the [Amplitude guide](docs/amplitude.md) for schema and import limits. Pageviews include all
 contributing screen frame IDs, including variants and screens without controls.
 
 ## Example output
@@ -177,7 +179,7 @@ figma-taxonomy-mcp
 | --- | --- |
 | `extract_taxonomy` | Extract from a Figma URL or local fixture |
 | `validate_taxonomy` | Compare a saved taxonomy with a design |
-| `export_taxonomy` | Write JSON, CSV, Markdown or Excel |
+| `export_taxonomy` | Write JSON, review CSV, Markdown, Excel, or Amplitude Data CSV with a JSON companion |
 
 Set the client's command to `figma-taxonomy-mcp`, or the absolute path to that executable in the virtual environment. Supply `FIGMA_TOKEN` through the environment for live extraction. See [mcp_server.py](src/figma_taxonomy/mcp_server.py) for tool registration.
 

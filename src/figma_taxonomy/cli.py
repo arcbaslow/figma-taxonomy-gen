@@ -15,7 +15,7 @@ from figma_taxonomy.models import Screen, ScreenElement, TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
 from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 
-SUPPORTED_OUTPUT_FORMATS = ("excel", "csv", "json", "markdown")
+SUPPORTED_OUTPUT_FORMATS = ("excel", "csv", "json", "markdown", "amplitude-csv")
 
 
 def _fetch_file(url: str, no_cache: bool) -> dict:
@@ -116,6 +116,13 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
     if use_ai or config.ai.enabled:
         events = _run_enrichment(events, config, assume_yes)
 
+    if "amplitude-csv" in format_list:
+        from figma_taxonomy.output.amplitude_data_csv import build_import_rows
+        try:
+            build_import_rows(events)
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -130,6 +137,14 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         path = output_dir / "taxonomy.csv"
         write_csv(events, config, path)
         click.echo(f"  CSV:      {path}")
+
+    if "amplitude-csv" in format_list:
+        from figma_taxonomy.output.amplitude_data_csv import IMPORT_NOTES, write_amplitude_csv
+        path = output_dir / "taxonomy.amplitude.csv"
+        companion_path = write_amplitude_csv(events, config, path)
+        click.echo(f"  Amplitude CSV: {path}")
+        click.echo(f"  Companion:     {companion_path}")
+        click.echo(f"  {IMPORT_NOTES}")
 
     if "json" in format_list:
         from figma_taxonomy.output.json_schema import write_json

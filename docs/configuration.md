@@ -80,6 +80,14 @@ property_rules:
         type: "string"
 ```
 
+## Output formats
+
+Output formats are `excel`, `csv`, `json`, `markdown`, and the opt-in
+`amplitude-csv`. The default list is unchanged. Selecting `amplitude-csv` also
+writes `taxonomy.amplitude.json` for provenance, even when `json` is not selected.
+Use `formats: [csv, amplitude-csv]` to produce both review and import CSVs.
+See [the import contract and limits](amplitude.md#amplitude-data-csv-import).
+
 ## Naming conventions in practice
 
 The pattern `{screen}_{element}_{action}` runs through three layers of cleaning:

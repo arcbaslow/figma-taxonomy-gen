@@ -103,10 +103,16 @@ Write a taxonomy to disk in a specific format.
 | Argument               | Type           | Description                                       |
 |------------------------|----------------|---------------------------------------------------|
 | `taxonomy_json`        | `dict`         | Parsed taxonomy JSON                              |
-| `format`               | `str`          | `json`, `csv`, `markdown`, or `excel`             |
+| `format`               | `str`          | `json`, `csv`, `markdown`, `excel`, or `amplitude-csv` |
 | `output_path`          | `str`          | Destination file path                             |
 
 Returns: `{"output_path": str, "format": str}`.
+
+For `amplitude-csv`, the path must end in `.csv`; a sibling `.json` companion is
+always written to preserve sources and schemas. The result additionally includes
+`companion_path` and `notes` about import behavior. Both stored event maps and
+extraction results are supported. Unsupported schemas fail before output writes.
+The `csv` format remains the review CSV. See [Amplitude import](amplitude.md#amplitude-data-csv-import).
 
 ## Example conversations
 

@@ -80,8 +80,9 @@ Either produces four files in `./output/`:
 
 CSV contains `Source Node ID` and `Source Node IDs`; Excel uses columns N and O.
 The plural column is a JSON array. Pageview sources are screen frame IDs, including
-empty screens and variants. CSV import into Amplitude requires adapting
-to its current template; this review format is not a direct import file.
+empty screens and variants. The review format is not a direct import file.
+Use `--format amplitude-csv` for the separate Amplitude Data profile and its
+JSON provenance companion; see [the import guide](amplitude.md#amplitude-data-csv-import).
 
 ## Commit the JSON
 
