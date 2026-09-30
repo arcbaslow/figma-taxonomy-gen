@@ -9,9 +9,9 @@ from pathlib import Path
 import click
 
 from figma_taxonomy.config import TaxonomyConfig, load_config
-from figma_taxonomy.extractor import extract_elements
+from figma_taxonomy.extractor import extract_elements, extract_screens
 from figma_taxonomy.figma_client import fetch_file, load_fixture
-from figma_taxonomy.models import ScreenElement, TaxonomyEvent
+from figma_taxonomy.models import Screen, ScreenElement, TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
 from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 
@@ -26,10 +26,10 @@ def _fetch_file(url: str, no_cache: bool) -> dict:
 
 
 def _generate_taxonomy(
-    elements: list[ScreenElement], config: TaxonomyConfig,
+    elements: list[ScreenElement], config: TaxonomyConfig, screens: list[Screen],
 ) -> list[TaxonomyEvent]:
     try:
-        return generate_taxonomy(elements, config)
+        return generate_taxonomy(elements, config, screens=screens)
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -43,6 +43,13 @@ def _print_source_changes(changes: list[dict]) -> None:
                 click.echo(f"      + node {node}")
             for node in change["removed"]:
                 click.echo(f"      - node {node}")
+
+
+def _print_category_changes(changes: list[dict]) -> None:
+    if changes:
+        click.echo(f"\n  Category changes ({len(changes)}):")
+        for change in changes:
+            click.echo(f"    {change['event_name']}: {change['from']} -> {change['to']}")
 
 
 @click.group()
@@ -103,7 +110,7 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
     click.echo(f"Found {len(elements)} interactive elements")
 
     click.echo("Generating taxonomy...")
-    events = _generate_taxonomy(elements, config)
+    events = _generate_taxonomy(elements, config, extract_screens(figma_file, config))
     click.echo(f"Generated {len(events)} events")
 
     if use_ai or config.ai.enabled:
@@ -185,7 +192,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
         figma_file = _fetch_file(figma_url, no_cache=no_cache)
 
     elements = extract_elements(figma_file, config)
-    current_events = _generate_taxonomy(elements, config)
+    current_events = _generate_taxonomy(elements, config, extract_screens(figma_file, config))
 
     report = diff_taxonomies(existing_events, current_events)
 
@@ -216,6 +223,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
                 click.echo(f"      - {prop}")
 
     _print_source_changes(report.source_changes)
+    _print_category_changes(report.category_changes)
 
     if exit_code:
         raise SystemExit(1)
@@ -306,6 +314,7 @@ def diff_cmd(old_path, new_path, exit_code):
                 click.echo(f"      - {prop}")
 
     _print_source_changes(report.source_changes)
+    _print_category_changes(report.category_changes)
 
     if exit_code:
         raise SystemExit(1)

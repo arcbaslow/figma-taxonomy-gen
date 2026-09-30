@@ -50,6 +50,7 @@
 
 ### login_screen_pageview
 - **Trigger:** User views login screen screen
+- **Sources:** Figma nodes `1:1`, `1:2`
 - **Properties:**
   - `screen_name` (string) — Screen where event occurred
   - `platform` (string) (enum: ios, android, web)
@@ -110,6 +111,7 @@
 
 ### home_pageview
 - **Trigger:** User views home screen
+- **Sources:** Figma nodes `2:1`
 - **Properties:**
   - `screen_name` (string) — Screen where event occurred
   - `platform` (string) (enum: ios, android, web)
@@ -172,6 +174,7 @@
 
 ### payment_form_pageview
 - **Trigger:** User views payment form screen
+- **Sources:** Figma nodes `3:1`
 - **Properties:**
   - `screen_name` (string) — Screen where event occurred
   - `platform` (string) (enum: ios, android, web)
@@ -179,6 +182,7 @@
 
 ### payment_success_pageview
 - **Trigger:** User views payment success screen
+- **Sources:** Figma nodes `3:2`
 - **Properties:**
   - `screen_name` (string) — Screen where event occurred
   - `platform` (string) (enum: ios, android, web)

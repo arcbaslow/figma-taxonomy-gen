@@ -64,15 +64,15 @@ payment_success_done_clicked,Payments,User clicks Done,element_text,string,Visib
 payment_success_done_clicked,Payments,User clicks Done,screen_name,string,Screen where event occurred,3:20,"[""3:20""]"
 payment_success_done_clicked,Payments,User clicks Done,platform,string,,3:20,"[""3:20""]"
 payment_success_done_clicked,Payments,User clicks Done,app_version,string,Application version,3:20,"[""3:20""]"
-home_pageview,Home,User views home screen,screen_name,string,Screen where event occurred,,[]
-home_pageview,Home,User views home screen,platform,string,,,[]
-home_pageview,Home,User views home screen,app_version,string,Application version,,[]
-login_screen_pageview,Login,User views login screen screen,screen_name,string,Screen where event occurred,,[]
-login_screen_pageview,Login,User views login screen screen,platform,string,,,[]
-login_screen_pageview,Login,User views login screen screen,app_version,string,Application version,,[]
-payment_form_pageview,Payments,User views payment form screen,screen_name,string,Screen where event occurred,,[]
-payment_form_pageview,Payments,User views payment form screen,platform,string,,,[]
-payment_form_pageview,Payments,User views payment form screen,app_version,string,Application version,,[]
-payment_success_pageview,Payments,User views payment success screen,screen_name,string,Screen where event occurred,,[]
-payment_success_pageview,Payments,User views payment success screen,platform,string,,,[]
-payment_success_pageview,Payments,User views payment success screen,app_version,string,Application version,,[]
+home_pageview,Home,User views home screen,screen_name,string,Screen where event occurred,2:1,"[""2:1""]"
+home_pageview,Home,User views home screen,platform,string,,2:1,"[""2:1""]"
+home_pageview,Home,User views home screen,app_version,string,Application version,2:1,"[""2:1""]"
+login_screen_pageview,Login,User views login screen screen,screen_name,string,Screen where event occurred,1:1,"[""1:1"", ""1:2""]"
+login_screen_pageview,Login,User views login screen screen,platform,string,,1:1,"[""1:1"", ""1:2""]"
+login_screen_pageview,Login,User views login screen screen,app_version,string,Application version,1:1,"[""1:1"", ""1:2""]"
+payment_form_pageview,Payments,User views payment form screen,screen_name,string,Screen where event occurred,3:1,"[""3:1""]"
+payment_form_pageview,Payments,User views payment form screen,platform,string,,3:1,"[""3:1""]"
+payment_form_pageview,Payments,User views payment form screen,app_version,string,Application version,3:1,"[""3:1""]"
+payment_success_pageview,Payments,User views payment success screen,screen_name,string,Screen where event occurred,3:2,"[""3:2""]"
+payment_success_pageview,Payments,User views payment success screen,platform,string,,3:2,"[""3:2""]"
+payment_success_pageview,Payments,User views payment success screen,app_version,string,Application version,3:2,"[""3:2""]"
