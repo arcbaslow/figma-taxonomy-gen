@@ -5,6 +5,12 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Fetch the selected Figma branch, reject malformed file URLs/keys, explain access and rate-limit errors, and prevent cache reads and writes with `--no-cache`.
+
 ## [0.4.2] - 2026-09-08
 
 ### Added
