@@ -38,3 +38,11 @@ class TaxonomyEvent:
     description: str
     properties: list[EventProperty] = field(default_factory=list)
     source_node_id: str = ""
+    source_node_ids: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Keep the legacy primary source while retaining every contributing node."""
+        self.source_node_ids = list(dict.fromkeys(
+            node for node in [self.source_node_id, *self.source_node_ids] if node
+        ))
+        self.source_node_id = self.source_node_ids[0] if self.source_node_ids else ""

@@ -24,6 +24,7 @@ def _event_to_dict(event: TaxonomyEvent) -> dict[str, Any]:
         "category": event.flow,
         "description": event.description,
         "source_node_id": event.source_node_id,
+        "source_node_ids": list(event.source_node_ids),
         "properties": [
             {
                 "name": p.name,
@@ -75,6 +76,10 @@ def _normalize_taxonomy(taxonomy_json: dict) -> dict:
         if name in events:
             raise ValueError(f"Duplicate event name '{name}'; resolve it before exporting node IDs.")
         node_id = event.get("source_node_id", "")
+        node_ids = list(dict.fromkeys(
+            node for node in [node_id, *event.get("source_node_ids", [])] if node
+        ))
+        node_id = node_ids[0] if node_ids else ""
         properties: dict[str, dict] = {}
         for prop in event.get("properties", []):
             body = {"type": prop["type"], "description": prop.get("description", "")}
@@ -85,6 +90,7 @@ def _normalize_taxonomy(taxonomy_json: dict) -> dict:
             "category": event.get("category", ""),
             "description": event.get("description", ""),
             "source": f"figma:node_id:{node_id}" if node_id else "",
+            "sources": [f"figma:node_id:{node}" for node in node_ids],
             "properties": properties,
         }
     return {**taxonomy_json, "events": events}
@@ -133,6 +139,7 @@ def validate_taxonomy_tool(
         "removed": list(report.removed),
         "renamed": [{"from": old, "to": new} for old, new in report.renamed],
         "property_changes": list(report.property_changes),
+        "source_changes": list(report.source_changes),
     }
 
 

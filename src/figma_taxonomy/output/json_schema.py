@@ -32,6 +32,7 @@ def write_json(
             "description": event.description,
             "category": event.flow,
             "source": f"figma:node_id:{event.source_node_id}" if event.source_node_id else "",
+            "sources": [f"figma:node_id:{node}" for node in event.source_node_ids],
             "properties": properties,
         }
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 from figma_taxonomy.config import TaxonomyConfig
@@ -19,7 +20,7 @@ def write_csv(
         writer.writerow([
             "Event Type", "Category", "Description",
             "Property Name", "Property Type", "Property Description",
-            "Source Node ID",
+            "Source Node ID", "Source Node IDs",
         ])
 
         for event in events:
@@ -29,10 +30,12 @@ def write_csv(
                         event.event_name, event.flow, event.description,
                         prop.name, prop.type, prop.description,
                         event.source_node_id,
+                        json.dumps(event.source_node_ids),
                     ])
             else:
                 writer.writerow([
                     event.event_name, event.flow, event.description,
                     "", "", "",
                     event.source_node_id,
+                    json.dumps(event.source_node_ids),
                 ])

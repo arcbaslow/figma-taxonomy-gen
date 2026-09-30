@@ -209,7 +209,7 @@ class TestAmplitudeCsvOutput:
         lines = output_path.read_text().strip().split("\n")
         assert lines[0] == (
             "Event Type,Category,Description,Property Name,Property Type,Property Description,"
-            "Source Node ID"
+            "Source Node ID,Source Node IDs"
         )
 
     def test_csv_data_rows(self, sample_events, config, tmp_path):

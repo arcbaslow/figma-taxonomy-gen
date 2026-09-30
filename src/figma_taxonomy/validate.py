@@ -15,14 +15,25 @@ class ValidationReport:
     removed: list[str] = field(default_factory=list)
     renamed: list[tuple[str, str]] = field(default_factory=list)
     property_changes: list[dict] = field(default_factory=list)
+    source_changes: list[dict] = field(default_factory=list)
 
     def is_clean(self) -> bool:
-        return not (self.added or self.removed or self.renamed or self.property_changes)
+        return not (
+            self.added or self.removed or self.renamed or self.property_changes or self.source_changes
+        )
 
 
 def _node_id_from_source(source: str) -> str:
     prefix = "figma:node_id:"
     return source[len(prefix):] if source.startswith(prefix) else ""
+
+
+def _source_node_ids(body: dict) -> list[str]:
+    """Read additive sources and the primary source from older saved taxonomies."""
+    return list(dict.fromkeys(
+        node for source in [body.get("source", ""), *body.get("sources", [])]
+        if (node := _node_id_from_source(source))
+    ))
 
 
 def diff_taxonomies(
@@ -32,39 +43,59 @@ def diff_taxonomies(
     """Compare a stored taxonomy (parsed JSON "events" dict) against freshly generated events.
 
     Matching strategy:
-    1. Try to match by Figma node_id (survives renames).
-    2. Fall back to event_name for events without a node_id.
+    1. Match shared Figma sources only when the correspondence is one-to-one.
+    2. Fall back to unchanged event names for unmatched events.
+    Splits and merges with ambiguous identities are additions/removals, not renames.
     """
     report = ValidationReport()
 
-    existing_by_node: dict[str, tuple[str, dict]] = {}
-    existing_by_name: dict[str, dict] = {}
-    for name, body in existing.items():
-        existing_by_name[name] = body
-        node_id = _node_id_from_source(body.get("source", ""))
-        if node_id:
-            existing_by_node[node_id] = (name, body)
+    old_sources = {name: set(_source_node_ids(body)) for name, body in existing.items()}
+    existing_by_node: dict[str, set[str]] = {}
+    for name, nodes in old_sources.items():
+        for node in nodes:
+            existing_by_node.setdefault(node, set()).add(name)
+    candidates: dict[str, set[str]] = {}
+    reverse: dict[str, set[str]] = {}
+    for event in current:
+        names: set[str] = set()
+        for node in event.source_node_ids:
+            names.update(existing_by_node.get(node, set()))
+        candidates[event.event_name] = names
+        for name in names:
+            reverse.setdefault(name, set()).add(event.event_name)
 
-    matched_existing_names: set[str] = set()
+    matches: dict[str, str] = {}
+    for name, options in candidates.items():
+        if len(options) == 1:
+            old_name = next(iter(options))
+            if len(reverse[old_name]) == 1:
+                matches[name] = old_name
+    matched_existing_names = set(matches.values())
+    for event in current:
+        name = event.event_name
+        if name not in matches and name in existing and name not in matched_existing_names:
+            matches[name] = name
+            matched_existing_names.add(name)
 
     for event in current:
-        match_name: str | None = None
-        match_body: dict | None = None
-
-        if event.source_node_id and event.source_node_id in existing_by_node:
-            match_name, match_body = existing_by_node[event.source_node_id]
-        elif event.event_name in existing_by_name:
-            match_name = event.event_name
-            match_body = existing_by_name[event.event_name]
-
-        if match_body is None:
+        match_name = matches.get(event.event_name)
+        if match_name is None:
             report.added.append(event)
             continue
-
-        matched_existing_names.add(match_name)
+        match_body = existing[match_name]
 
         if match_name != event.event_name:
             report.renamed.append((match_name, event.event_name))
+
+        current_sources = set(event.source_node_ids)
+        added_sources = sorted(current_sources - old_sources[match_name])
+        removed_sources = sorted(old_sources[match_name] - current_sources)
+        if added_sources or removed_sources:
+            report.source_changes.append({
+                "event_name": event.event_name,
+                "added": added_sources,
+                "removed": removed_sources,
+            })
 
         existing_props = set(match_body.get("properties", {}).keys())
         current_props = {p.name for p in event.properties}
@@ -79,7 +110,7 @@ def diff_taxonomies(
                 }
             )
 
-    for name in existing_by_name:
+    for name in existing:
         if name not in matched_existing_names:
             report.removed.append(name)
 
@@ -90,7 +121,7 @@ def _events_from_dict(taxonomy_dict: dict[str, dict]) -> list[TaxonomyEvent]:
     """Hydrate a JSON `events` dict back into TaxonomyEvent objects for diffing."""
     events: list[TaxonomyEvent] = []
     for name, body in taxonomy_dict.items():
-        node_id = _node_id_from_source(body.get("source", ""))
+        node_ids = _source_node_ids(body)
         props = []
         for prop_name, prop_body in (body.get("properties") or {}).items():
             props.append(
@@ -106,7 +137,7 @@ def _events_from_dict(taxonomy_dict: dict[str, dict]) -> list[TaxonomyEvent]:
                 event_name=name,
                 flow=body.get("category", ""),
                 description=body.get("description", ""),
-                source_node_id=node_id,
+                source_node_ids=node_ids,
                 properties=props,
             )
         )

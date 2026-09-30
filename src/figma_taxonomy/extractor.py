@@ -98,17 +98,6 @@ def _extract_text_content(node: dict) -> str | None:
     return None
 
 
-def _get_variant_base(frame_name: str, config: TaxonomyConfig) -> str:
-    name = frame_name
-    for suffix in config.naming.screen_name.strip_suffixes:
-        if name.endswith(suffix):
-            name = name[: -len(suffix)].strip().strip("-").strip()
-            break
-    if config.naming.screen_name.strip_prefixes:
-        name = _PREFIX_RE.sub("", name)
-    return name.strip()
-
-
 def _screen_frames(container: dict) -> Iterator[dict]:
     """Sections organize screens; frames contain screen layout, so stop there."""
     for child in container.get("children", []):
@@ -116,20 +105,6 @@ def _screen_frames(container: dict) -> Iterator[dict]:
             yield child
         elif child.get("type") == "SECTION":
             yield from _screen_frames(child)
-
-
-def _find_screens(page_node: dict, config: TaxonomyConfig) -> list[dict]:
-    """Return deduplicated screen frames, including those organized in sections."""
-
-    seen_bases: dict[str, dict] = {}
-    result = []
-    for frame in _screen_frames(page_node):
-        base = _get_variant_base(frame["name"], config)
-        if base not in seen_bases:
-            seen_bases[base] = frame
-            result.append(frame)
-
-    return result
 
 
 def _walk_node(
@@ -211,9 +186,8 @@ def extract_elements(figma_file: dict, config: TaxonomyConfig) -> list[ScreenEle
         if page_name in exclude:
             continue
 
-        screens = _find_screens(page, config)
-
-        for frame in screens:
+        # Visit every variant; merge shared event names only after extracting IDs.
+        for frame in _screen_frames(page):
             screen_name = _clean_screen_name(frame["name"], config)
             parent_path = [page_name, frame["name"]]
 
