@@ -13,6 +13,34 @@ from figma_taxonomy.taxonomy_engine import generate_taxonomy
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
+def test_review_outputs_preserve_source_ids(tmp_path: Path) -> None:
+    import csv
+
+    import openpyxl
+
+    from figma_taxonomy.output.amplitude_csv import write_csv
+    from figma_taxonomy.output.excel import write_excel
+
+    config = load_config(None)
+    events = [
+        TaxonomyEvent('pay_clicked', 'Payments', 'Pay', source_node_id='10:20'),
+        TaxonomyEvent('save_clicked', 'Payments', 'Save',
+                      [EventProperty('amount', 'number', 'Amount')], '10:21'),
+    ]
+    csv_path = tmp_path / 'review.csv'
+    write_csv(events, config, csv_path)
+    with csv_path.open(encoding='utf-8', newline='') as stream:
+        rows = list(csv.DictReader(stream))
+    assert {row['Source Node ID'] for row in rows} == {'10:20', '10:21'}
+    excel_path = tmp_path / 'review.xlsx'
+    write_excel(events, config, excel_path)
+    workbook = openpyxl.load_workbook(excel_path)
+    sheet = workbook['Events']
+    assert sheet.cell(2, 14).value == 'Source Node ID'
+    assert {sheet.cell(row, 14).value for row in (3, 4)} == {'10:20', '10:21'}
+    workbook.close()
+
+
 @pytest.fixture
 def config():
     return load_config(None)
@@ -179,7 +207,10 @@ class TestAmplitudeCsvOutput:
         write_csv(sample_events, config, output_path)
 
         lines = output_path.read_text().strip().split("\n")
-        assert lines[0] == "Event Type,Category,Description,Property Name,Property Type,Property Description"
+        assert lines[0] == (
+            "Event Type,Category,Description,Property Name,Property Type,Property Description,"
+            "Source Node ID"
+        )
 
     def test_csv_data_rows(self, sample_events, config, tmp_path):
         from figma_taxonomy.output.amplitude_csv import write_csv

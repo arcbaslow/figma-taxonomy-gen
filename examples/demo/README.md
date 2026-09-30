@@ -1,5 +1,14 @@
 # Offline documentation example
 
-These are synthetic fixtures for `figma-taxonomy-gen`. They contain no real account, customer or design data. Run the command in the root README's **Example output** section to reproduce the generated files. Figma uses `tests/fixtures/banking_app.json`; GTM uses the two exports in `test/fixtures/`.
+These outputs use the synthetic `tests/fixtures/banking_app.json` fixture and contain
+no real account, customer or design data. Reproduce them from the repository root:
 
-`assets/screenshot.png` is a browser capture of the generated output. Markdown is displayed in a documentation viewer; the GTM HTML report is displayed directly. This preview is not a dashboard or a live account audit.
+```bash
+uv run figma-taxonomy extract --fixture tests/fixtures/banking_app.json --output examples/demo
+```
+
+The CSV is a review file with source node IDs, not the current Amplitude Data
+import template.
+
+`assets/screenshot.png` is a browser capture of the generated Markdown in a
+documentation viewer, not a live account audit.
