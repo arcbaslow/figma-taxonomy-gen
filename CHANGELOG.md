@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Detect named frames, groups, text and rectangles with prototype interactions, preserving their inferred element type and node ID.
+
 - Fetch the selected Figma branch, reject malformed file URLs/keys, explain access and rate-limit errors, and prevent cache reads and writes with `--no-cache`.
 
 ## [0.4.2] - 2026-09-08

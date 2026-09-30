@@ -145,7 +145,7 @@ def _walk_node(
     has_interaction = _has_interactions(node)
 
     is_interactive_component = element_type is not None and node_type in _COMPONENT_TYPES
-    is_interactive_frame = has_interaction and element_type is None
+    is_interactive_frame = has_interaction
 
     if is_interactive_component or is_interactive_frame:
         text_content = _extract_text_content(node)

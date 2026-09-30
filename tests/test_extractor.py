@@ -31,6 +31,16 @@ def test_returns_screen_elements(elements):
     assert all(isinstance(e, ScreenElement) for e in elements)
 
 
+def test_named_prototype_nodes_preserve_types_and_ids() -> None:
+    fixture = json.loads((FIXTURES_DIR / "prototype_nodes.json").read_text())
+    detected = extract_elements(fixture, load_config(None))
+    assert {e.node_id: e.element_type for e in detected} == {
+        "1:2": "button", "1:3": "card", "1:4": "link",
+        "1:5": "button", "1:7": "interactive",
+    }
+    assert all(e.has_interaction for e in detected)
+
+
 def test_detects_buttons(elements):
     buttons = [e for e in elements if e.element_type == "button"]
     names = [e.element_name for e in buttons]
