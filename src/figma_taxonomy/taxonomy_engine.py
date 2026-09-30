@@ -35,8 +35,20 @@ def _build_event_name(
     action: str,
     config: TaxonomyConfig,
 ) -> str:
-    name = f"{screen}_{element_name}_{action}"
-    name = re.sub(r"_+", "_", name).strip("_")
+    if config.naming.max_event_length <= 0:
+        raise ValueError("naming.max_event_length must be a positive integer.")
+    try:
+        name = config.naming.pattern.format(screen=screen, element=element_name, action=action)
+    except (KeyError, ValueError, IndexError, AttributeError) as exc:
+        raise ValueError(
+            "naming.pattern must use {screen}, {element} and/or {action} placeholders."
+        ) from exc
+    name = _to_snake_case(name)
+    if config.naming.style == "camelCase":
+        first, *rest = name.split("_")
+        name = first + "".join(word.capitalize() for word in rest)
+    elif config.naming.style != "snake_case":
+        raise ValueError("naming.style must be snake_case or camelCase.")
     if len(name) > config.naming.max_event_length:
         name = name[: config.naming.max_event_length].rstrip("_")
     return name
@@ -146,7 +158,9 @@ def generate_taxonomy(
         )
 
     for screen_name in sorted(screens_seen):
-        pv_name = f"{screen_name}_pageview"
+        pv_name = _build_event_name(
+            screen_name, "", config.naming.actions.get("screen", "pageview"), config,
+        )
         if pv_name not in seen_names:
             seen_names.add(pv_name)
             flow = screen_flow_map.get(screen_name, "")

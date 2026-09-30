@@ -163,3 +163,45 @@ def test_manual_element():
     toggle_events = [e for e in events if "toggled" in e.event_name]
     assert len(toggle_events) == 1
     assert "biometric" in toggle_events[0].event_name.lower()
+
+
+@pytest.mark.parametrize(('style', 'expected'), [
+    ('snake_case', 'tapped_save_settings'), ('camelCase', 'tappedSaveSettings'),
+])
+def test_configured_pattern_and_style(style: str, expected: str) -> None:
+    config = load_config(None)
+    config.naming.pattern = '{action}_{element}_{screen}'
+    config.naming.style = style
+    config.naming.actions['button'] = 'tapped'
+    element = ScreenElement('1:1', 'settings', 'Save', 'button', None, False)
+    assert generate_taxonomy([element], config)[0].event_name == expected
+
+
+def test_pageview_uses_screen_action_and_length_cap() -> None:
+    config = load_config(None)
+    config.naming.actions['screen'] = 'opened'
+    config.naming.max_event_length = 64
+    element = ScreenElement('1:1', 's' * 58, 'Save', 'button', None, False)
+    events = generate_taxonomy([element], config)
+    assert len(events) == 2
+    assert all(len(event.event_name) <= 64 for event in events)
+    element.screen_name = 'settings'
+    assert generate_taxonomy([element], config)[-1].event_name == 'settings_opened'
+
+
+@pytest.mark.parametrize('limit', [0, -1])
+def test_reject_nonpositive_event_name_cap(limit: int) -> None:
+    config = load_config(None)
+    config.naming.max_event_length = limit
+    element = ScreenElement('1:1', 'settings', 'Save', 'button', None, False)
+    with pytest.raises(ValueError, match='max_event_length'):
+        generate_taxonomy([element], config)
+
+
+@pytest.mark.parametrize(('setting', 'value'), [('style', 'invalid'), ('pattern', '{missing}')])
+def test_invalid_naming_settings_are_actionable(setting: str, value: str) -> None:
+    config = load_config(None)
+    setattr(config.naming, setting, value)
+    element = ScreenElement('1:1', 'settings', 'Save', 'button', None, False)
+    with pytest.raises(ValueError, match=f'naming.{setting}'):
+        generate_taxonomy([element], config)

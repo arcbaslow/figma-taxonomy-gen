@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Honor configured naming patterns and snake_case/camelCase styles; apply the configured screen action and event-name length cap to pageviews too.
+
 - Detect named frames, groups, text and rectangles with prototype interactions, preserving their inferred element type and node ID.
 
 - Fetch the selected Figma branch, reject malformed file URLs/keys, explain access and rate-limit errors, and prevent cache reads and writes with `--no-cache`.
