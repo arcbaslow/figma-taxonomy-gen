@@ -36,10 +36,10 @@ manually, keeping source node IDs. Regeneration overwrites those edits.
 figma-taxonomy extract https://figma.com/design/ABC/App -f json,markdown
 ```
 
-## Blocking renames
+## Blocking drift
 
-Sometimes you want to reject PRs that rename events without explicit approval.
-Checking `report.renamed` is non-empty in your CI script does this:
+The composite action fails for any drift, not only renames. This example allows
+an explicit override for a failed check:
 
 ```yaml
 - uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
@@ -50,12 +50,14 @@ Checking `report.renamed` is non-empty in your CI script does this:
   continue-on-error: true
   id: drift
 
-- name: Block renames without override
-  if: steps.drift.outcome == 'failure' && !contains(github.event.pull_request.labels.*.name, 'taxonomy-rename-approved')
+- name: Block drift without override
+  if: steps.drift.outcome == 'failure' && !contains(github.event.pull_request.labels.*.name, 'taxonomy-drift-approved')
   run: exit 1
 ```
 
-Require a `taxonomy-rename-approved` label on the PR to let renames through.
+Require a `taxonomy-drift-approved` label on the PR to allow a failed check. This
+also overrides operational errors, so inspect the log first. Rename-only gating
+requires a custom script inspecting `ValidationReport.renamed`.
 
 ## Taxonomy-as-code review
 

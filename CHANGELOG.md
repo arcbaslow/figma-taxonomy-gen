@@ -11,6 +11,10 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 - Discover screen frames inside nested Figma sections while keeping page flow names and source node IDs.
 
+### Changed
+
+- Document the researched roadmap, remaining provenance/configuration limits, actual screen naming and property precedence, and valid composite-action CI examples.
+
 ### Fixed
 
 - Preserve source node IDs in CSV and Excel review exports. Clarify that the review CSV is not the current Amplitude Data import template.
@@ -99,5 +103,5 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 - JSON Schema output with Figma node IDs preserved for traceability.
 - `extract` CLI command.
 
-[Unreleased]: https://github.com/arcbaslow/figma-taxonomy-gen/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/arcbaslow/figma-taxonomy-gen/compare/v0.4.2...HEAD
 [0.4.0]: https://github.com/arcbaslow/figma-taxonomy-gen/releases/tag/v0.4.0

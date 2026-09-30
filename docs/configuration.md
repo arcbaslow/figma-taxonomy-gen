@@ -85,7 +85,7 @@ property_rules:
 The pattern `{screen}_{element}_{action}` runs through three layers of cleaning:
 
 1. **Screen name** — taken from the Figma frame hierarchy (`page → frame`). Numbered
-   prefixes like `01 - ` or `Step 1:` are stripped. Variant suffixes like `- Default`
+   prefixes like `01 - ` are stripped; `Step 1:` is not currently recognized. Variant suffixes like `- Default`
    or `- Dark` collapse so one screen isn't counted twice.
 2. **Element name** — if the element has text content (button label, field
    placeholder), that's used. Otherwise the component name is used with common
@@ -96,8 +96,8 @@ The pattern `{screen}_{element}_{action}` runs through three layers of cleaning:
 
 ```
 Figma:    Page "Onboarding" → Frame "02 - Phone Input" → Input "Phone Number"
-Cleaned:  screen="onboarding_phone_input" element="phone_number" action="entered"
-Event:    onboarding_phone_input_phone_number_entered
+Cleaned:  screen="phone_input" element="phone_number" action="entered"
+Event:    phone_input_phone_number_entered
 ```
 
 If that exceeds `max_event_length`, it's truncated (trailing underscores trimmed).
@@ -116,6 +116,13 @@ the [roadmap's provenance decision](ROADMAP.md#next).
 Rules match against the **event name** using glob patterns (`fnmatch`). A property
 added via a rule is deduplicated against globals and against other rules — no
 duplicate property names on a single event.
+
+Rule properties currently take precedence over globals with the same name; among
+rules, the first matching definition wins. The page supplies the flow/category,
+not a prefix in the screen name. `screen_name.max_depth`,
+`element_name.fallback_to_component_name`, and `output.directory` are currently
+unused; pass `--output` to select the output directory. These configuration gaps
+remain [open decisions](ROADMAP.md#next).
 
 ```yaml
 property_rules:

@@ -30,21 +30,26 @@ No design cache or credential-bearing config was opened.
 
 ## Now
 
-Implement these in order, bugs before the final small detection feature. Each
-implementation commit gets regression coverage and the full local CI check set.
+Completed in this run, bugs before the final small detection feature. Each
+implementation commit received regression coverage and the full local CI check set.
 
 | Item | Why it matters | Evidence | Effort | Risk |
 | --- | --- | --- | --- | --- |
-| N1. Correct Figma URL parsing, disable both cache reads and writes with `--no-cache`, and explain auth/rate errors | Fetch the selected branch and avoid persisting private designs when explicitly disabled | Baseline `figma_client.py:33–43` matches the parent before the branch; `:119` writes unconditionally; no client tests. [Authentication](https://developers.figma.com/docs/rest-api/authentication/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1 | Low; malformed inputs become errors |
-| N2. Detect named non-component nodes with prototype interactions | A frame called Button must not disappear when a generic clickable frame is detected | Baseline `extractor.py:156–158` requires a missing name match for non-components. Add a synthetic interaction fixture | 0.5 | Low; more expected events |
-| N3. Honor naming pattern/style and apply the configured cap and screen action to pageviews | Config must govern generated names, including long screen names | Baseline `taxonomy_engine.py:43` hardcodes the pattern; `:157` bypasses the cap and screen action; `test_config.py` already accepts camelCase | 1 | Medium; previously ignored settings change names; collision policy remains an open question |
-| N4. Make Amplitude dry runs offline and correct event category payloads | Preview must work without credentials; categories must arrive on the event | Baseline `amplitude_push.py:78` GETs before dry-run; event POST uses `category_name` instead of documented `category`. [API](https://amplitude.com/docs/apis/analytics/taxonomy) | 0.5 | Low; mock exact bodies and reject API-declared failures |
+| N1. Correct Figma URL parsing, disable both cache reads and writes with `--no-cache`, and explain auth/rate errors | Fetch the selected branch and avoid persisting private designs when explicitly disabled | Baseline `figma_client.py:27–36` matches the parent before the branch; `:99` writes unconditionally; no client tests. [Authentication](https://developers.figma.com/docs/rest-api/authentication/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1 | Low; malformed inputs become errors |
+| N2. Detect named non-component nodes with prototype interactions | A frame called Button must not disappear when a generic clickable frame is detected | Baseline `extractor.py:147–150` requires a missing name match for non-components. Add a synthetic interaction fixture | 0.5 | Low; more expected events |
+| N3. Honor naming pattern/style and apply the configured cap and screen action to pageviews | Config must govern generated names, including long screen names | Baseline `taxonomy_engine.py:38` hardcodes the pattern; `:149` bypasses the cap and screen action; `test_config.py` already accepts camelCase | 1 | Medium; previously ignored settings change names; collision policy remains an open question |
+| N4. Make Amplitude dry runs offline and correct event category payloads | Preview must work without credentials; categories must arrive on the event | Baseline `amplitude_push.py:70` GETs before dry-run; event POST uses `category_name` instead of documented `category`. [API](https://amplitude.com/docs/apis/analytics/taxonomy) | 0.5 | Low; mock exact bodies and reject API-declared failures |
 | N5. Make MCP extraction results usable by export and validate; align page filtering | An implementer should be able to connect the advertised tools without rewriting JSON | Baseline `mcp_tools.py` returns an event list but consumers require a map; tests manually convert it. Missing/excluded page behavior differs from CLI | 1 | Low; accept both existing shapes |
-| N6. Correct AI price estimates and the added-property count | Users need a credible billable-run preview and accurate result | Baseline `ai_enricher.py:26` overprices Opus 4.6; unknown models silently use Haiku rates; CLI counts after mutation. [Pricing](https://platform.claude.com/docs/en/about-claude/pricing) | 0.5 | Low; preserve opt-in behavior |
+| N6. Correct AI price estimates and the added-property count | Users need a credible billable-run preview and accurate result | Baseline `ai_enricher.py:23` overprices Opus 4.6; unknown models silently use Haiku rates; CLI counts after mutation. [Pricing](https://platform.claude.com/docs/en/about-claude/pricing) | 0.5 | Low; preserve opt-in behavior |
 | N7. Carry source node IDs into CSV and Excel review exports; correct import claims | Reviewers need the source design in every output, not only JSON/Markdown | `output/amplitude_csv.py`, `output/excel.py` omit IDs. Current six-column CSV differs from the [Data import schema](https://amplitude.com/docs/data/csv-import-export) | 0.5 | Medium; additive columns affect positional consumers |
 | N8. Discover screen frames inside Figma sections | Teams organize screens in sections; those screens currently vanish | Baseline `_find_screens` reads direct page frames only. [SECTION node](https://developers.figma.com/docs/rest-api/file-node-types/). Add a nested-section fixture; retain current variant semantics | 0.5 | Low; additional screens appear |
 
 ## Next
+
+These are proposals, not completed work. Full preservation of all variant and
+collision node IDs is still unresolved in the existing event model. The changes
+above retain source IDs for emitted events and add them to review exports; they
+do not claim to solve the pre-existing discarded-node policy.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
@@ -58,6 +63,7 @@ implementation commit gets regression coverage and the full local CI check set.
 | Validate config and expose unsupported options honestly | `screen_name.max_depth`, `fallback_to_component_name` and `output.directory` are loaded but unused. Property-rule precedence differs from the prose, and raw YAML errors are not actionable | 1–2 | Medium: intended fallback/depth behavior is unspecified; document and decide rather than invent it |
 | Compare property schemas in drift reports | `validate.py` compares only property names, so type/enum/description changes are invisible; same-name replacement nodes can be matched despite changed IDs | 1–2 | Medium: define drift categories and matching policy with fixtures |
 | Harden optional enrichment against malformed and oversized responses | `parse_suggestions` assumes iterable properties, the merger searches all flows, and one call per flow can exceed the output budget | 1–2 | Medium: add hostile/malformed mock responses, per-flow merge boundaries and reviewed batching; keep AI disabled by default |
+| Harden review exports and Windows text I/O | Excel stores arbitrary design strings as cell values and only renders four property pairs; JSON output and fixture/config readers omit explicit UTF-8. Formula-like labels and non-ASCII Windows round trips need dedicated fixtures | 1–2 | Medium: suspected spreadsheet interpretation/encoding risks from code review, not exercised in this run; avoid altering cell semantics without tests |
 
 ## Later
 
@@ -122,3 +128,41 @@ cross explicit non-goals or introduce unsolicited paid calls. A new importer,
 multi-source event model and MCP 2 migration remain proposals because they need
 contract decisions and broader tests. Competing on unverified vendor shortcomings
 is also rejected. Small correctness and handoff improvements are the useful gap.
+
+## Execution report
+
+Local branch: `roadmap-work`, created from `master` at `dd79a4a`. Version remains
+0.4.2. No push, pull request, tag, publication or live service call was performed.
+
+| Commit | Change | Tests passing before commit |
+| --- | --- | --- |
+| `25b6532` | Add the researched roadmap and navigation | 106 |
+| `c5c1c0f` | Correct Figma branch fetching, cache controls and errors | 117 |
+| `d0ca539` | Detect named prototype controls on raw nodes | 118 |
+| `51da373` | Honor naming pattern/style, pageview action and cap | 125 |
+| `9cdbf81` | Make Amplitude previews offline and correct category writes | 127 |
+| `95a7f63` | Accept MCP extraction output in export/validation | 134 |
+| `1d9f06a` | Correct optional AI estimates and result counts | 137 |
+| `8b2bd31` | Preserve source IDs in CSV/Excel review exports | 138 |
+| `03c6368` | Discover screens inside nested sections | 139 |
+
+All rows also passed Ruff, package build, strict docs build, fixture extraction
+and offline drift validation. Each bug had a failing regression before its fix;
+the section fixture also failed against the previous discovery code. The banking
+fixture remains at 17 elements and 21 events with no drift. New fixtures cover
+named prototype nodes and nested sections.
+
+Final verification: **139 tests pass** on Windows/Python 3.12.14. Ruff, source and
+wheel builds, strict MkDocs and offline drift checks pass. The initial temporary
+directory errors were environmental; no test expectations were weakened to fix
+them. Runs used `PYTEST_ADDOPTS` to select fresh `tests/.tmp/...` paths and a
+writable pytest cache. Check logs are retained outside the Git repository after
+the final run.
+
+Unverified: the other five CI OS/Python combinations; live PAT/branch permissions;
+actual account rate limits; current Amplitude entitlement and UI imports; paid
+model quality, token usage and model availability for an account; the Event
+Planner plugin's current maintenance. Vendor contract checks used public web
+documentation, not authenticated API calls. The runtime lockfile was not upgraded.
+The larger and ambiguous changes remain in Next/Later for the reasons in their
+risk columns. No credential-bearing config or design cache was read or staged.

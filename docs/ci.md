@@ -29,7 +29,7 @@ jobs:
           figma-token: ${{ secrets.FIGMA_TOKEN }}
 ```
 
-The action runs `figma-taxonomy validate --exit-code`. A clean run produces no output;
+The action runs `figma-taxonomy validate --exit-code`. A clean run prints `No drift detected.`;
 drift produces a grouped diff and exits non-zero, failing the PR check.
 
 ## Inputs
@@ -71,7 +71,7 @@ sequenceDiagram
     D->>F: Rename button to "Start Application"
     R->>C: Scheduled drift check (Monday)
     C->>F: Fetches current Figma
-    C-->>R: Drift detected ✗ — issue opened / PR blocked
+    C-->>R: Drift detected — check fails
 ```
 
 ## Patterns
@@ -89,18 +89,24 @@ Run the action once per file:
 ```yaml
 jobs:
   drift-ios:
-    uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
-    with:
-      taxonomy-path: tracking/ios.json
-      figma-url: https://figma.com/design/IOS123/iOSApp
-      figma-token: ${{ secrets.FIGMA_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
+        with:
+          taxonomy-path: tracking/ios.json
+          figma-url: https://figma.com/design/IOS123/iOSApp
+          figma-token: ${{ secrets.FIGMA_TOKEN }}
 
   drift-android:
-    uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
-    with:
-      taxonomy-path: tracking/android.json
-      figma-url: https://figma.com/design/AND456/AndroidApp
-      figma-token: ${{ secrets.FIGMA_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arcbaslow/figma-taxonomy-gen/.github/actions/drift-check@v0.4.0
+        with:
+          taxonomy-path: tracking/android.json
+          figma-url: https://figma.com/design/AND456/AndroidApp
+          figma-token: ${{ secrets.FIGMA_TOKEN }}
 ```
 
 ### Posting drift as a PR comment
