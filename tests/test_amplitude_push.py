@@ -33,7 +33,7 @@ def test_push_creates_events_properties_and_categories():
 
     def handler(request: httpx.Request) -> httpx.Response:
         calls.append((request.method, request.url.path))
-        if request.method == "GET" and request.url.path == "/api/2/taxonomy/event":
+        if request.method == "GET":
             return httpx.Response(200, json={"data": []})
         return httpx.Response(200, json={"success": True})
 
@@ -52,14 +52,19 @@ def test_push_creates_events_properties_and_categories():
     assert result.errors == []
 
     methods_paths = [(m, p) for m, p in calls if m == "POST"]
-    # 1 category + 2 properties + 2 events = 5 POSTs
-    assert len(methods_paths) == 5
+    # 1 category + 3 event/property associations + 2 events = 6 POSTs
+    assert len(methods_paths) == 6
 
 
 def test_push_skips_events_already_present_in_amplitude():
     def handler(request: httpx.Request) -> httpx.Response:
         if request.method == "GET" and request.url.path == "/api/2/taxonomy/event":
-            return httpx.Response(200, json={"data": [{"event_type": "home_pageview"}]})
+            return httpx.Response(200, json={"data": [{
+                "event_type": "home_pageview", "category": {"name": "Home"},
+                "description": "home_pageview description",
+            }]})
+        if request.method == "GET":
+            return httpx.Response(200, json={"data": []})
         return httpx.Response(200, json={"success": True})
 
     client = _make_client(handler)
@@ -141,7 +146,7 @@ def test_push_collects_api_errors_without_aborting():
     assert len(result.errors) == 2
 
 
-def test_push_dedupes_category_and_property_posts():
+def test_push_reuses_category_but_creates_each_property_association():
     post_paths = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -158,7 +163,7 @@ def test_push_dedupes_category_and_property_posts():
 
     push_taxonomy(events, client=client)
 
-    # One category, one property, two events = 4 POSTs
-    assert len(post_paths) == 4
+    # One category, two associations, two events = 5 POSTs
+    assert len(post_paths) == 5
     assert post_paths.count("/api/2/taxonomy/category") == 1
-    assert post_paths.count("/api/2/taxonomy/event-property") == 1
+    assert post_paths.count("/api/2/taxonomy/event-property") == 2

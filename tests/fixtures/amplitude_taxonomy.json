@@ -1,0 +1,7 @@
+{
+  "categories": [{"id": 100, "name": "Checkout"}],
+  "events": [{"event_type": "pay_clicked", "category": {"name": "Checkout"}, "description": "Pay"}],
+  "properties": {
+    "pay_clicked": [{"event_type": "pay_clicked", "event_property": "mode", "description": "Mode", "type": "enum", "enum_values": ["card", "cash"], "is_array_type": false}]
+  }
+}

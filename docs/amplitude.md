@@ -67,21 +67,22 @@ The `amplitude-csv` profile above is independent of Taxonomy API access.
 
 ## Dry run first
 
-Always dry-run before a real push to see what would change:
+Dry-run before a real push to validate the local input:
 
 ```bash
 figma-taxonomy push output/taxonomy.json --dry-run
 ```
 
-Dry runs make no requests, including GETs, and require no credentials. Counts
-describe the local input and cannot predict which events already exist remotely.
+Dry runs validate names, types and enum constraints without requests or credentials.
+Counts describe the local input; they cannot predict existing definitions or remote
+conflicts. A property used on two events counts as two associations.
 
 ```
 Loaded 21 events from output/taxonomy.json
 
-Dry run - would push:
+Dry run - validated local input (remote changes unknown):
   3 categories: ['Home', 'Login', 'Payments']
-  6 properties
+  77 event/property associations
   21 events
 ```
 
@@ -93,19 +94,43 @@ figma-taxonomy push output/taxonomy.json
 
 The command:
 
-1. `GET`s the existing event list to avoid duplicates
-2. `POST`s unique categories (`/api/2/taxonomy/category`)
-3. `POST`s unique event properties (`/api/2/taxonomy/event-property`)
-4. `POST`s new events, skipping any that already exist
+1. Validates the entire local input before contacting Amplitude.
+2. Reads events, categories, and the properties associated with each existing input
+   event. A failed or malformed initial inventory stops all writes.
+3. Creates missing categories and events, in that order. Existing events must match
+   the input category and description.
+4. Creates missing property associations **after their parent event exists**. Each
+   property POST includes `event_type`; each property GET uses the documented form
+   body with `event_type`. Shared names on different events can have different schemas.
 
-Event creation sends the documented `category` field. HTTP errors and API bodies
-declaring `success: false` are reported as failures. Properties are currently
-shared definitions, not event-specific overrides; enum constraints are not pushed.
-Repeated category/property creation may produce conflicts. Review these limits
-before a real push; the command is not a full tracking-plan synchronization tool.
+The policy is **create-only**. Existing event descriptions/categories and property
+types/descriptions/enums must match; conflicts produce errors without updates.
+Enum order is ignored. Existing array properties conflict with the scalar input
+model. Remote fields not modeled here (owners, visibility, required flags, regex,
+classifications and tags) are not compared or changed. The API decides whether a
+new association creates a shared definition or an event-specific override; the
+command never updates a shared definition or sends `overrideScope`.
 
-Errors from the API are collected in a report and printed at the end. A single
-failed event doesn't abort the whole push.
+Supported API types are `string`, `number`, `boolean`, `any`, and string enums.
+A string property with `enum` values is sent as `type=enum` with comma-separated
+`enum_values`. Enum members must be non-empty strings without commas, line breaks
+or surrounding whitespace. Integer, object/array schemas, numeric/boolean enums
+and additional local constraints are rejected rather than weakened. The separate
+CSV import profile supports integers; API push does not. Figma sources remain in
+the local JSON and are not sent as Amplitude metadata.
+
+Repeated pushes reuse matching definitions and make no writes when the plan is
+already present. After a partial failure, rerunning can fill missing associations
+without recreating their events. A `409` triggers one inventory read; it is counted
+as reused only if a matching definition is now visible. Hidden/deleted definitions
+can still conflict: review them manually. Push never restores, renames or deletes.
+Other failed writes are not automatically retried; HTTP/transport errors, invalid
+responses and API-declared failures are collected and cause a nonzero exit.
+Failed categories/events block their dependent writes while independent events
+can proceed. There is no transaction or rollback across the plan.
+
+Tests use a synthetic inventory fixture and mocked requests. Real-account API
+acceptance and project entitlement remain unverified.
 
 ## Regions
 
@@ -122,7 +147,7 @@ Deletes and renames must be done through the Amplitude UI —
 `push` only creates.
 
 Treat Amplitude as the downstream system. The Figma file + `taxonomy.json` is the
-source of truth; `push` mirrors state into Amplitude. If you want to remove an event
+source of truth; `push` adds missing definitions to Amplitude. If you want to remove an event
 from Amplitude, remove it from Figma, regenerate the taxonomy, and archive the
 event in Amplitude manually.
 

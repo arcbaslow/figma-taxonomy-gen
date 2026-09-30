@@ -250,8 +250,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
 @click.option("--base-url", default="https://amplitude.com", help="Amplitude base URL")
 def push(taxonomy_path, dry_run, base_url):
     """Push a taxonomy JSON to Amplitude's Taxonomy API (project access required)."""
-    from figma_taxonomy.amplitude_push import make_client, push_taxonomy
-    from figma_taxonomy.validate import _events_from_dict
+    from figma_taxonomy.amplitude_push import events_for_push, make_client, push_taxonomy
 
     api_key = os.environ.get("AMPLITUDE_API_KEY")
     secret_key = os.environ.get("AMPLITUDE_SECRET_KEY")
@@ -260,8 +259,11 @@ def push(taxonomy_path, dry_run, base_url):
             "AMPLITUDE_API_KEY and AMPLITUDE_SECRET_KEY must be set for non-dry-run pushes."
         )
 
-    stored = json.loads(Path(taxonomy_path).read_text(encoding="utf-8"))
-    events = _events_from_dict(stored.get("events", {}))
+    try:
+        stored = json.loads(Path(taxonomy_path).read_text(encoding="utf-8"))
+        events = events_for_push(stored)
+    except (OSError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
     click.echo(f"Loaded {len(events)} events from {taxonomy_path}")
 
     client = make_client(api_key or "dry", secret_key or "dry", base_url=base_url)
@@ -270,20 +272,22 @@ def push(taxonomy_path, dry_run, base_url):
     finally:
         client.close()
 
-    if dry_run:
+    if dry_run and not result.errors:
         categories = sorted({e.flow for e in events if e.flow})
-        properties = sorted({p.name for e in events for p in e.properties})
-        click.echo("\nDry run - would push:")
+        associations = sum(len(e.properties) for e in events)
+        click.echo("\nDry run - validated local input (remote changes unknown):")
         click.echo(f"  {len(categories)} categories: {categories}")
-        click.echo(f"  {len(properties)} properties")
+        click.echo(f"  {associations} event/property associations")
         click.echo(f"  {len(events)} events")
         return
 
     click.echo(f"\nCreated: {len(result.events_created)} events, "
-               f"{len(result.properties_created)} properties, "
+               f"{len(result.property_associations_created)} event/property associations, "
                f"{len(result.categories_created)} categories")
     if result.events_skipped:
-        click.echo(f"Skipped (already exist): {len(result.events_skipped)}")
+        click.echo(f"Reused matching events: {len(result.events_skipped)}")
+    if result.property_associations_skipped:
+        click.echo(f"Reused matching associations: {len(result.property_associations_skipped)}")
     if result.errors:
         click.echo(click.style(f"\n{len(result.errors)} error(s):", fg="red"))
         for err in result.errors[:10]:

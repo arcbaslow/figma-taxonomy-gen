@@ -195,6 +195,12 @@ figma-taxonomy push output/taxonomy.json --dry-run
 
 A real push requires Amplitude Taxonomy API access and `AMPLITUDE_API_KEY` / `AMPLITUDE_SECRET_KEY`. Check access for your Amplitude project. **Removing `--dry-run` performs writes immediately**; there is no extra confirmation prompt. CSV export remains available independently of Taxonomy API access.
 
+Push creates missing categories, events and event-specific property associations,
+including string enums. Repeated runs reuse matching definitions; schema or
+category conflicts are reported without overwriting remote definitions. Dry-run
+validates the local input offline and cannot predict remote conflicts. See the
+[push policy and supported schemas](docs/amplitude.md#real-push).
+
 `--dry-run` makes no API requests and needs no credentials. Its counts describe
 the input plan; they do not check which events already exist remotely.
 
