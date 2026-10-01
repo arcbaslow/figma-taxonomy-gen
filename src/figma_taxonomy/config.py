@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from copy import deepcopy
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from string import Formatter
 from typing import Any
 
 import yaml
@@ -117,8 +119,8 @@ class TaxonomyConfig:
     naming: NamingConfig = field(default_factory=NamingConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     ai: AIConfig = field(default_factory=AIConfig)
-    global_properties: list[dict[str, Any]] = field(default_factory=lambda: list(_DEFAULT_GLOBAL_PROPERTIES))
-    property_rules: list[dict[str, Any]] = field(default_factory=lambda: list(_DEFAULT_PROPERTY_RULES))
+    global_properties: list[dict[str, Any]] = field(default_factory=lambda: deepcopy(_DEFAULT_GLOBAL_PROPERTIES))
+    property_rules: list[dict[str, Any]] = field(default_factory=lambda: deepcopy(_DEFAULT_PROPERTY_RULES))
 
 
 def _merge_dict(base: dict, override: dict) -> dict:
@@ -128,13 +130,96 @@ def _merge_dict(base: dict, override: dict) -> dict:
     return merged
 
 
+def _validate_properties(properties: Any, location: str) -> None:
+    if not isinstance(properties, list):
+        raise ValueError(f"{location} must be a list of property definitions.")
+    names: set[str] = set()
+    for prop in properties:
+        if not isinstance(prop, dict) or set(prop) - {"name", "type", "description", "enum"}:
+            raise ValueError(f"{location} entries accept name, type, description and enum only.")
+        name = prop.get("name")
+        if not isinstance(name, str) or not name.strip() or name in names:
+            raise ValueError(f"{location} requires unique non-empty property names.")
+        names.add(name)
+        for key in ("type", "description"):
+            if key in prop and not isinstance(prop[key], str):
+                raise ValueError(f"{location}.{name}.{key} must be a string.")
+        if "enum" in prop and (not isinstance(prop["enum"], list) or not prop["enum"]):
+            raise ValueError(f"{location}.{name}.enum must be a non-empty list.")
+
+
+def _validate_shape(value: Any, default: Any, location: str = "config") -> None:
+    if location == "config.global_properties":
+        _validate_properties(value, location)
+    elif location == "config.property_rules":
+        if not isinstance(value, list):
+            raise ValueError(f"{location} must be a list.")
+        for rule in value:
+            if not isinstance(rule, dict) or set(rule) != {"match", "add"}:
+                raise ValueError(f"{location} entries require match and add.")
+            if not isinstance(rule["match"], str) or not rule["match"]:
+                raise ValueError(f"{location}.match must be a non-empty glob pattern.")
+            _validate_properties(rule["add"], f"{location}.add")
+    elif location == "config.naming.actions":
+        if not isinstance(value, dict) or any(
+            not isinstance(k, str) or not k or not isinstance(v, str) or not v
+            for k, v in value.items()
+        ):
+            raise ValueError(f"{location} must map component types to non-empty action strings.")
+    elif isinstance(default, dict):
+        if not isinstance(value, dict):
+            raise ValueError(f"{location} must be a mapping.")
+        for key, item in value.items():
+            if key not in default:
+                raise ValueError(f"Unknown setting {location}.{key}.")
+            _validate_shape(item, default[key], f"{location}.{key}")
+    elif isinstance(default, list):
+        if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+            raise ValueError(f"{location} must be a list of strings.")
+    elif type(value) is not type(default):
+        raise ValueError(f"{location} must be {type(default).__name__}.")
+
+
+def _validate_config(config: TaxonomyConfig) -> None:
+    if config.naming.style not in {"snake_case", "camelCase"}:
+        raise ValueError("naming.style must be snake_case or camelCase.")
+    if config.naming.max_event_length < 1:
+        raise ValueError("naming.max_event_length must be positive.")
+    if config.naming.screen_name.max_depth != 2:
+        raise ValueError("naming.screen_name.max_depth is reserved; only the legacy value 2 is supported. Screens are top-level frames inside pages/sections.")
+    try:
+        parts = list(Formatter().parse(config.naming.pattern))
+        if not config.naming.pattern or any(
+            name is not None and (name not in {"page", "screen", "element", "action"} or spec or conversion)
+            for _, name, spec, conversion in parts
+        ):
+            raise ValueError()
+    except ValueError as exc:
+        raise ValueError("naming.pattern supports plain {page}, {screen}, {element}, {action} placeholders only.") from exc
+    supported = {"excel", "csv", "json", "markdown", "amplitude-csv"}
+    if not config.output.formats or set(config.output.formats) - supported:
+        raise ValueError("output.formats must be a non-empty list of supported formats: " + ", ".join(sorted(supported)))
+    if not config.output.directory.strip():
+        raise ValueError("output.directory must be non-empty.")
+    if config.ai.max_tokens < 1 or not config.ai.model.strip():
+        raise ValueError("ai.max_tokens must be positive and ai.model must be non-empty.")
+
+
 def load_config(path: Path | None) -> TaxonomyConfig:
     """Load config from a YAML file, falling back to defaults for missing keys."""
     if path is None:
         return TaxonomyConfig()
 
-    with open(path) as f:
-        raw = yaml.safe_load(f) or {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = yaml.safe_load(f)
+    except yaml.YAMLError as exc:
+        mark = getattr(exc, "problem_mark", None)
+        location = f" at line {mark.line + 1}" if mark is not None else ""
+        raise ValueError(f"Invalid YAML in {path}{location}; check indentation and syntax.") from exc
+    if raw is None:
+        raw = {}
+    _validate_shape(raw, asdict(TaxonomyConfig()))
 
     config = TaxonomyConfig()
 
@@ -199,4 +284,5 @@ def load_config(path: Path | None) -> TaxonomyConfig:
     if "property_rules" in raw:
         config.property_rules = raw["property_rules"]
 
+    _validate_config(config)
     return config
