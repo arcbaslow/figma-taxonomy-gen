@@ -19,6 +19,14 @@ for fresh remote data. Offline mode requires an existing indexed cache, makes no
 requests and needs no token. Fixture paths remain offline independently of these
 options. `offline` and `no_cache` cannot be combined for API sources.
 
+To use managed Figma OAuth, install both extras (`uv sync --extra mcp --extra oauth`)
+and run `figma-taxonomy auth login` once in a terminal under the same OS user.
+Configure the MCP subprocess with `FIGMA_TOKEN_TYPE=oauth` and omit `FIGMA_TOKEN`.
+The server reads and refreshes that user's native credential-store session;
+it never opens a browser or asks for credentials during a tool call. Login errors
+direct you back to the terminal. See [OAuth setup](oauth.md). This authenticates
+Figma REST calls; the MCP transport remains local stdio.
+
 Extraction also accepts `explain: true` (default false), adding an `explanation`
 object with versioned node decisions and generated event names. The event payload
 is unchanged. See [detection reports](detection.md#when-detection-goes-wrong).

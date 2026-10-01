@@ -27,7 +27,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Sync dependencies (with all extras)
-        run: uv sync --extra dev --extra ai --extra mcp
+        run: uv sync --extra dev --extra ai --extra mcp --extra oauth
 
       - name: Run tests
         run: uv run pytest -v
@@ -41,7 +41,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Check pyproject.toml is valid
-        run: uv sync --extra dev --extra ai --extra mcp
+        run: uv sync --extra dev --extra ai --extra mcp --extra oauth
 
       - name: Lint
         run: uv run ruff check src/ tests/

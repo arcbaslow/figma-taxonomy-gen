@@ -33,9 +33,13 @@ def _auth_headers() -> dict[str, str]:
     kind = os.environ.get("FIGMA_TOKEN_TYPE", "pat").lower()
     if kind not in {"pat", "plan", "oauth"}:
         raise ValueError("FIGMA_TOKEN_TYPE must be pat, plan, or oauth.")
-    token = _get_token()
     if kind == "oauth":
+        token = os.environ.get("FIGMA_TOKEN")
+        if not token:
+            from figma_taxonomy.oauth import access_token
+            token = access_token()
         return {"Authorization": f"Bearer {token}"}
+    token = _get_token()
     return {"X-FIGMA-TOKEN": token}
 
 
@@ -57,7 +61,7 @@ def _check_response(response: httpx.Response) -> None:
     if response.status_code in {401, 403}:
         raise RuntimeError(
             "Figma denied access. Check FIGMA_TOKEN expiry, file_content:read scope, "
-            "token type, and file access/resource allowlist. Refresh OAuth tokens externally."
+            "token type, and file access/resource allowlist. For managed OAuth, run 'figma-taxonomy auth login' again."
         )
     if response.status_code == 404:
         raise RuntimeError("Figma file not found. Check the file key or branch URL and file access.")
@@ -176,6 +180,10 @@ def fetch_file(
 
     with httpx.Client(timeout=60.0) as client:
         resp = _get_with_retries(client, f"{FIGMA_API_BASE}/files/{file_key}", headers)
+        if resp.status_code == 401 and os.environ.get("FIGMA_TOKEN_TYPE", "pat").lower() == "oauth" and not os.environ.get("FIGMA_TOKEN"):
+            from figma_taxonomy.oauth import access_token
+            refreshed = access_token(force_refresh=True, rejected_token=headers["Authorization"][7:])
+            resp = _get_with_retries(client, f"{FIGMA_API_BASE}/files/{file_key}", {"Authorization": f"Bearer {refreshed}"})
         _check_response(resp)
         try:
             data = resp.json()
