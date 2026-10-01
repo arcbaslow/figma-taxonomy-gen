@@ -198,6 +198,10 @@ Configuration is validated before extraction. `output.directory` supplies the
 default destination, with `--output` overriding it. Disabling component-name
 fallback makes unlabeled controls an explicit error containing the Figma node ID.
 
+Excel exports retain the existing overview and add an `Event Properties` sheet
+with every event/property association, type, enum and source ID. Design strings
+are stored as literal text, including labels beginning with `=`.
+
 ### Amplitude push
 
 ```bash
