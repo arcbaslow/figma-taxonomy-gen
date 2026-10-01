@@ -202,6 +202,10 @@ Excel exports retain the existing overview and add an `Event Properties` sheet
 with every event/property association, type, enum and source ID. Design strings
 are stored as literal text, including labels beginning with `=`.
 
+Optional AI uses bounded batches shared with its cost preview. Suggestions stay
+within their source batch; failed or truncated runs leave the input properties
+unchanged. AI remains off by default.
+
 ### Amplitude push
 
 ```bash

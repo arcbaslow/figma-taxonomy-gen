@@ -50,6 +50,8 @@ ai:
   enabled: false
   model: "claude-haiku-4-5-20251001"
   max_tokens: 2048
+  batch_size: 20           # Maximum events per enrichment call
+  max_prompt_chars: 12000 # Maximum complete prompt length
 
 # Added to every event
 global_properties:

@@ -110,6 +110,8 @@ class AIConfig:
     enabled: bool = False
     model: str = "claude-haiku-4-5-20251001"
     max_tokens: int = 2048
+    batch_size: int = 20
+    max_prompt_chars: int = 12000
 
 
 @dataclass
@@ -203,6 +205,8 @@ def _validate_config(config: TaxonomyConfig) -> None:
         raise ValueError("output.directory must be non-empty.")
     if config.ai.max_tokens < 1 or not config.ai.model.strip():
         raise ValueError("ai.max_tokens must be positive and ai.model must be non-empty.")
+    if config.ai.batch_size < 1 or config.ai.max_prompt_chars < 1:
+        raise ValueError("ai.batch_size and ai.max_prompt_chars must be positive.")
 
 
 def load_config(path: Path | None) -> TaxonomyConfig:
@@ -276,6 +280,8 @@ def load_config(path: Path | None) -> TaxonomyConfig:
             enabled=a.get("enabled", config.ai.enabled),
             model=a.get("model", config.ai.model),
             max_tokens=a.get("max_tokens", config.ai.max_tokens),
+            batch_size=a.get("batch_size", config.ai.batch_size),
+            max_prompt_chars=a.get("max_prompt_chars", config.ai.max_prompt_chars),
         )
 
     if "global_properties" in raw:

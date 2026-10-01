@@ -104,6 +104,28 @@ def build_prompt(
 
 # ---- Response parsing ----
 
+def plan_batches(
+    events: list[TaxonomyEvent], config: TaxonomyConfig,
+) -> list[tuple[str, list[TaxonomyEvent], str]]:
+    """Plan all calls before spending, shared by the preview and executor."""
+    if config.ai.batch_size < 1 or config.ai.max_prompt_chars < 1:
+        raise ValueError("AI batch_size and max_prompt_chars must be positive.")
+    batches = []
+    for flow, flow_events in group_events_by_flow(events).items():
+        batch: list[TaxonomyEvent] = []
+        for event in flow_events:
+            single = build_prompt(flow, [event], config.app.type, config.app.name)
+            if len(single) > config.ai.max_prompt_chars:
+                raise ValueError(f"Event {event.event_name!r} exceeds ai.max_prompt_chars; shorten its context or raise the prompt limit.")
+            candidate = build_prompt(flow, [*batch, event], config.app.type, config.app.name)
+            if batch and (len(batch) >= config.ai.batch_size or len(candidate) > config.ai.max_prompt_chars):
+                batches.append((flow, batch, build_prompt(flow, batch, config.app.type, config.app.name)))
+                batch = []
+            batch.append(event)
+        if batch:
+            batches.append((flow, batch, build_prompt(flow, batch, config.app.type, config.app.name)))
+    return batches
+
 _JSON_FENCE_RE = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.DOTALL)
 _JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
 
@@ -111,6 +133,8 @@ _JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
 def parse_suggestions(response_text: str) -> list[EnrichmentSuggestion]:
     """Extract suggestions from a model response. Returns [] on any parse failure."""
     payload: Any = None
+    if not isinstance(response_text, str) or len(response_text) > 200000:
+        return []
 
     fence_match = _JSON_FENCE_RE.search(response_text)
     candidates = []
@@ -139,28 +163,39 @@ def parse_suggestions(response_text: str) -> list[EnrichmentSuggestion]:
         if not isinstance(item, dict):
             continue
         event_name = item.get("event_name")
-        if not isinstance(event_name, str):
+        if not isinstance(event_name, str) or not event_name.strip():
             continue
 
         props: list[EventProperty] = []
-        for prop_raw in item.get("properties", []) or []:
+        raw_properties = item.get("properties")
+        if not isinstance(raw_properties, list):
+            continue
+        for prop_raw in raw_properties:
             if not isinstance(prop_raw, dict):
                 continue
             name = prop_raw.get("name")
-            if not isinstance(name, str):
+            if not isinstance(name, str) or not name.strip():
+                continue
+            kind = prop_raw.get("type", "string")
+            description = prop_raw.get("description", "")
+            if not isinstance(kind, str) or kind not in {"string", "number", "boolean"} or not isinstance(description, str):
                 continue
             enum_values = prop_raw.get("enum")
-            if enum_values is not None and not isinstance(enum_values, list):
-                enum_values = None
+            if enum_values is not None and (
+                kind != "string" or not isinstance(enum_values, list) or not enum_values
+                or any(not isinstance(v, str) or not v for v in enum_values)
+            ):
+                continue
             props.append(
                 EventProperty(
                     name=name,
-                    type=prop_raw.get("type", "string"),
-                    description=prop_raw.get("description", ""),
+                    type=kind,
+                    description=description,
                     enum_values=enum_values,
                 )
             )
-        suggestions.append(EnrichmentSuggestion(event_name=event_name, properties=props))
+        if props:
+            suggestions.append(EnrichmentSuggestion(event_name=event_name, properties=props[:4]))
 
     return suggestions
 
@@ -200,31 +235,31 @@ def enrich_events(
     max_tokens: int = 2048,
 ) -> list[TaxonomyEvent]:
     """Merge Claude-suggested properties into each event. Returns a new list (events mutated)."""
-    grouped = group_events_by_flow(events)
-    by_name: dict[str, TaxonomyEvent] = {e.event_name: e for e in events}
-
-    for flow, flow_events in grouped.items():
-        prompt = build_prompt(
-            flow=flow,
-            events=flow_events,
-            app_type=config.app.type,
-            app_name=config.app.name,
-        )
+    pending: list[tuple[TaxonomyEvent, EventProperty]] = []
+    for flow, batch, prompt in plan_batches(events, config):
+        by_name = {event.event_name: event for event in batch}
         response = client.messages.create(
             model=model,
             max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = response.content[0].text
+        if getattr(response, "stop_reason", None) == "max_tokens":
+            raise ValueError(f"AI response for {flow!r} was truncated; reduce ai.batch_size or increase ai.max_tokens. No suggestions were applied.")
+        blocks = getattr(response, "content", None)
+        if not isinstance(blocks, list):
+            raise ValueError("AI response has no content list; no suggestions were applied.")
+        text = "\n".join(block.text for block in blocks if isinstance(getattr(block, "text", None), str))
+        if not text or len(text) > 200000:
+            raise ValueError("AI response has no usable text or exceeds the response limit; no suggestions were applied.")
         for suggestion in parse_suggestions(text):
             target = by_name.get(suggestion.event_name)
             if target is None:
                 continue
-            existing_names = {p.name for p in target.properties}
             for prop in suggestion.properties:
-                if prop.name in existing_names:
-                    continue
-                target.properties.append(prop)
-                existing_names.add(prop.name)
+                pending.append((target, prop))
+
+    for target, prop in pending:
+        if prop.name not in {p.name for p in target.properties}:
+            target.properties.append(prop)
 
     return events
