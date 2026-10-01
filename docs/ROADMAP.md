@@ -161,6 +161,12 @@ calls with event-count and prompt-character limits, and the preview uses that sa
 plan. Truncated/missing responses fail without partially mutating the taxonomy.
 Paid calls remain opt-in and all verification uses mock clients.
 
+Completed: plan-token authentication, plus acceptance of externally issued OAuth
+access tokens. `FIGMA_TOKEN_TYPE` selects PAT/plan headers or OAuth bearer auth;
+tokens remain environment-only. This takes the plan-token alternative in the
+proposal without building an OAuth callback service or credential lifecycle.
+Issuance, rotation/refresh and account entitlement remain external and unverified.
+
 These proposals remain unfinished, in priority order. The provenance and import
 profile implementations above are complete. Excluded/undetected controls and
 real-account import acceptance are not claimed as covered.
@@ -176,7 +182,6 @@ real-account import acceptance are not claimed as covered.
 | --- | --- | --- | --- |
 | Explain detection decisions in an optional report | Implementers could inspect why a node was included/excluded without reading regexes; current `_walk_node` silently skips nodes | 2–3 | Medium: define a stable report without changing event output |
 | Configurable detection overrides | Teams could map their own design-system names without a fork; current patterns are module constants | 2–3 | Medium: precedence, validation and false-positive fixtures needed |
-| OAuth or plan-token authentication | PAT-only `X-FIGMA-TOKEN` currently matches documented PAT authentication. OAuth uses bearer tokens; organization/enterprise plan tokens became available in July 2026. [Authentication](https://developers.figma.com/docs/rest-api/authentication/), [changelog](https://developers.figma.com/docs/rest-api/changelog/) | 3–5 | High: credential lifecycle and distribution change project scope; proposal only |
 
 ## Research notes
 

@@ -24,9 +24,19 @@ def _get_token() -> str:
     if not token:
         raise RuntimeError(
             "FIGMA_TOKEN environment variable is required. "
-            "Get a Personal Access Token from Figma > Settings > Access Tokens."
+            "Supply a personal, REST API plan, or OAuth access token and set FIGMA_TOKEN_TYPE."
         )
     return token
+
+
+def _auth_headers() -> dict[str, str]:
+    kind = os.environ.get("FIGMA_TOKEN_TYPE", "pat").lower()
+    if kind not in {"pat", "plan", "oauth"}:
+        raise ValueError("FIGMA_TOKEN_TYPE must be pat, plan, or oauth.")
+    token = _get_token()
+    if kind == "oauth":
+        return {"Authorization": f"Bearer {token}"}
+    return {"X-FIGMA-TOKEN": token}
 
 
 def _parse_file_key(url_or_key: str) -> str:
@@ -47,7 +57,7 @@ def _check_response(response: httpx.Response) -> None:
     if response.status_code in {401, 403}:
         raise RuntimeError(
             "Figma denied access. Check FIGMA_TOKEN expiry, file_content:read scope, "
-            "and the token owner's access to the file."
+            "token type, and file access/resource allowlist. Refresh OAuth tokens externally."
         )
     if response.status_code == 404:
         raise RuntimeError("Figma file not found. Check the file key or branch URL and file access.")
@@ -162,7 +172,7 @@ def fetch_file(
             return cached
     if offline:
         raise RuntimeError("No valid offline cache for this file; fetch it online first or use a fixture.")
-    headers = {"X-FIGMA-TOKEN": _get_token()}
+    headers = _auth_headers()
 
     with httpx.Client(timeout=60.0) as client:
         resp = _get_with_retries(client, f"{FIGMA_API_BASE}/files/{file_key}", headers)
