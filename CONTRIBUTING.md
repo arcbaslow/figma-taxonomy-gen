@@ -40,7 +40,7 @@ Examples of the desired tone:
 - `honor configured output formats`
 - `collapse variant frames sharing a screen name`
 - `strip Organisms/ prefix from element names`
-- `cap event names at the Amplitude 64-char limit`
+- `honor the configured event-name length limit`
 
 PR refs `(#NNN)` only when one exists.
 

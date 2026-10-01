@@ -38,7 +38,7 @@ graph LR
   Data import template; see [integration limits](amplitude.md).
 - **Drift detection.** `validate` matches events by Figma `node_id`, so a component
   rename shows up as a rename instead of an add plus a remove.
-- **AI enrichment (optional).** `--ai` sends one prompt per flow to Claude;
+- **AI enrichment (optional).** `--ai` sends bounded batches within each flow to Claude;
   suggestions merge into the event set and skip any property names that already exist.
 - **MCP server.** Claude Desktop and claude.ai can call `extract_taxonomy`,
   `validate_taxonomy`, and `export_taxonomy` directly.

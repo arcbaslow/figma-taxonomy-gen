@@ -27,6 +27,7 @@ Figma REST API or local fixture
 | Capability | Result |
 | --- | --- |
 | Extract | Detect buttons, inputs, toggles, tabs and other interactive nodes |
+| Explain | Inspect node inclusion, exclusions and generated events with `--explain decisions.json` |
 | Name | Apply configurable patterns, styles and action verbs |
 | Enrich | Attach global properties and name-matching rules; optionally infer properties with Anthropic |
 | Export | Excel and CSV review sheets, structured JSON and Markdown, with source node IDs |
