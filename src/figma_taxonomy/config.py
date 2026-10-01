@@ -115,9 +115,18 @@ class AIConfig:
 
 
 @dataclass
+class DetectionOverride:
+    match: str = ""
+    node_id: str = ""
+    action: str = "include"
+    type: str = "interactive"
+
+
+@dataclass
 class DetectionConfig:
     include_hidden: bool = True
     traverse_interactive_children: bool = False
+    overrides: list[DetectionOverride] = field(default_factory=list)
 
 
 @dataclass
@@ -158,7 +167,18 @@ def _validate_properties(properties: Any, location: str) -> None:
 
 
 def _validate_shape(value: Any, default: Any, location: str = "config") -> None:
-    if location == "config.global_properties":
+    if location == "config.detection.overrides":
+        if not isinstance(value, list):
+            raise ValueError(f"{location} must be a list of override mappings.")
+        for rule in value:
+            if not isinstance(rule, dict) or set(rule) - {"match", "node_id", "action", "type"}:
+                raise ValueError(f"{location} accepts match or node_id, action and type only.")
+            selectors = set(rule) & {"match", "node_id"}
+            if len(selectors) != 1 or any(not isinstance(v, str) or not v.strip() for v in rule.values()):
+                raise ValueError(f"{location} requires one non-empty match or node_id selector and string values.")
+            if rule.get("action", "include") not in {"include", "exclude"}:
+                raise ValueError(f"{location}.action must be include or exclude.")
+    elif location == "config.global_properties":
         _validate_properties(value, location)
     elif location == "config.property_rules":
         if not isinstance(value, list):
@@ -235,7 +255,12 @@ def load_config(path: Path | None) -> TaxonomyConfig:
     config = TaxonomyConfig()
 
     if "detection" in raw:
-        config.detection = DetectionConfig(**raw["detection"])
+        detection = raw["detection"]
+        config.detection = DetectionConfig(
+            include_hidden=detection.get("include_hidden", True),
+            traverse_interactive_children=detection.get("traverse_interactive_children", False),
+            overrides=[DetectionOverride(**rule) for rule in detection.get("overrides", [])],
+        )
 
     if "app" in raw:
         app = raw["app"]

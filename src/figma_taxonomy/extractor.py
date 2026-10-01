@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fnmatch
 import re
 from collections.abc import Iterator
 
@@ -63,6 +64,28 @@ def _has_interactions(node: dict) -> bool:
     return bool(interactions) or bool(node.get("transitionNodeID"))
 
 
+def _classify_node(node: dict, config: TaxonomyConfig) -> tuple[str | None, str, int | None]:
+    """One decision function for extraction and explanation, with stable reason codes."""
+    if not config.detection.include_hidden and node.get("visible") is False:
+        return None, "hidden", None
+    name = node.get("name", "")
+    for index, rule in enumerate(config.detection.overrides):
+        if ((rule.node_id and rule.node_id == node.get("id"))
+                or (rule.match and fnmatch.fnmatchcase(name.casefold(), rule.match.casefold()))):
+            if rule.action == "exclude":
+                return None, "override_exclude", index
+            return rule.type, "override_include", index
+    if _is_excluded(name):
+        return None, "excluded_name", None
+    kind = _classify_element(name)
+    if _has_interactions(node):
+        reason = "prototype_interaction" if node.get("interactions") else "legacy_transition"
+        return kind or "interactive", reason, None
+    if kind is not None and node.get("type") in _COMPONENT_TYPES:
+        return kind, "component_name", None
+    return None, "not_interactive", None
+
+
 def _clean_screen_name(raw: str, config: TaxonomyConfig) -> str:
     name = raw
     sn_config = config.naming.screen_name
@@ -79,7 +102,7 @@ def _clean_screen_name(raw: str, config: TaxonomyConfig) -> str:
     return name
 
 
-def _extract_text_content(node: dict) -> str | None:
+def _extract_text_content(node: dict, config: TaxonomyConfig | None = None) -> str | None:
     if node.get("visible") is False:
         return None
     if node.get("characters"):
@@ -101,11 +124,15 @@ def _extract_text_content(node: dict) -> str | None:
                 return child["characters"]
     for child in children:
         # A nested control owns its own text, not its enclosing card/form.
+        if config is not None:
+            child_kind, child_reason, _ = _classify_node(child, config)
+            if child_kind is not None or child_reason in {"hidden", "override_exclude", "excluded_name"}:
+                continue
         if _has_interactions(child) or (
             child.get("type") in _COMPONENT_TYPES and _classify_element(child.get("name", ""))
         ):
             continue
-        if text := _extract_text_content(child):
+        if text := _extract_text_content(child, config):
             return text
     return None
 
@@ -139,21 +166,13 @@ def _walk_node(
 ) -> list[ScreenElement]:
     elements: list[ScreenElement] = []
     name = node.get("name", "")
-    node_type = node.get("type", "")
-
-    if not config.detection.include_hidden and node.get("visible") is False:
-        return elements
-    if _is_excluded(name):
+    element_type, reason, _ = _classify_node(node, config)
+    if reason in {"hidden", "override_exclude", "excluded_name"}:
         return elements
 
-    element_type = _classify_element(name)
     has_interaction = _has_interactions(node)
-
-    is_interactive_component = element_type is not None and node_type in _COMPONENT_TYPES
-    is_interactive_frame = has_interaction
-
-    if is_interactive_component or is_interactive_frame:
-        text_content = _extract_text_content(node)
+    if element_type is not None:
+        text_content = _extract_text_content(node, config)
 
         clean_name = name
         for prefix in config.naming.element_name.strip_common:

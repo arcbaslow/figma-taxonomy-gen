@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Add ordered detection overrides by case-insensitive name glob or exact Figma node ID, with include/exclude actions and configurable control types. Preserve visibility and ancestor traversal boundaries.
+
 - Add fixture-backed hidden-layer and nested-control policies, retain instance variant metadata, search nested visible labels and recognize legacy prototype transitions. Preserve existing hidden-layer and parent-suppression defaults.
 
 - Support explicit Figma PAT, REST API plan-token and existing OAuth access-token authentication through `FIGMA_TOKEN_TYPE`, with correct headers and no persisted credentials.

@@ -214,6 +214,8 @@ complete extraction → export → validation tool workflow.
 Detection searches nested visible labels and recognizes legacy prototype links.
 Hidden-layer inclusion and traversal inside detected controls are explicit config
 options; their defaults preserve earlier behavior.
+Ordered `detection.overrides` can map custom component names or specific Figma
+nodes to control types, or exclude their subtrees. See [detection rules](docs/detection.md).
 
 ### Amplitude push
 

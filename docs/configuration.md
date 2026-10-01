@@ -16,6 +16,7 @@ figma:
 detection:
   include_hidden: true
   traverse_interactive_children: false
+  overrides: []           # Ordered name-glob or exact-node rules; see detection guide
 
 naming:
   style: snake_case
