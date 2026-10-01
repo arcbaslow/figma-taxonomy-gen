@@ -39,7 +39,7 @@ ai = [
     "anthropic>=0.40",
 ]
 mcp = [
-    "mcp>=1.0,<2",
+    "mcp>=1.30,<2",
 ]
 docs = [
     "mkdocs-material>=9.5",

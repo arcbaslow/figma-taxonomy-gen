@@ -21,6 +21,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Upgrade the MCP extra and lockfile to SDK 1.30 within the existing `<2` bound. Verify the actual stdio protocol through extraction, export, validation and error responses; document the separate MCP 2 migration assessment.
+
 - Document the researched roadmap, remaining provenance/configuration limits, actual screen naming and property precedence, and valid composite-action CI examples.
 
 ### Fixed
