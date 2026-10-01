@@ -87,7 +87,7 @@ Screens are frames directly under a page or nested inside `SECTION` containers.
 Discovery stops at each screen frame, so its internal layout frames do not become
 additional screens. Section names do not enter event names; the Figma page still
 supplies the flow. This traversal does not use `screen_name.max_depth`, which is
-currently a reserved, unused setting.
+reserved: only its legacy value `2` is accepted; other values fail validation.
 
 The "screen" for each event comes from the Figma hierarchy, not the element. Given:
 
@@ -186,6 +186,25 @@ or change AI prompts. Synthetic coverage is in `tests/fixtures/detection_policy.
 
 ## When detection goes wrong
 
+Use `figma-taxonomy extract --fixture design.json --explain decisions.json` to
+write an optional JSON report alongside the normal taxonomy, or pass `explain=true`
+to the MCP extraction tool. With `--page`, the report covers the selected page.
+It does not change events or enable AI.
+
+Report `schema_version: 1` contains one `nodes` record per supplied node, including
+nodes skipped by traversal. Each record has its Figma ID/source, original name
+and path, page/screen context, `variants`, `element_type`, `control_detected`,
+`reason`, zero-based `matched_rule` (or null), and actual generated `event_names`.
+`included` means the node is a source of an event, including a screen pageview.
+Control exclusion does not remove a screen from the separate pageview inventory.
+
+Reasons identify name or prototype detection, explicit overrides, hidden layers,
+excluded pages/names, suppressed descendants (`*_ancestor`), noninteractive nodes,
+pageview-only screens, or nodes outside screens. A matched rule refers to the
+ordered `detection.overrides` list. Reports include design text and should be
+shared with the same care as the source fixture. Choose a report path distinct
+from fixture/config inputs and generated taxonomy files.
+
 If an event you expected isn't showing up:
 
 1. Check the component name in Figma against the pattern list
@@ -194,5 +213,5 @@ If an event you expected isn't showing up:
 4. Add a prototype interaction to include a raw node that is not excluded
 5. Or override by renaming the component to include a keyword like `button`
 
-The fastest debugging path is `figma-taxonomy extract --page "Your Page" -f json` and
-inspect which `node_id`s made it through.
+The report connects detection decisions to the final events, including merged
+sources, so inspect it before changing a naming rule or accepting new controls.

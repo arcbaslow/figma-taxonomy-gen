@@ -37,6 +37,7 @@ def build_server():
         figma_url_or_path: str,
         config_path: str | None = None,
         page: str | None = None,
+        explain: bool = False,
         cache_ttl: float = 300,
         offline: bool = False,
         no_cache: bool = False,
@@ -51,7 +52,7 @@ def build_server():
         Returns:
             {"count": int, "events": [ {event_name, category, description, ...} ]}
         """
-        return extract_taxonomy_tool(figma_url_or_path, config_path, page, cache_ttl=cache_ttl, offline=offline, no_cache=no_cache)
+        return extract_taxonomy_tool(figma_url_or_path, config_path, page, explain=explain, cache_ttl=cache_ttl, offline=offline, no_cache=no_cache)
 
     @mcp.tool()
     def validate_taxonomy(

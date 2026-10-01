@@ -123,7 +123,7 @@ event/property associations; the Python result retains legacy unique property
 names and adds precise association lists. Unmodeled remote metadata is left
 untouched. Live account acceptance remains unverified.
 
-## Next
+## Completed continuation (2026-10-01)
 
 Owner authorized completion of the remaining Next and Later work on 2026-10-01.
 Work continues on `roadmap-work` after the previous 14 commits were merged and
@@ -189,18 +189,24 @@ type or subtree exclusion. Visibility and ancestor traversal boundaries stay
 explicit. Tests cover icon-only CTAs, custom component names, precedence, hidden
 nodes and invalid rules without changing the naming engine's configurability.
 
-These proposals remain unfinished, in priority order. The provenance and import
-profile implementations above are complete. Excluded/undetected controls and
-real-account import acceptance are not claimed as covered.
+Completed: optional detection explanation reports. CLI `--explain PATH` and MCP
+`explain=true` expose a versioned record for every supplied node, including
+excluded and suppressed descendants, rule matches, variants and actual generated
+event names. Shared classification keeps decisions aligned with extraction;
+reports do not alter event output. Tests cover provenance, traversal, opt-in
+behavior and protection against overwriting taxonomy output with a report.
 
-| Proposal | Why / evidence | Effort | Risk / decision needed |
-| --- | --- | --- | --- |
+## Next
+
+No unfinished implementation items remain from the roadmap authorized on
+2026-10-01. Service verification used fixtures and mocks; real-account import
+acceptance remains unverified and requires a separate live-service decision.
 
 ## Later
 
-| Proposal | Why / evidence | Effort | Risk |
-| --- | --- | --- | --- |
-| Explain detection decisions in an optional report | Implementers could inspect why a node was included/excluded without reading regexes; current `_walk_node` silently skips nodes | 2–3 | Medium: define a stable report without changing event output |
+The original Later item (detection explanations) is complete. MCP 2 migration,
+an OAuth credential lifecycle, and new screen-depth semantics remain future
+product decisions, outside the evaluated/alternative scope completed above.
 
 ## Research notes
 

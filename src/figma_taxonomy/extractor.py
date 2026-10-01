@@ -7,7 +7,7 @@ import re
 from collections.abc import Iterator
 
 from figma_taxonomy.config import TaxonomyConfig
-from figma_taxonomy.models import Screen, ScreenElement
+from figma_taxonomy.models import Screen, ScreenElement, TaxonomyEvent
 
 INTERACTIVE_PATTERNS = [
     (re.compile(p, re.IGNORECASE), element_type)
@@ -244,3 +244,66 @@ def extract_elements(figma_file: dict, config: TaxonomyConfig) -> list[ScreenEle
             element.screen_node_id = frame.get("id", "")
         all_elements.extend(elements)
     return all_elements
+
+
+def explain_detection(
+    figma_file: dict, config: TaxonomyConfig, events: list[TaxonomyEvent],
+) -> dict:
+    """Explain every supplied node using the same classification and traversal policy.
+
+    Reports are optional and do not alter extraction. Event names come from actual
+    provenance after generation, including merged sources and screen pageviews.
+    """
+    document = figma_file.get("document", figma_file)
+    frame_ids = {
+        frame.get("id") for page in document.get("children", [])
+        if page.get("type") in {"CANVAS", "PAGE"}
+        for frame in _screen_frames(page) if frame.get("id")
+    }
+    event_names: dict[str, list[str]] = {}
+    for event in events:
+        for node_id in event.source_node_ids:
+            event_names.setdefault(node_id, []).append(event.event_name)
+    records: list[dict] = []
+
+    def walk(
+        node: dict, page_id: str = "", screen_id: str = "", screen_name: str = "",
+        blocked: str | None = None, path: tuple[str, ...] = (),
+    ) -> None:
+        node_id, name = node.get("id", ""), node.get("name", "")
+        if node.get("type") in {"CANVAS", "PAGE"}:
+            page_id = node_id
+            if name in config.figma.exclude_pages:
+                blocked = "excluded_page"
+        if node_id in frame_ids:
+            screen_id = node_id
+            screen_name = _clean_screen_name(name, config)
+        kind, rule_index = None, None
+        if blocked:
+            reason = blocked
+        elif not config.detection.include_hidden and node.get("visible") is False:
+            reason = "hidden"
+        elif screen_id:
+            kind, reason, rule_index = _classify_node(node, config)
+        else:
+            reason = "outside_screen"
+        names = event_names.get(node_id, [])
+        records.append({
+            "node_id": node_id, "source": f"figma:node_id:{node_id}" if node_id else "",
+            "name": name, "path": [*path, name], "page_id": page_id,
+            "screen_node_id": screen_id, "screen_name": screen_name,
+            "included": bool(names), "control_detected": kind is not None,
+            "reason": "screen_pageview" if names and kind is None and reason == "not_interactive" else reason,
+            "element_type": kind, "matched_rule": rule_index,
+            "variants": _variants(node), "event_names": list(names),
+        })
+        child_block = blocked
+        if reason in {"hidden", "excluded_name", "override_exclude"}:
+            child_block = reason + "_ancestor"
+        elif kind is not None and not config.detection.traverse_interactive_children:
+            child_block = "interactive_ancestor"
+        for child in node.get("children", []):
+            walk(child, page_id, screen_id, screen_name, child_block, (*path, name))
+
+    walk(document)
+    return {"schema_version": 1, "nodes": records}
