@@ -1,5 +1,13 @@
 # CLI reference
 
+Excel's `Events` and `Parameters` sheets retain the existing summary layout.
+The additional `Event Properties` sheet contains every property association,
+including globals and properties beyond the four-column-pair overview, with
+types, JSON enum values and all Figma source IDs. All design text is stored as
+literal text cells. Text exceeding Excel's cell limit or containing unsupported
+control characters fails before replacing an existing workbook; use JSON to
+retain such content. CSV retains raw text, while XLSX specifies cell types.
+
 Figma extraction uses `--cache-ttl 300` seconds; validation defaults to
 `--cache-ttl 0` so CI checks fetch fresh data. A cache miss makes one file request.
 `--offline` uses any valid indexed cache without a token or requests and fails
