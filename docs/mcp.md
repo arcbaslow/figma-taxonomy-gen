@@ -1,14 +1,17 @@
 # MCP server
 
-The optional dependency targets `mcp>=1.30,<2`. An offline stdio integration test
+The optional dependency targets `mcp>=2.2,<3`, locked at 2.2.0. An offline stdio integration test
 starts the real server process, negotiates a session, lists tools, extracts a
 fixture, exports JSON, validates it, detects schema drift and checks tool errors.
 
-MCP 2 was evaluated separately against the [upstream migration guide](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md).
-It renames `FastMCP` to `MCPServer`, changes protocol model field names and replaces
-HTTP dependencies. This release keeps the maintained 1.x line; widening the major
-bound alone would break server construction. A future major migration must port
-imports/transport tests and revalidate clients. No remote MCP service was contacted.
+The server uses `MCPServer` and explicitly selects stdio, following the
+[upstream migration guide](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md).
+Protocol tests use the SDK's snake_case model fields; tool names, arguments and
+JSON payloads are unchanged. MCP brings its own `httpx2` dependency; the Figma and
+Amplitude clients continue using their separately declared `httpx` dependency.
+Upgrade an existing checkout with `uv sync --extra mcp` (plus any other needed
+extras), or reinstall `figma-taxonomy-gen[mcp]` from the updated source. Python
+3.11 remains supported. No remote MCP service was contacted during verification.
 
 Extraction and validation accept `cache_ttl`, `offline`, and `no_cache`.
 Extraction defaults to 300 seconds of cache reuse; validation defaults to zero
@@ -94,9 +97,9 @@ normalizes to the stored map, retaining source IDs, property descriptions and en
 Explicit page selection overrides exclusions; a missing page raises an error
 listing available pages, matching CLI behavior.
 
-The package currently targets MCP SDK 1.x (`mcp>=1.30,<2`), with 1.30.0 in the
-lockfile. Current upstream 2.x requires a separate migration; see the
-[roadmap](ROADMAP.md#next).
+MCP 1.x installations must upgrade the optional dependency with this source
+version. External clients still use standard MCP JSON-RPC; Python SDK users
+should follow the upstream migration guide when inspecting protocol objects.
 
 ### `validate_taxonomy`
 

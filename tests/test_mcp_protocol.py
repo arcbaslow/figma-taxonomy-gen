@@ -14,8 +14,8 @@ from mcp.client.stdio import stdio_client
 
 
 def _data(result) -> dict:
-    assert not result.isError, result
-    return result.structuredContent or json.loads(result.content[0].text)
+    assert not result.is_error, result
+    return result.structured_content or json.loads(result.content[0].text)
 
 
 @pytest.mark.asyncio
@@ -29,7 +29,8 @@ async def test_stdio_extract_export_validate_and_errors(tmp_path: Path) -> None:
     with anyio.fail_after(45):
         async with stdio_client(parameters) as (reader, writer):
             async with ClientSession(reader, writer) as client:
-                await client.initialize()
+                initialized = await client.initialize()
+                assert initialized.server_info.name == "figma-taxonomy-gen"
                 listing = await client.list_tools()
                 assert {tool.name for tool in listing.tools} == {"extract_taxonomy", "export_taxonomy", "validate_taxonomy"}
                 extracted = _data(await client.call_tool("extract_taxonomy", {"figma_url_or_path": fixture, "explain": True}))
@@ -45,5 +46,5 @@ async def test_stdio_extract_export_validate_and_errors(tmp_path: Path) -> None:
                 changed = _data(await client.call_tool("validate_taxonomy", {"taxonomy_json": extracted, "figma_url_or_path": fixture}))
                 assert changed["property_schema_changes"] and not changed["is_clean"]
                 invalid = await client.call_tool("export_taxonomy", {"taxonomy_json": stored, "format": "invalid", "output_path": str(tmp_path / "bad")})
-                assert invalid.isError
+                assert invalid.is_error
                 assert not (tmp_path / "bad").exists()
