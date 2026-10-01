@@ -183,6 +183,12 @@ on elements. Hidden inclusion and parent suppression preserve legacy defaults,
 with explicit options to exclude hidden subtrees or collect nested controls.
 Decorative exclusions still win unless overridden in the next item.
 
+Completed: configurable detection overrides. Ordered, typed config rules select
+case-insensitive name globs or exact node IDs; the first match determines include
+type or subtree exclusion. Visibility and ancestor traversal boundaries stay
+explicit. Tests cover icon-only CTAs, custom component names, precedence, hidden
+nodes and invalid rules without changing the naming engine's configurability.
+
 These proposals remain unfinished, in priority order. The provenance and import
 profile implementations above are complete. Excluded/undetected controls and
 real-account import acceptance are not claimed as covered.
@@ -195,7 +201,6 @@ real-account import acceptance are not claimed as covered.
 | Proposal | Why / evidence | Effort | Risk |
 | --- | --- | --- | --- |
 | Explain detection decisions in an optional report | Implementers could inspect why a node was included/excluded without reading regexes; current `_walk_node` silently skips nodes | 2–3 | Medium: define a stable report without changing event output |
-| Configurable detection overrides | Teams could map their own design-system names without a fork; current patterns are module constants | 2–3 | Medium: precedence, validation and false-positive fixtures needed |
 
 ## Research notes
 

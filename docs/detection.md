@@ -51,6 +51,29 @@ on raw frames or text. A node with an interaction and no type match uses
 
 ## Exclusion patterns
 
+`detection.overrides` lets a design system include or exclude controls explicitly.
+Rules run in order; the first match wins. A rule selects either a case-insensitive
+name glob (`match`) or an exact Figma `node_id`. Included nodes use the rule's
+`type` (default `interactive`); naming and action lookup still use the normal
+configuration. Overrides take precedence over built-in name exclusions, but
+cannot resurrect an excluded/hidden ancestor or bypass the hidden-layer policy.
+
+```yaml
+detection:
+  overrides:
+    - node_id: "1:10"
+      type: button
+    - match: "Acme/Action*"
+      type: button
+    - match: "Acme/Decorative*"
+      action: exclude
+```
+
+`action` defaults to `include`; `exclude` prunes the matching subtree. A child
+override is visited only if its ancestors are traversed. To target independent
+controls inside detected containers, also enable `traverse_interactive_children`.
+Unknown keys, empty selectors and invalid actions fail during config loading.
+
 Even if a name matches layer 1, these exclusions drop it:
 
 - `icon` (icons inside buttons, not standalone CTAs)
