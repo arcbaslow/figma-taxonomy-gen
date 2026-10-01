@@ -11,18 +11,18 @@ That's what `--ai` adds.
 
 ## How it works
 
-Events are grouped by their **flow** (top-level Figma page). For each flow, one
-prompt goes to Claude with:
+Events are grouped by their **flow** (top-level Figma page), then split into
+batches of at most 20 events and 12,000 prompt characters by default. Each prompt includes:
 
 - App type and name from `config.app`
 - The flow name
-- Every event in that flow with its description and existing properties
+- Events in that batch with their descriptions and existing properties
 
 Claude returns a JSON block with suggested properties per event. The CLI merges
 suggestions into the taxonomy, skipping any property names that already exist.
 
 ```
-21 events across 6 flows  →  6 API calls
+21 events across 6 small flows  →  6 API calls (if each fits one batch)
 ```
 
 ## Running it
@@ -64,16 +64,28 @@ ai:
   enabled: false     # overridden by --ai flag
   model: "claude-sonnet-4-6"
   max_tokens: 2048
+  batch_size: 20
+  max_prompt_chars: 12000
 ```
 
 ## Cost estimation
 
-Estimates use four characters per input token and 800 output tokens per flow.
+The preview and executor use the same complete batch plan. An individual event
+that exceeds the prompt limit fails before any calls. Estimates use four
+characters per input token and 800 output tokens per batch.
 For the example above: 3,200 input tokens at $1/M plus 4,800 output tokens at $5/M
 equals $0.0272. This is arithmetic for an assumed workload, not a measured invoice.
 Flow size, language, actual response length and SDK retries can change the bill.
 `max_tokens` caps each response, not total spending. Per-screen price promises are
 not reliable because requests are grouped by page/flow.
+
+Malformed property containers and unsupported property schemas are ignored.
+Suggestions can only target events in the batch that produced them; they cannot
+change another flow. Existing properties and all source IDs are preserved. A
+truncated response, missing response text or failed call aborts without applying
+partial suggestions from earlier batches. Already completed API calls may still
+be billed. Reduce batch size or increase `max_tokens` after truncation. All tests
+use mocks; AI remains disabled by default.
 
 ## What it doesn't do
 

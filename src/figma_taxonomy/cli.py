@@ -365,10 +365,9 @@ def _run_enrichment(
     events: list[TaxonomyEvent], config: TaxonomyConfig, assume_yes: bool,
 ) -> list[TaxonomyEvent]:
     from figma_taxonomy.ai_enricher import (
-        build_prompt,
         enrich_events,
         estimate_cost,
-        group_events_by_flow,
+        plan_batches,
     )
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -382,11 +381,10 @@ def _run_enrichment(
             "anthropic package not installed. Install with: uv pip install 'figma-taxonomy-gen[ai]'"
         )
 
-    grouped = group_events_by_flow(events)
-    prompts = [
-        build_prompt(flow, flow_events, app_type=config.app.type, app_name=config.app.name)
-        for flow, flow_events in grouped.items()
-    ]
+    try:
+        prompts = [prompt for _, _, prompt in plan_batches(events, config)]
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     estimate = estimate_cost(prompts, model=config.ai.model)
     cost = estimate['est_cost_usd']
     cost_label = f"${cost:.4f}" if cost is not None else "unavailable (unknown model pricing)"
@@ -407,6 +405,8 @@ def _run_enrichment(
             events, config, client=client,
             model=config.ai.model, max_tokens=config.ai.max_tokens,
         )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     finally:
         client.close()
     new_prop_count = sum(len(e.properties) for e in enriched) - original_prop_count

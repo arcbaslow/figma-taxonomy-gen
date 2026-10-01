@@ -23,6 +23,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Validate optional AI property responses, constrain suggestions to their source batch, and plan bounded calls before spending. Share batch planning with the cost preview and apply suggestions only after every call succeeds without truncation.
+
 - Preserve every property schema in a new Excel detail sheet, including enums and all source IDs. Write design strings as literal cells and reject unrepresentable text before replacing a workbook; retain existing overview sheets.
 
 - Validate YAML field names, shapes, types, naming settings and property definitions before extraction. Honor configured output directories and disabled component-name fallback; reject unsupported screen-depth values. Read config as UTF-8 and isolate mutable defaults between configurations.

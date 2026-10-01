@@ -119,8 +119,10 @@ When `--ai` or `--enrich` flag is passed:
 ### Cost control
 - Claude Haiku for bulk inference (cheap, fast)
 - Claude Sonnet for complex screens with many variants
-- Estimated cost: ~$0.02-0.05 per screen (Haiku), ~$0.10-0.20 per screen (Sonnet)
-- Full banking app (30-50 screens): $0.50-2.00 total
+- Estimate using the actual batch plan and the known model price table; unknown
+  models show an unavailable price. There is no reliable per-screen price promise.
+- Default batches contain at most 20 events and 12,000 prompt characters. Failed
+  or truncated runs do not apply partial suggestions. AI is disabled by default.
 
 ---
 
