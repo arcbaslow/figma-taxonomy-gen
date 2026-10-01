@@ -187,6 +187,10 @@ Pass an `extract_taxonomy` result directly into `export_taxonomy` or
 `validate_taxonomy`; both also accept stored taxonomy JSON. Explicit page selection
 overrides page exclusions, and a missing page reports available names.
 
+Drift checks report property type, description and enum changes as well as added
+or removed property names. Enum order does not affect the result. Both CLI
+`validate`/`diff --exit-code` and MCP validation expose schema-only changes.
+
 ### Amplitude push
 
 ```bash

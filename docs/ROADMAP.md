@@ -125,6 +125,16 @@ untouched. Live account acceptance remains unverified.
 
 ## Next
 
+Owner authorized completion of the remaining Next and Later work on 2026-10-01.
+Work continues on `roadmap-work` after the previous 14 commits were merged and
+pushed to `master`. Non-goals and offline-only service testing remain in effect.
+
+Completed in this continuation: property schema drift. Reports include type,
+description and enum changes, preserving enum set semantics and following source
+renames. File-to-file diffs also compare extra stored constraints without dropping
+them during hydration. CLI and MCP expose an additive `property_schema_changes`
+field; property-name additions/removals retain their existing shape.
+
 These proposals remain unfinished, in priority order. The provenance and import
 profile implementations above are complete. Excluded/undetected controls and
 real-account import acceptance are not claimed as covered.
@@ -135,7 +145,6 @@ real-account import acceptance are not claimed as covered.
 | Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
 | Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
 | Validate config and expose unsupported options honestly | `screen_name.max_depth`, `fallback_to_component_name` and `output.directory` are loaded but unused. Property-rule precedence differs from the prose, and raw YAML errors are not actionable | 1–2 | Medium: intended fallback/depth behavior is unspecified; document and decide rather than invent it |
-| Compare property schemas in drift reports | `validate.py` compares only property names, so type/enum/description changes are invisible. Source membership changes are now reported separately | 1–2 | Medium: define property drift categories with fixtures |
 | Harden optional enrichment against malformed and oversized responses | `parse_suggestions` assumes iterable properties, the merger searches all flows, and one call per flow can exceed the output budget | 1–2 | Medium: add hostile/malformed mock responses, per-flow merge boundaries and reviewed batching; keep AI disabled by default |
 | Harden review exports and Windows text I/O | Excel stores arbitrary design strings as cell values and only renders four property pairs; fixture/config readers omit explicit UTF-8. JSON writing is now UTF-8 with a Unicode regression. Formula-like labels and remaining Windows round trips need fixtures | 1–2 | Medium: spreadsheet interpretation risks remain untested; avoid altering cell semantics without tests |
 

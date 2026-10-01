@@ -143,6 +143,7 @@ def validate_taxonomy_tool(
         "property_changes": list(report.property_changes),
         "source_changes": list(report.source_changes),
         "category_changes": list(report.category_changes),
+        "property_schema_changes": list(report.property_schema_changes),
     }
 
 
