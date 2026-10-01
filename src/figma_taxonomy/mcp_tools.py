@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from figma_taxonomy.config import TaxonomyConfig, load_config
-from figma_taxonomy.extractor import extract_elements, extract_screens
+from figma_taxonomy.extractor import explain_detection, extract_elements, extract_screens
 from figma_taxonomy.figma_client import fetch_file, load_fixture
 from figma_taxonomy.models import TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
@@ -103,6 +103,7 @@ def extract_taxonomy_tool(
     config_path: str | None = None,
     page: str | None = None,
     *, cache_ttl: float = 300, offline: bool = False, no_cache: bool = False,
+    explain: bool = False,
 ) -> dict[str, Any]:
     """Extract a taxonomy from a Figma file or local fixture."""
     config = _load_config(config_path)
@@ -115,10 +116,13 @@ def extract_taxonomy_tool(
     elements = extract_elements(figma_file, config)
     events = generate_taxonomy(elements, config, screens=extract_screens(figma_file, config))
 
-    return {
+    result = {
         "count": len(events),
         "events": [_event_to_dict(e) for e in events],
     }
+    if explain:
+        result["explanation"] = explain_detection(figma_file, config, events)
+    return result
 
 
 def validate_taxonomy_tool(

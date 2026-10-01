@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 
 from figma_taxonomy.config import TaxonomyConfig, load_config
-from figma_taxonomy.extractor import extract_elements, extract_screens
+from figma_taxonomy.extractor import explain_detection, extract_elements, extract_screens
 from figma_taxonomy.figma_client import fetch_file, load_fixture
 from figma_taxonomy.models import Screen, ScreenElement, TaxonomyEvent
 from figma_taxonomy.taxonomy_engine import generate_taxonomy
@@ -88,12 +88,13 @@ def main():
     help="Comma-separated output formats (defaults to output.formats from config)",
 )
 @click.option("--page", help="Extract only a specific page by name")
+@click.option("--explain", "explain_path", type=click.Path(path_type=Path, dir_okay=False), help="Write a JSON report of node decisions and generated events")
 @click.option("--no-cache", is_flag=True, help="Skip Figma API cache")
 @click.option("--cache-ttl", type=click.FloatRange(min=0), default=300, show_default=True, help="Maximum cached age in seconds")
 @click.option("--offline", is_flag=True, help="Use a previously cached Figma file without requests")
 @click.option("--ai", "use_ai", is_flag=True, help="Enrich events with Claude-suggested properties")
 @click.option("--yes", "-y", "assume_yes", is_flag=True, help="Skip cost-estimate confirmation prompt")
-def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache, cache_ttl, offline, use_ai, assume_yes):
+def extract(figma_url, fixture, config_path, output_dir, formats, page, explain_path, no_cache, cache_ttl, offline, use_ai, assume_yes):
     """Extract taxonomy from a Figma file.
 
     Pass a Figma URL to fetch from the API, or use --fixture with a local JSON file.
@@ -103,6 +104,15 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
 
     config = _load_config(config_path)
     format_list = _parse_formats(formats, config.output.formats)
+    output_dir = Path(output_dir if output_dir is not None else config.output.directory)
+    if explain_path is not None:
+        reserved = {output_dir / name for name in (
+            "taxonomy.xlsx", "taxonomy.csv", "taxonomy.json", "taxonomy.md",
+            "taxonomy.amplitude.csv", "taxonomy.amplitude.json",
+        )}
+        reserved.update(path for path in (fixture, config_path) if path is not None)
+        if explain_path.resolve() in {path.resolve() for path in reserved}:
+            raise click.ClickException("Use a different path for --explain; it must not replace inputs or taxonomy outputs.")
 
     if fixture:
         click.echo(f"Loading fixture: {fixture}")
@@ -141,7 +151,6 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         except ValueError as exc:
             raise click.ClickException(str(exc)) from exc
 
-    output_dir = Path(output_dir if output_dir is not None else config.output.directory)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if "excel" in format_list:
@@ -176,6 +185,10 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         write_markdown(events, config, path)
         click.echo(f"  Markdown: {path}")
 
+    if explain_path is not None:
+        explain_path.parent.mkdir(parents=True, exist_ok=True)
+        explain_path.write_text(json.dumps(explain_detection(figma_file, config, events), indent=2, ensure_ascii=False), encoding="utf-8")
+        click.echo(f"  Explanation: {explain_path}")
     click.echo(f"\nDone! {len(events)} events written to {output_dir}/")
 
 

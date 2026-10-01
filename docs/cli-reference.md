@@ -43,9 +43,12 @@ figma-taxonomy extract --fixture <path> [OPTIONS]
 |--------------------|--------------------|--------------------------------------------------|
 | `--fixture PATH`   |                    | Read a local Figma JSON dump instead of the API  |
 | `-c, --config PATH`|                    | Path to a custom `taxonomy.config.yaml`          |
-| `-o, --output DIR` | `./output`         | Directory for generated files                    |
+| `-o, --output DIR` | `output.directory` from config (`./output`) | Directory for generated files |
 | `-f, --format`     | `output.formats` from config | Comma-separated format list            |
 | `--page NAME`      |                    | Limit extraction to one Figma page               |
+| `--explain PATH`   |                    | Write optional node decisions and event provenance as JSON |
+| `--cache-ttl SECONDS` | `300`          | Maximum local cache age                          |
+| `--offline`        | `false`            | Use indexed cache without requests or credentials |
 | `--no-cache`       | `false`            | Disable design-cache reads and writes          |
 | `--ai`             | `false`            | Enrich events with Claude-suggested properties   |
 | `-y, --yes`        | `false`            | Skip AI cost-estimate confirmation prompt        |
@@ -79,14 +82,23 @@ figma-taxonomy validate <taxonomy.json> --fixture <path> [OPTIONS]
 | `--fixture PATH`   |         | Local Figma JSON (alternative to `--figma`)   |
 | `-c, --config PATH`|         | Path to a custom `taxonomy.config.yaml`       |
 | `--no-cache`       | `false` | Skip the Figma API cache                      |
+| `--cache-ttl SECONDS` | `0` | Maximum local cache age; fresh data by default |
+| `--offline`        | `false` | Validate using indexed cache without requests |
 | `--exit-code`      | `false` | Exit non-zero when drift is detected (for CI) |
 
-Reports four categories:
+Reports:
 
 - **Added** — interactive elements in Figma with no matching event in the JSON
 - **Removed** — events in the JSON whose node no longer exists in Figma
 - **Renamed** — same node, different event name
 - **Property changes** — added or removed properties on an existing event
+- **Property schema changes** — changed types, descriptions, enums or stored constraints
+- **Source changes** — added or removed Figma sources for a matched event
+- **Category changes** — changed page/flow ownership
+
+Matching considers every source of merged events. Ambiguous splits/merges use
+unchanged names where possible, otherwise additions/removals, without guessing
+renames. See [source matching](detection.md#screen-name-derivation).
 
 ## `diff`
 

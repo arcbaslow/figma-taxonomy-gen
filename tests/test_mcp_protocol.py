@@ -32,8 +32,9 @@ async def test_stdio_extract_export_validate_and_errors(tmp_path: Path) -> None:
                 await client.initialize()
                 listing = await client.list_tools()
                 assert {tool.name for tool in listing.tools} == {"extract_taxonomy", "export_taxonomy", "validate_taxonomy"}
-                extracted = _data(await client.call_tool("extract_taxonomy", {"figma_url_or_path": fixture}))
+                extracted = _data(await client.call_tool("extract_taxonomy", {"figma_url_or_path": fixture, "explain": True}))
                 assert extracted["count"] == 21
+                assert extracted["explanation"]["schema_version"] == 1
                 assert all(event["source_node_ids"] for event in extracted["events"])
                 path = tmp_path / "taxonomy.json"
                 _data(await client.call_tool("export_taxonomy", {"taxonomy_json": extracted, "format": "json", "output_path": str(path)}))

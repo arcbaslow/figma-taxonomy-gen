@@ -16,6 +16,10 @@ for fresh remote data. Offline mode requires an existing indexed cache, makes no
 requests and needs no token. Fixture paths remain offline independently of these
 options. `offline` and `no_cache` cannot be combined for API sources.
 
+Extraction also accepts `explain: true` (default false), adding an `explanation`
+object with versioned node decisions and generated event names. The event payload
+is unchanged. See [detection reports](detection.md#when-detection-goes-wrong).
+
 The tool ships an [MCP](https://modelcontextprotocol.io) server so Claude Desktop
 and claude.ai can call its functions directly, without shelling out to the CLI.
 
