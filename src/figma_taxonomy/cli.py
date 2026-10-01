@@ -52,6 +52,15 @@ def _print_category_changes(changes: list[dict]) -> None:
             click.echo(f"    {change['event_name']}: {change['from']} -> {change['to']}")
 
 
+def _print_schema_changes(changes: list[dict]) -> None:
+    if changes:
+        click.echo(f"\n  Property schema changes ({len(changes)}):")
+        for change in changes:
+            click.echo(f"    {change['event_name']}/{change['property']}:")
+            for key, values in change["changes"].items():
+                click.echo(f"      {key}: {values['from']!r} -> {values['to']!r}")
+
+
 @click.group()
 @click.version_option()
 def main():
@@ -239,6 +248,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
 
     _print_source_changes(report.source_changes)
     _print_category_changes(report.category_changes)
+    _print_schema_changes(report.property_schema_changes)
 
     if exit_code:
         raise SystemExit(1)
@@ -334,6 +344,7 @@ def diff_cmd(old_path, new_path, exit_code):
 
     _print_source_changes(report.source_changes)
     _print_category_changes(report.category_changes)
+    _print_schema_changes(report.property_schema_changes)
 
     if exit_code:
         raise SystemExit(1)

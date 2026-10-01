@@ -1,5 +1,11 @@
 # CLI reference
 
+`validate` and `diff` report property schema changes separately from property-name
+additions/removals. Type, description and enum membership changes cause
+`--exit-code` to return 1. Enum order/duplicates do not count as changes. File diffs
+also retain extra stored constraints; validation against Figma reports constraints
+the generated schema no longer contains. Renamed events retain schema comparisons.
+
 All commands are subcommands of `figma-taxonomy`. Run any command with `--help` for the
 full option list.
 

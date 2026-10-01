@@ -23,6 +23,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Detect property type, description, enum and stored constraint changes in drift reports, including renamed events. Expose schema changes through CLI and MCP without treating enum ordering as drift.
+
 - Make Amplitude pushes repeatable and event-specific: reuse matching definitions, preserve string enums, create events before their property associations, and report conflicts without overwriting schemas. Validate unsupported input before requests, fail closed on unreadable inventory, and reconcile 409 responses with one scoped read. CLI previews and results count event/property associations.
 
 - Write taxonomy JSON explicitly as UTF-8, including import companions; reject duplicate properties in MCP extraction results instead of silently overwriting them.

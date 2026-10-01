@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 
 from figma_taxonomy.models import EventProperty, TaxonomyEvent
@@ -17,11 +18,12 @@ class ValidationReport:
     property_changes: list[dict] = field(default_factory=list)
     source_changes: list[dict] = field(default_factory=list)
     category_changes: list[dict] = field(default_factory=list)
+    property_schema_changes: list[dict] = field(default_factory=list)
 
     def is_clean(self) -> bool:
         return not (
             self.added or self.removed or self.renamed or self.property_changes
-            or self.source_changes or self.category_changes
+            or self.source_changes or self.category_changes or self.property_schema_changes
         )
 
 
@@ -41,6 +43,8 @@ def _source_node_ids(body: dict) -> list[str]:
 def diff_taxonomies(
     existing: dict[str, dict],
     current: list[TaxonomyEvent],
+    *,
+    current_schemas: dict[str, dict] | None = None,
 ) -> ValidationReport:
     """Compare a stored taxonomy (parsed JSON "events" dict) against freshly generated events.
 
@@ -109,6 +113,25 @@ def diff_taxonomies(
         current_props = {p.name for p in event.properties}
         added_props = sorted(current_props - existing_props)
         removed_props = sorted(existing_props - current_props)
+        schemas = (
+            current_schemas[event.event_name].get("properties", {})
+            if current_schemas is not None else {
+                p.name: {"type": p.type, "description": p.description, "enum": p.enum_values}
+                for p in event.properties
+            }
+        )
+        for prop_name in sorted(existing_props & current_props):
+            before = _normalized_schema(match_body["properties"][prop_name])
+            after = _normalized_schema(schemas[prop_name])
+            changes = {
+                key: {"from": before.get(key), "to": after.get(key)}
+                for key in sorted(before.keys() | after.keys())
+                if key not in before or key not in after or before[key] != after[key]
+            }
+            if changes:
+                report.property_schema_changes.append({
+                    "event_name": event.event_name, "property": prop_name, "changes": changes,
+                })
         if added_props or removed_props:
             report.property_changes.append(
                 {
@@ -123,6 +146,17 @@ def diff_taxonomies(
             report.removed.append(name)
 
     return report
+
+
+def _normalized_schema(schema: dict) -> dict:
+    """Apply legacy defaults and enum set semantics without mutating stored input."""
+    normalized = {"type": "string", "description": "", **(schema if isinstance(schema, dict) else {})}
+    if normalized.get("enum") is None:
+        normalized.pop("enum", None)
+    elif isinstance(normalized["enum"], list):
+        values = {json.dumps(v, sort_keys=True): v for v in normalized["enum"]}
+        normalized["enum"] = [values[key] for key in sorted(values)]
+    return normalized
 
 
 def _events_from_dict(taxonomy_dict: dict[str, dict]) -> list[TaxonomyEvent]:
@@ -157,4 +191,4 @@ def diff_taxonomy_dicts(
     new: dict[str, dict],
 ) -> ValidationReport:
     """Compare two stored taxonomies (parsed JSON `events` dicts)."""
-    return diff_taxonomies(old, _events_from_dict(new))
+    return diff_taxonomies(old, _events_from_dict(new), current_schemas=new)
