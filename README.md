@@ -208,6 +208,9 @@ Optional AI uses bounded batches shared with its cost preview. Suggestions stay
 within their source batch; failed or truncated runs leave the input properties
 unchanged. AI remains off by default.
 
+The MCP extra targets SDK 1.30–1.x and has an offline stdio test covering the
+complete extraction → export → validation tool workflow.
+
 ### Amplitude push
 
 ```bash

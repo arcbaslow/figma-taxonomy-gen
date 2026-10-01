@@ -1,5 +1,15 @@
 # MCP server
 
+The optional dependency targets `mcp>=1.30,<2`. An offline stdio integration test
+starts the real server process, negotiates a session, lists tools, extracts a
+fixture, exports JSON, validates it, detects schema drift and checks tool errors.
+
+MCP 2 was evaluated separately against the [upstream migration guide](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md).
+It renames `FastMCP` to `MCPServer`, changes protocol model field names and replaces
+HTTP dependencies. This release keeps the maintained 1.x line; widening the major
+bound alone would break server construction. A future major migration must port
+imports/transport tests and revalidate clients. No remote MCP service was contacted.
+
 Extraction and validation accept `cache_ttl`, `offline`, and `no_cache`.
 Extraction defaults to 300 seconds of cache reuse; validation defaults to zero
 for fresh remote data. Offline mode requires an existing indexed cache, makes no
@@ -80,7 +90,7 @@ normalizes to the stored map, retaining source IDs, property descriptions and en
 Explicit page selection overrides exclusions; a missing page raises an error
 listing available pages, matching CLI behavior.
 
-The package currently targets MCP SDK 1.x (`mcp>=1.0,<2`), with 1.27.0 in the
+The package currently targets MCP SDK 1.x (`mcp>=1.30,<2`), with 1.30.0 in the
 lockfile. Current upstream 2.x requires a separate migration; see the
 [roadmap](ROADMAP.md#next).
 

@@ -167,13 +167,20 @@ tokens remain environment-only. This takes the plan-token alternative in the
 proposal without building an OAuth callback service or credential lifecycle.
 Issuance, rotation/refresh and account entitlement remain external and unverified.
 
+Completed: MCP 1.x upgrade and separate 2.x evaluation. The optional requirement
+is now `mcp>=1.30,<2`, locked at 1.30.0. The real stdio protocol test covers session
+initialization, discovery, fixture extraction, JSON export, validation, schema
+drift and invalid tool arguments. Evaluation of the [2.x migration guide](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md)
+confirms `FastMCP` import removal, renamed model fields and HTTP dependency changes;
+retain the maintained 1.x line for this release. A major migration is not implied
+by completion of its evaluation and remains a separate future release decision.
+
 These proposals remain unfinished, in priority order. The provenance and import
 profile implementations above are complete. Excluded/undetected controls and
 real-account import acceptance are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
 | Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
 
 ## Later
