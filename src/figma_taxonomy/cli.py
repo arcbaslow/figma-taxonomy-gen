@@ -8,6 +8,7 @@ from pathlib import Path
 
 import click
 
+from figma_taxonomy.auth_cli import auth
 from figma_taxonomy.config import TaxonomyConfig, load_config
 from figma_taxonomy.extractor import explain_detection, extract_elements, extract_screens
 from figma_taxonomy.figma_client import fetch_file, load_fixture
@@ -73,6 +74,9 @@ def _print_schema_changes(changes: list[dict]) -> None:
 def main():
     """Extract interactive UI elements from Figma designs and generate Amplitude event taxonomies."""
     pass
+
+
+main.add_command(auth)
 
 
 @main.command()

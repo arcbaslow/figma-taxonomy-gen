@@ -73,7 +73,9 @@ branch. Extraction reuses cached data for up to five minutes (`--cache-ttl 300`)
 validation defaults to fresh data (`--cache-ttl 0`). `--offline` explicitly uses an
 existing local cache of any age without credentials or network requests.
 For online access, `FIGMA_TOKEN_TYPE` selects `pat` (default), `plan`, or `oauth`
-for the token supplied in `FIGMA_TOKEN`. OAuth issuance/refresh is external.
+for the token supplied in `FIGMA_TOKEN`. For managed browser login and automatic
+refresh, install the `oauth` extra and run `figma-taxonomy auth login` with your
+own Figma OAuth app. See [OAuth setup](docs/oauth.md).
 Use `--no-cache` to disable both design-cache reads and writes. Rate-limit
 errors report the server's retry interval; quotas depend on your seat and file plan.
 
@@ -209,7 +211,7 @@ Optional AI uses bounded batches shared with its cost preview. Suggestions stay
 within their source batch; failed or truncated runs leave the input properties
 unchanged. AI remains off by default.
 
-The MCP extra targets SDK 1.30–1.x and has an offline stdio test covering the
+The MCP extra targets SDK 2.2–2.x and has an offline stdio test covering the
 complete extraction → export → validation tool workflow.
 
 Detection searches nested visible labels and recognizes legacy prototype links.

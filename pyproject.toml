@@ -41,6 +41,10 @@ ai = [
 mcp = [
     "mcp>=2.2,<3",
 ]
+oauth = [
+    "keyring>=25,<26",
+    "filelock>=3.16,<4",
+]
 docs = [
     "mkdocs-material>=9.5",
 ]

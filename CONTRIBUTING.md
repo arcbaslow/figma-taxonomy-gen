@@ -7,7 +7,7 @@ Patches welcome. Keep changes small and focused.
 ```
 git clone https://github.com/arcbaslow/figma-taxonomy-gen
 cd figma-taxonomy-gen
-uv sync --extra dev --extra ai --extra mcp
+uv sync --extra dev --extra ai --extra mcp --extra oauth
 ```
 
 Tokens, all optional depending on what you're touching:
@@ -65,6 +65,9 @@ not add a test that hits the network, even guarded.
 
 The same goes for the AI enricher and the Amplitude push: mock the
 client, assert on the request you would have sent.
+
+OAuth tests use synthetic credentials, an in-memory credential store and local
+loopback callbacks. Never open a developer's actual keychain or OAuth app from tests.
 
 ## What I'll accept
 

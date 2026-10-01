@@ -10,7 +10,7 @@ Please do not file public issues for security problems.
 ## What's in scope
 
 - Token handling in `src/figma_taxonomy/figma_client.py`,
-  `ai_enricher.py`, and `amplitude_push.py` — the Figma PAT, the
+  `oauth.py`, `auth_cli.py`, `ai_enricher.py`, and `amplitude_push.py` — Figma tokens, OAuth app credentials, the
   Anthropic API key, and the Amplitude key/secret pair
 - The local file cache under `.figma-taxonomy-cache/`. It holds full
   Figma file trees, which for an unreleased product is commercially
@@ -24,7 +24,7 @@ Please do not file public issues for security problems.
   Layer names are attacker-controllable if the design file is shared,
   and they land in a prompt.
 - Dependency-chain vulnerabilities in `click`, `httpx`, `pyyaml`,
-  `openpyxl`, and the optional `anthropic` and `mcp` extras
+  `openpyxl`, and the optional `anthropic`, `mcp`, `keyring` and `filelock` dependencies
 
 ## What's out of scope
 
@@ -39,11 +39,21 @@ Please do not file public issues for security problems.
 
 ## Where credentials come from
 
-All three are environment variables. None are persisted by the tool:
+Explicit environment credentials are not persisted by the tool:
 
-- `FIGMA_TOKEN` — Figma personal access token
+- `FIGMA_TOKEN` — Figma PAT, REST API plan token, or externally managed OAuth token
 - `ANTHROPIC_API_KEY` — only read when `--ai` is passed
 - `AMPLITUDE_API_KEY` / `AMPLITUDE_SECRET_KEY` — only read on `push`
+
+Optional `auth login` is a separate, explicit persistence path: the user's OAuth
+app client secret, access token and refresh token are saved together in the native
+Windows Credential Manager, macOS Keychain or Linux Secret Service. No plaintext
+backend fallback is allowed. The local lock file contains no credentials. OAuth
+uses state validation, S256 PKCE and a loopback-only callback with a deadline.
+Token exchanges are HTTPS POST requests with Basic app authentication and are
+not automatically retried or redirected. Logs and status output omit tokens.
+`auth logout` deletes the local session; remote revocation is performed in Figma.
+See [OAuth setup](docs/oauth.md) for selection, refresh and concurrency behavior.
 
 `taxonomy.config.yaml` has `api_key` fields for convenience. Leave them
 empty and use the environment variables. A config file with a real key

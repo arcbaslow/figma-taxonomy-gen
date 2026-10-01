@@ -8,11 +8,12 @@ selected resource and must be REST API tokens, not Figma CLI tokens.
 See [plan tokens](https://developers.figma.com/docs/rest-api/plan-access-tokens/)
 and [OAuth access tokens](https://developers.figma.com/docs/rest-api/oauth-apps/).
 
-Credentials are read from the environment, never saved in config or cache. OAuth
-app registration, consent, token exchange and refresh remain the caller's
-responsibility; this local tool accepts an already-issued access token. Offline
-fixtures and explicit offline cache use require no credentials. Header selection
-is mock-tested; account permissions and token refresh have not been tested live.
+Explicit environment credentials are never saved in config or cache. For managed
+consent, code exchange and refresh, install the `oauth` extra and follow
+[OAuth setup](oauth.md). You register your own app; the CLI stores its session in
+the native OS credential store. Offline fixtures and explicit offline cache use
+require no credentials. Authentication is tested with mocks and local callbacks;
+account permissions and live token exchange remain unverified.
 
 ## Install
 
@@ -42,6 +43,7 @@ Optional extras:
 |--------|-------------------|------------------------------|
 | `ai`   | `anthropic` SDK   | `--ai` enrichment flag       |
 | `mcp`  | `mcp` SDK         | `figma-taxonomy-mcp` server  |
+| `oauth` | `keyring`, `filelock` | Browser login, secure session storage and refresh |
 | `docs` | `mkdocs-material` | Building these docs locally  |
 
 Install multiple at once:

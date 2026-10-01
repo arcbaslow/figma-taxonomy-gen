@@ -80,7 +80,11 @@ not a verified universal Amplitude limit. Truncation collisions fail explicitly.
 ### Authentication
 - Token via `FIGMA_TOKEN`; `FIGMA_TOKEN_TYPE=pat` (default), `plan`, or `oauth`.
 - PAT/REST API plan tokens use `X-Figma-Token`; OAuth uses bearer authorization.
-  OAuth issuance and refresh are managed externally; no credentials are persisted.
+  An explicit environment token is never persisted or auto-refreshed. With the
+  optional `oauth` extra, `auth login` handles consent/code exchange for the user's
+  registered app; access/refresh tokens and app credentials stay in the native
+  OS credential store. `FIGMA_TOKEN_TYPE=oauth` with no `FIGMA_TOKEN` selects that
+  session and enables refresh. See `docs/oauth.md`; no plaintext fallback.
 
 ### Limits
 - The client uses the file endpoint once per cache miss; extraction caches have a

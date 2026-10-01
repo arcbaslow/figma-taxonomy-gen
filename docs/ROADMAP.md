@@ -204,9 +204,10 @@ acceptance remains unverified and requires a separate live-service decision.
 
 ## Later
 
-The original Later item (detection explanations) is complete. MCP 2 migration,
-an OAuth credential lifecycle, and new screen-depth semantics remain future
-product decisions, outside the evaluated/alternative scope completed above.
+The original Later item (detection explanations) is complete. The owner then
+explicitly requested MCP 2 migration and OAuth lifecycle support; both are
+implemented in the follow-up below. New screen-depth semantics remain a future
+product decision.
 
 ## Research notes
 
@@ -383,3 +384,36 @@ No paid inference, live account import/push, credential-bearing config or real
 design cache was used. Live entitlement, token permissions, import acceptance
 and paid model output quality remain unverified. This continuation is committed
 locally; it has not been pushed or released.
+
+## MCP 2 and OAuth follow-up (2026-10-01)
+
+The owner explicitly requested the two previously deferred implementation
+decisions. This section supersedes the earlier decision to retain MCP 1.x and
+leave all OAuth token lifecycle operations external.
+
+MCP now requires `>=2.2,<3` and locks 2.2.0. Commit `7f5b241` ports server
+construction to `MCPServer`, selects stdio explicitly and adapts SDK protocol
+field access while retaining the public tool contracts. The real subprocess
+integration test passes extraction, explanation, export, validation and errors.
+
+The optional `oauth` extra provides browser login for the user's own Figma app,
+S256 PKCE/state validation, a bounded loopback callback, native OS credential
+storage, proactive refresh, one refresh/replay after 401, and status/refresh/logout
+commands. Local processes coordinate session changes with a per-user file lock.
+Explicit environment tokens take precedence and are neither stored nor refreshed.
+OAuth is selected explicitly; fixtures and offline cache reads remain independent
+of credentials. No app secret is bundled and no plaintext storage fallback exists.
+See [OAuth setup](oauth.md) and [MCP setup](mcp.md).
+
+Verification: **386 tests pass**, including 48 new OAuth cases using synthetic
+credentials, mocked Figma endpoints, an in-memory credential store and a real
+local callback listener. Tests cover PKCE/state, callback rejection/denial/timeout,
+token response validation, rotation, concurrent refresh, failures without secret
+disclosure, environment precedence and CLI flows. Ruff, source/wheel builds,
+strict docs, fixture extraction and clean drift checks pass on Windows/Python
+3.12.14. CI now installs the OAuth extra across its existing OS/Python matrix.
+
+No actual OS credential entry, live OAuth consent or Figma service was accessed.
+Native backend selection is unit-tested; real store permissions/unlock behavior
+and account/redirect acceptance remain live setup checks. The package version is
+unchanged; these changes are committed locally, without push or release.

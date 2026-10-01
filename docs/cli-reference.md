@@ -133,3 +133,21 @@ GET'd first and skipped on conflict. See [Amplitude push](amplitude.md) for deta
 
 Separate console script. Runs the MCP server over stdio for Claude Desktop /
 claude.ai integration. Takes no arguments. See [MCP server](mcp.md).
+
+## `auth`
+
+Manage an optional Figma OAuth session in the native OS credential store. Install
+the `oauth` extra and register your own app first; see [OAuth setup](oauth.md).
+
+| Command | Behavior |
+| --- | --- |
+| `auth login --client-id ID` | Authorize in the browser and save the session; also accepts `FIGMA_OAUTH_CLIENT_ID` |
+| `auth status` | Print only local login/expiry metadata and whether the managed session is selected |
+| `auth refresh` | Refresh the saved session without printing the token |
+| `auth logout` | Delete saved local credentials; does not revoke remote consent or clear environment tokens |
+
+Login prompts for the client secret with hidden input, or reads
+`FIGMA_OAUTH_CLIENT_SECRET`. `--port` defaults to 8765, `--timeout` to 180 seconds,
+and `--no-browser` prints the URL for manual opening. The redirect must be registered
+as `http://127.0.0.1:8765/oauth/callback` (use the selected port). Select the saved
+session with `FIGMA_TOKEN_TYPE=oauth` and no `FIGMA_TOKEN`.
