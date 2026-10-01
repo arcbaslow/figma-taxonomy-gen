@@ -68,7 +68,10 @@ figma-taxonomy extract https://www.figma.com/design/YOUR_FILE_KEY/MyApp --output
 ```
 
 The token needs `file_content:read` and access to the file. Branch URLs select the
-branch. Use `--no-cache` to disable both design-cache reads and writes. Rate-limit
+branch. Extraction reuses cached data for up to five minutes (`--cache-ttl 300`);
+validation defaults to fresh data (`--cache-ttl 0`). `--offline` explicitly uses an
+existing local cache of any age without credentials or network requests.
+Use `--no-cache` to disable both design-cache reads and writes. Rate-limit
 errors report the server's retry interval; quotas depend on your seat and file plan.
 
 | Output | Purpose |

@@ -37,12 +37,12 @@ def _event_to_dict(event: TaxonomyEvent) -> dict[str, Any]:
     }
 
 
-def _load_figma_source(figma_url_or_path: str) -> dict:
+def _load_figma_source(figma_url_or_path: str, **fetch_options: Any) -> dict:
     """Figma URL → API fetch; local path → fixture load."""
     candidate = Path(figma_url_or_path)
     if candidate.exists() and candidate.is_file():
         return load_fixture(candidate)
-    return fetch_file(figma_url_or_path)
+    return fetch_file(figma_url_or_path, **fetch_options)
 
 
 def _load_config(config_path: str | None) -> TaxonomyConfig:
@@ -102,10 +102,11 @@ def extract_taxonomy_tool(
     figma_url_or_path: str,
     config_path: str | None = None,
     page: str | None = None,
+    *, cache_ttl: float = 300, offline: bool = False, no_cache: bool = False,
 ) -> dict[str, Any]:
     """Extract a taxonomy from a Figma file or local fixture."""
     config = _load_config(config_path)
-    figma_file = _load_figma_source(figma_url_or_path)
+    figma_file = _load_figma_source(figma_url_or_path, cache_ttl=cache_ttl, offline=offline, no_cache=no_cache)
 
     if page:
         config.figma.exclude_pages = []
@@ -124,10 +125,11 @@ def validate_taxonomy_tool(
     taxonomy_json: dict,
     figma_url_or_path: str,
     config_path: str | None = None,
+    *, cache_ttl: float = 0, offline: bool = False, no_cache: bool = False,
 ) -> dict[str, Any]:
     """Diff a stored taxonomy against the current Figma file."""
     config = _load_config(config_path)
-    figma_file = _load_figma_source(figma_url_or_path)
+    figma_file = _load_figma_source(figma_url_or_path, cache_ttl=cache_ttl, offline=offline, no_cache=no_cache)
 
     elements = extract_elements(figma_file, config)
     current_events = generate_taxonomy(elements, config, screens=extract_screens(figma_file, config))

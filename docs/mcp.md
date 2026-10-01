@@ -1,5 +1,11 @@
 # MCP server
 
+Extraction and validation accept `cache_ttl`, `offline`, and `no_cache`.
+Extraction defaults to 300 seconds of cache reuse; validation defaults to zero
+for fresh remote data. Offline mode requires an existing indexed cache, makes no
+requests and needs no token. Fixture paths remain offline independently of these
+options. `offline` and `no_cache` cannot be combined for API sources.
+
 The tool ships an [MCP](https://modelcontextprotocol.io) server so Claude Desktop
 and claude.ai can call its functions directly, without shelling out to the CLI.
 
