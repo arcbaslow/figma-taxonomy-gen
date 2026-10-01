@@ -211,6 +211,10 @@ unchanged. AI remains off by default.
 The MCP extra targets SDK 1.30–1.x and has an offline stdio test covering the
 complete extraction → export → validation tool workflow.
 
+Detection searches nested visible labels and recognizes legacy prototype links.
+Hidden-layer inclusion and traversal inside detected controls are explicit config
+options; their defaults preserve earlier behavior.
+
 ### Amplitude push
 
 ```bash

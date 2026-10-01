@@ -29,6 +29,11 @@ Any node with a Figma **prototype interaction** (click, hover, drag, etc.) is cl
 as interactive regardless of its name. This catches elements that look like cards or
 tiles but are actually clickable.
 
+Legacy non-empty `transitionNodeID` also counts as a prototype interaction, as
+documented in the [Figma node reference](https://developers.figma.com/docs/rest-api/file-node-types/).
+Decorative-name exclusions still take precedence by default, including icon-only
+CTAs whose names begin with `Icon`.
+
 ## Layer 3: Component types
 
 Only these Figma node types are considered:
@@ -135,9 +140,26 @@ With text content, you get `..._apply_now_clicked` (matches the user's mental mo
 Without, you'd get `..._button_primary_large_clicked` (bound to the design system,
 breaks when the component is restyled).
 
-When there is no immediate child label, extraction falls back to the component
-name. `element_name.fallback_to_component_name` is loaded but currently unused.
-Nested labels are not searched recursively.
+When there is no immediate child label, extraction searches visible nested layout
+children. It does not borrow text from independently interactive descendants.
+If no text exists, component-name fallback is used unless explicitly disabled;
+disabled fallback produces an error containing the node ID.
+
+## Hidden layers and nested controls
+
+`detection.include_hidden: true` preserves the existing default. Set it to `false`
+to exclude hidden nodes and their descendants, including hidden screen frames and
+sections. The screen inventory and control extraction follow the same policy.
+
+`detection.traverse_interactive_children: false` preserves parent suppression:
+a detected card/form/button owns the interaction and its descendants are not
+separate controls. Set it to `true` to collect nested controls as well, then review
+whether these correspond to independent gestures. Every added control retains
+its own source ID. Decorative exclusions still remove entire subtrees.
+
+Instance `componentProperties` entries of type `VARIANT` are retained on extracted
+elements as `Name=Value` strings. They do not automatically become event properties
+or change AI prompts. Synthetic coverage is in `tests/fixtures/detection_policy.json`.
 
 ## When detection goes wrong
 

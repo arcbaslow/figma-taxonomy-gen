@@ -13,6 +13,10 @@ app:
 figma:
   exclude_pages: ["Archive", "Drafts", "Components"]
 
+detection:
+  include_hidden: true
+  traverse_interactive_children: false
+
 naming:
   style: snake_case
   pattern: "{screen}_{element}_{action}"
