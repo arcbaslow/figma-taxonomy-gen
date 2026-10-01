@@ -78,8 +78,12 @@ Amplitude event names are limited to 64 characters (`max_event_length: 64` in `t
 - OAuth2 flow for MCP server (future)
 
 ### Limits
-- The `nodes` endpoint batches at most 50 IDs per request
-- Tier 1 rate limit is roughly 60 requests/min
+- The client uses the file endpoint once per cache miss; extraction caches have a
+  five-minute TTL and validation fetches fresh data by default. Offline cache use
+  is explicit. No metadata endpoint or extra scope is required.
+- Limits vary by seat and resource plan. GET retries respect `Retry-After`, stop
+  after three attempts and allow at most ten seconds of retry waiting.
+  [Rate limits](https://developers.figma.com/docs/rest-api/rate-limits/).
 
 ---
 

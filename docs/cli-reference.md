@@ -1,5 +1,18 @@
 # CLI reference
 
+Figma extraction uses `--cache-ttl 300` seconds; validation defaults to
+`--cache-ttl 0` so CI checks fetch fresh data. A cache miss makes one file request.
+`--offline` uses any valid indexed cache without a token or requests and fails
+if none exists. It cannot be combined with `--no-cache`, which disables both
+cache reads and writes. Cache age is local freshness, not proof of remote version
+equality. Failed online requests never fall back silently to stale data. Older
+unindexed caches are refreshed once. No metadata scope is required.
+
+GET requests retry transport failures, 429, and 500/502/503/504 at most twice,
+with at most ten seconds of retry sleep. A longer `Retry-After` is reported
+without sleeping or retrying early. Other errors fail immediately. Requests
+have a 60-second HTTP timeout. See [Figma's retry contract](https://developers.figma.com/docs/rest-api/rate-limits/).
+
 `validate` and `diff` report property schema changes separately from property-name
 additions/removals. Type, description and enum membership changes cause
 `--exit-code` to return 1. Enum order/duplicates do not count as changes. File diffs

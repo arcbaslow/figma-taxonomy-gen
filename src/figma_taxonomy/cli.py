@@ -18,9 +18,9 @@ from figma_taxonomy.validate import diff_taxonomies, diff_taxonomy_dicts
 SUPPORTED_OUTPUT_FORMATS = ("excel", "csv", "json", "markdown", "amplitude-csv")
 
 
-def _fetch_file(url: str, no_cache: bool) -> dict:
+def _fetch_file(url: str, no_cache: bool, cache_ttl: float, offline: bool) -> dict:
     try:
-        return fetch_file(url, no_cache=no_cache)
+        return fetch_file(url, no_cache=no_cache, cache_ttl=cache_ttl, offline=offline)
     except (ValueError, RuntimeError) as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -82,9 +82,11 @@ def main():
 )
 @click.option("--page", help="Extract only a specific page by name")
 @click.option("--no-cache", is_flag=True, help="Skip Figma API cache")
+@click.option("--cache-ttl", type=click.FloatRange(min=0), default=300, show_default=True, help="Maximum cached age in seconds")
+@click.option("--offline", is_flag=True, help="Use a previously cached Figma file without requests")
 @click.option("--ai", "use_ai", is_flag=True, help="Enrich events with Claude-suggested properties")
 @click.option("--yes", "-y", "assume_yes", is_flag=True, help="Skip cost-estimate confirmation prompt")
-def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache, use_ai, assume_yes):
+def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache, cache_ttl, offline, use_ai, assume_yes):
     """Extract taxonomy from a Figma file.
 
     Pass a Figma URL to fetch from the API, or use --fixture with a local JSON file.
@@ -100,7 +102,7 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         figma_file = load_fixture(fixture)
     else:
         click.echo(f"Fetching Figma file: {figma_url}")
-        figma_file = _fetch_file(figma_url, no_cache=no_cache)
+        figma_file = _fetch_file(figma_url, no_cache=no_cache, cache_ttl=cache_ttl, offline=offline)
 
     if page:
         config.figma.exclude_pages = []
@@ -199,8 +201,10 @@ def _parse_formats(raw_formats: str | None, config_formats: list[str]) -> list[s
 @click.option("--fixture", type=click.Path(exists=True, path_type=Path), help="Local JSON fixture instead of Figma API")
 @click.option("--config", "-c", "config_path", type=click.Path(exists=True, path_type=Path), help="Path to taxonomy.config.yaml")
 @click.option("--no-cache", is_flag=True, help="Skip Figma API cache")
+@click.option("--cache-ttl", type=click.FloatRange(min=0), default=0, show_default=True, help="Maximum cached age; validation fetches fresh data by default")
+@click.option("--offline", is_flag=True, help="Validate against a previously cached Figma file")
 @click.option("--exit-code", is_flag=True, help="Exit non-zero if drift is detected (for CI)")
-def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code):
+def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, cache_ttl, offline, exit_code):
     """Check an existing taxonomy JSON for drift against the current Figma file."""
     if not figma_url and not fixture:
         raise click.UsageError("Provide --figma URL or --fixture with a local JSON file.")
@@ -213,7 +217,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, exit_code
     if fixture:
         figma_file = load_fixture(fixture)
     else:
-        figma_file = _fetch_file(figma_url, no_cache=no_cache)
+        figma_file = _fetch_file(figma_url, no_cache=no_cache, cache_ttl=cache_ttl, offline=offline)
 
     elements = extract_elements(figma_file, config)
     current_events = _generate_taxonomy(elements, config, extract_screens(figma_file, config))

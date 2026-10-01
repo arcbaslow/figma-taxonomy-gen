@@ -37,6 +37,9 @@ def build_server():
         figma_url_or_path: str,
         config_path: str | None = None,
         page: str | None = None,
+        cache_ttl: float = 300,
+        offline: bool = False,
+        no_cache: bool = False,
     ) -> dict[str, Any]:
         """Extract an Amplitude taxonomy from a Figma file.
 
@@ -48,13 +51,16 @@ def build_server():
         Returns:
             {"count": int, "events": [ {event_name, category, description, ...} ]}
         """
-        return extract_taxonomy_tool(figma_url_or_path, config_path, page)
+        return extract_taxonomy_tool(figma_url_or_path, config_path, page, cache_ttl=cache_ttl, offline=offline, no_cache=no_cache)
 
     @mcp.tool()
     def validate_taxonomy(
         taxonomy_json: dict,
         figma_url_or_path: str,
         config_path: str | None = None,
+        cache_ttl: float = 0,
+        offline: bool = False,
+        no_cache: bool = False,
     ) -> dict[str, Any]:
         """Diff a stored taxonomy JSON against the current Figma file.
 
@@ -67,7 +73,7 @@ def build_server():
             {"is_clean": bool, "added": [...], "removed": [...], "renamed": [...],
              "property_changes": [...]}
         """
-        return validate_taxonomy_tool(taxonomy_json, figma_url_or_path, config_path)
+        return validate_taxonomy_tool(taxonomy_json, figma_url_or_path, config_path, cache_ttl=cache_ttl, offline=offline, no_cache=no_cache)
 
     @mcp.tool()
     def export_taxonomy(

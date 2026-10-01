@@ -135,13 +135,19 @@ renames. File-to-file diffs also compare extra stored constraints without droppi
 them during hydration. CLI and MCP expose an additive `property_schema_changes`
 field; property-name additions/removals retain their existing shape.
 
+Completed: Figma request efficiency and bounded retries. A cold/expired fetch
+makes one file request; extraction can reuse a five-minute local cache while
+validation defaults to fresh data. CLI/MCP expose cache age, explicit offline
+use and disabled caching. Three attempts and ten seconds of total retry waiting
+bound transient GET recovery; server delays are never shortened. Synthetic cache
+tests use isolated temp directories, never the repository's design cache.
+
 These proposals remain unfinished, in priority order. The provenance and import
 profile implementations above are complete. Excluded/undetected controls and
 real-account import acceptance are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Reduce Figma Tier 1 requests and add bounded retry policy | Cache hits still call `GET /files/:key?depth=1`; misses call that endpoint twice. This is not the distinct metadata endpoint. [Endpoints](https://developers.figma.com/docs/rest-api/file-endpoints/), [rate limits](https://developers.figma.com/docs/rest-api/rate-limits/) | 1–2 | Medium: metadata requires a separate scope; TTL/offline cache freshness and long retry waits need explicit semantics |
 | Upgrade within MCP 1.x, then evaluate 2.x separately | Requirement is `mcp>=1.0,<2`, lock 1.27.0; current release list shows 2.2.0 and maintained 1.30.0. [Releases](https://github.com/modelcontextprotocol/python-sdk/releases), [migration](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md) | 1 / 3–5 | Medium / high: test actual protocol calls and dependency compatibility, not just server construction. Keep `<2` until migration |
 | Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
 | Validate config and expose unsupported options honestly | `screen_name.max_depth`, `fallback_to_component_name` and `output.directory` are loaded but unused. Property-rule precedence differs from the prose, and raw YAML errors are not actionable | 1–2 | Medium: intended fallback/depth behavior is unspecified; document and decide rather than invent it |
