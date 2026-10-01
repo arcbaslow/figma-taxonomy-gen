@@ -25,6 +25,13 @@ def _fetch_file(url: str, no_cache: bool, cache_ttl: float, offline: bool) -> di
         raise click.ClickException(str(exc)) from exc
 
 
+def _load_config(path: Path | None) -> TaxonomyConfig:
+    try:
+        return load_config(path)
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
 def _generate_taxonomy(
     elements: list[ScreenElement], config: TaxonomyConfig, screens: list[Screen],
 ) -> list[TaxonomyEvent]:
@@ -72,7 +79,7 @@ def main():
 @click.argument("figma_url", required=False)
 @click.option("--fixture", type=click.Path(exists=True, path_type=Path), help="Use a local JSON fixture instead of Figma API")
 @click.option("--config", "-c", "config_path", type=click.Path(exists=True, path_type=Path), help="Path to taxonomy.config.yaml")
-@click.option("--output", "-o", "output_dir", type=click.Path(path_type=Path), default="./output", help="Output directory")
+@click.option("--output", "-o", "output_dir", type=click.Path(path_type=Path), default=None, help="Output directory (defaults to config output.directory)")
 @click.option(
     "--format",
     "-f",
@@ -94,7 +101,7 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
     if not figma_url and not fixture:
         raise click.UsageError("Provide a Figma URL or use --fixture with a local JSON file.")
 
-    config = load_config(config_path)
+    config = _load_config(config_path)
     format_list = _parse_formats(formats, config.output.formats)
 
     if fixture:
@@ -134,7 +141,7 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, no_cache
         except ValueError as exc:
             raise click.ClickException(str(exc)) from exc
 
-    output_dir = Path(output_dir)
+    output_dir = Path(output_dir if output_dir is not None else config.output.directory)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if "excel" in format_list:
@@ -209,7 +216,7 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, cache_ttl
     if not figma_url and not fixture:
         raise click.UsageError("Provide --figma URL or --fixture with a local JSON file.")
 
-    config = load_config(config_path)
+    config = _load_config(config_path)
 
     stored = json.loads(Path(taxonomy_path).read_text(encoding="utf-8"))
     existing_events = stored.get("events", {})

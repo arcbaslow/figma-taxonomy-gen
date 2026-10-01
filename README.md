@@ -194,6 +194,10 @@ Drift checks report property type, description and enum changes as well as added
 or removed property names. Enum order does not affect the result. Both CLI
 `validate`/`diff --exit-code` and MCP validation expose schema-only changes.
 
+Configuration is validated before extraction. `output.directory` supplies the
+default destination, with `--output` overriding it. Disabling component-name
+fallback makes unlabeled controls an explicit error containing the Figma node ID.
+
 ### Amplitude push
 
 ```bash

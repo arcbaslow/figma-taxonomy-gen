@@ -146,10 +146,18 @@ duplicate property names on a single event.
 Rule properties currently take precedence over globals with the same name; among
 rules, the first matching definition wins. The page supplies the flow/category,
 not an automatic prefix in the screen name. Use `{page}` for an explicit prefix.
-`screen_name.max_depth`,
-`element_name.fallback_to_component_name`, and `output.directory` are currently
-unused; pass `--output` to select the output directory. These configuration gaps
-remain [open decisions](ROADMAP.md#next).
+`screen_name.max_depth` is a reserved compatibility field: only `2` is accepted.
+Screens are page frames, including frames inside sections; arbitrary frame-depth
+inference is not implemented. Unsupported values now fail instead of being ignored.
+
+When text naming is enabled, `element_name.fallback_to_component_name: false`
+requires a label; unlabeled controls fail with their node ID instead of being
+silently dropped. When text naming is disabled, component names are used directly.
+`output.directory` is honored relative to the process working directory; explicit
+`--output` takes precedence. Config files are UTF-8. Unknown settings, invalid
+shapes/types, unsupported formats and malformed naming patterns fail with the
+relevant field path before fetching or writing. Property definitions require
+unique names within each list; the existing rule-over-global precedence remains.
 
 ```yaml
 property_rules:

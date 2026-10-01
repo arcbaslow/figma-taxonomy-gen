@@ -19,6 +19,8 @@ def _to_snake_case(text: str) -> str:
 def _clean_element_name(element: ScreenElement, config: TaxonomyConfig) -> str:
     if config.naming.element_name.use_text_content and element.text_content:
         return _to_snake_case(element.text_content)
+    if config.naming.element_name.use_text_content and not config.naming.element_name.fallback_to_component_name:
+        raise ValueError(f"Node {element.node_id} has no text; add a label or enable naming.element_name.fallback_to_component_name.")
 
     name = element.element_name
     for prefix in config.naming.element_name.strip_common:
