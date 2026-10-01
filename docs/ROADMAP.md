@@ -264,7 +264,7 @@ remains a proposal requiring contract decisions and broader tests. The separate
 CSV importer was implemented in an owner-authorized follow-up. Competing on unverified vendor shortcomings
 is also rejected. Small correctness and handoff improvements are the useful gap.
 
-## Execution report
+## Initial execution report (2026-09-30)
 
 Local branch: `roadmap-work`, created from `master` at `dd79a4a`. Version remains
 0.4.2. No push, pull request, tag, publication or live service call was performed.
@@ -299,8 +299,9 @@ actual account rate limits; current Amplitude entitlement and UI imports; paid
 model quality, token usage and model availability for an account; the Event
 Planner plugin's current maintenance. Vendor contract checks used public web
 documentation, not authenticated API calls. The runtime lockfile was not upgraded.
-The larger and ambiguous changes remain in Next/Later for the reasons in their
-risk columns. No credential-bearing config or design cache was read or staged.
+At that stage, larger and ambiguous changes remained in Next/Later; their later
+completion is recorded above. No credential-bearing config or design cache was
+read or staged.
 
 Follow-up verification: **160 tests pass**, including 21 provenance regressions
 covering shared/unique variant controls, all exports, legacy inputs, optional
@@ -343,3 +344,42 @@ is mocked. Ruff, package builds, strict MkDocs, fixture extraction and offline
 drift checks pass. The banking fixture remains at 18 controls and 21 events; its
 offline push preview reports 77 event/property associations. No live push,
 dependency upgrade or package version change was made.
+
+## Continuation execution report (2026-10-01)
+
+Completed all remaining original Next/Later proposals on `roadmap-work`, following
+the previous merge to `master` at `92dfc83`. Each implementation commit passed
+Ruff, the full test suite, package builds, strict MkDocs, banking-fixture extraction
+and offline drift validation.
+
+| Commit | Completed work | Tests passing |
+| --- | --- | --- |
+| `2eb06b0` | Property schema drift, including stored constraints | 264 |
+| `670537b` | Single-request cache misses, TTL/offline policy and bounded GET retries | 281 |
+| `487797b` | Strict config validation, independent defaults, output/fallback settings | 299 |
+| `f7f58a7` | Complete Excel property schemas and literal text handling | 302 |
+| `2e40a1e` | Bounded optional AI batches and validated, atomic suggestion application | 318 |
+| `3fbc5d7` | Explicit PAT, plan-token and externally issued OAuth token headers | 322 |
+| `37f03a8` | MCP 1.30 upgrade, real stdio integration test, separate 2.x evaluation | 323 |
+| `c9ad6f9` | Detection fixture coverage, nested labels, visibility and traversal policies | 326 |
+| `24c3fc6` | Ordered name/node include and exclude rules | 335 |
+| `62c1ec6` | Optional CLI/MCP node-decision and event-provenance reports | 338 |
+
+Final verification: **338 tests pass**, up from 254 at the start of this
+continuation (106 before the original audit). Windows/Python 3.12.14 was tested
+locally; the other hosted OS/Python combinations remain unverified. The banking
+fixture retains 18 controls and 21 events with no drift. Test caches and logs use
+synthetic data and are retained outside the repository after verification.
+
+MCP is now locked at 1.30.0 within `>=1.30,<2`; the package version is unchanged.
+MCP 2 was evaluated, not migrated. Plan-token support satisfies the alternative
+authentication proposal; OAuth issuance/refresh remains external. Screen depth
+remains reserved at 2 with explicit rejection of unsupported values. These are
+documented scope decisions, not claims of implementing a new credential service
+or a new screen hierarchy model.
+
+All service tests were offline or mocked, including the local MCP subprocess.
+No paid inference, live account import/push, credential-bearing config or real
+design cache was used. Live entitlement, token permissions, import acceptance
+and paid model output quality remain unverified. This continuation is committed
+locally; it has not been pushed or released.

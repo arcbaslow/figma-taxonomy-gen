@@ -39,7 +39,10 @@ and is exposed as the `figma-taxonomy-mcp` console script declared in `pyproject
 
 Figma nodes don't have a semantic "this is a button" flag. Detection relies on name-pattern and node-property heuristics (see `src/figma_taxonomy/extractor.py` and `docs/detection.md`).
 
-Additionally, any node with a **prototype interaction** (click, hover, drag) attached is automatically classified as interactive regardless of name.
+Prototype interactions (including legacy transitions) identify controls regardless
+of component type, subject to visibility, exclusions and ancestor traversal.
+Ordered name/node overrides make those policies configurable; `--explain` reports
+decisions and generated event sources.
 
 ### 2. Screen context inference
 
@@ -67,7 +70,8 @@ empty frames when calling `generate_taxonomy` directly.
 
 ### 3. Naming convention engine
 
-Amplitude event names are limited to 64 characters (`max_event_length: 64` in `taxonomy.config.yaml`).
+The default `max_event_length: 64` is this project's configurable naming policy,
+not a verified universal Amplitude limit. Truncation collisions fail explicitly.
 
 ---
 
@@ -105,21 +109,19 @@ for supported types, partial-failure behavior and the separate Data CSV profile.
 
 ## AI enrichment (Claude)
 
-When `--ai` or `--enrich` flag is passed:
+When `--ai` is passed or `ai.enabled` is explicitly configured:
 
-1. Batch screen contexts (screen name + list of components + text content)
-2. Send to Claude with a structured prompt requesting JSON output
-3. Claude infers:
-   - Event property names and types
-   - Enum values from component variants
-   - Business-relevant descriptions
-   - Category assignments
-4. Merge AI suggestions with rule-based taxonomy
-5. Human reviews via markdown diff or interactive CLI
+1. Batch events within each flow, bounded by event count and prompt size.
+2. Send event names, descriptions and existing properties in a JSON-output prompt.
+3. Request suggested property names, types, descriptions and optional enums.
+4. Validate responses and apply additional properties after all calls succeed.
+5. Users review the exported plan and compare stored versions with `diff`.
+
+Raw component variants are not sent to the model. Suggestions do not change
+event names, categories, descriptions or Figma sources.
 
 ### Cost control
-- Claude Haiku for bulk inference (cheap, fast)
-- Claude Sonnet for complex screens with many variants
+- Haiku is the default; model selection is explicit in config.
 - Estimate using the actual batch plan and the known model price table; unknown
   models show an unavailable price. There is no reliable per-screen price promise.
 - Default batches contain at most 20 events and 12,000 prompt characters. Failed
@@ -146,13 +148,10 @@ export AMPLITUDE_SECRET_KEY="your-secret" # optional, for push
 
 ## Competitive landscape
 
-| Tool | What it does | Gap this tool fills |
-|------|-------------|---------------------|
-| Amplitude Event Planner (Figma plugin) | Manual label placement on designs, CSV export | No auto-extraction. Manual work per element. |
-| Tracking Plan Companion (Glazed) | AI suggestions from uploaded designs | Proprietary SaaS, no CLI, no Amplitude integration, no config |
-| Avo | Full tracking plan lifecycle management | Heavy SaaS product ($$$). No Figma extraction. Requires manual plan creation. |
-| Iteratively (now Amplitude) | Type-safe tracking code generation | Requires existing tracking plan. Doesn't generate from design. |
-| This tool | Auto-extract from Figma -> taxonomy with configurable naming rules -> multi-format output | Fills the "design to initial tracking plan" gap. Open source. CLI-first. Configurable. |
+See the dated, source-linked research in `docs/ROADMAP.md`. Avoid carrying forward
+unsupported claims about competitors' features, pricing or maintenance. This
+tool's scope is an open-source CLI for generating and reviewing an initial
+tracking plan from designs, with configurable names and preserved provenance.
 
 ---
 
