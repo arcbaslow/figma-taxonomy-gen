@@ -1,5 +1,19 @@
 # Getting started
 
+For online Figma access, set `FIGMA_TOKEN` and optionally `FIGMA_TOKEN_TYPE`:
+`pat` (default), `plan`, or `oauth`. PAT and REST API plan tokens use
+`X-Figma-Token`; OAuth access tokens use `Authorization: Bearer`. The file
+endpoint requires `file_content:read`. Plan tokens must allow access to the
+selected resource and must be REST API tokens, not Figma CLI tokens.
+See [plan tokens](https://developers.figma.com/docs/rest-api/plan-access-tokens/)
+and [OAuth access tokens](https://developers.figma.com/docs/rest-api/oauth-apps/).
+
+Credentials are read from the environment, never saved in config or cache. OAuth
+app registration, consent, token exchange and refresh remain the caller's
+responsibility; this local tool accepts an already-issued access token. Offline
+fixtures and explicit offline cache use require no credentials. Header selection
+is mock-tested; account permissions and token refresh have not been tested live.
+
 ## Install
 
 === "uv (recommended)"

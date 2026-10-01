@@ -71,6 +71,8 @@ The token needs `file_content:read` and access to the file. Branch URLs select t
 branch. Extraction reuses cached data for up to five minutes (`--cache-ttl 300`);
 validation defaults to fresh data (`--cache-ttl 0`). `--offline` explicitly uses an
 existing local cache of any age without credentials or network requests.
+For online access, `FIGMA_TOKEN_TYPE` selects `pat` (default), `plan`, or `oauth`
+for the token supplied in `FIGMA_TOKEN`. OAuth issuance/refresh is external.
 Use `--no-cache` to disable both design-cache reads and writes. Rate-limit
 errors report the server's retry interval; quotas depend on your seat and file plan.
 

@@ -74,8 +74,9 @@ Amplitude event names are limited to 64 characters (`max_event_length: 64` in `t
 ## Figma API usage
 
 ### Authentication
-- Personal Access Token (PAT) via env var `FIGMA_TOKEN`
-- OAuth2 flow for MCP server (future)
+- Token via `FIGMA_TOKEN`; `FIGMA_TOKEN_TYPE=pat` (default), `plan`, or `oauth`.
+- PAT/REST API plan tokens use `X-Figma-Token`; OAuth uses bearer authorization.
+  OAuth issuance and refresh are managed externally; no credentials are persisted.
 
 ### Limits
 - The client uses the file endpoint once per cache miss; extraction caches have a
