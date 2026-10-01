@@ -60,7 +60,7 @@ def _classify_element(name: str) -> str | None:
 
 def _has_interactions(node: dict) -> bool:
     interactions = node.get("interactions")
-    return bool(interactions and len(interactions) > 0)
+    return bool(interactions) or bool(node.get("transitionNodeID"))
 
 
 def _clean_screen_name(raw: str, config: TaxonomyConfig) -> str:
@@ -80,9 +80,13 @@ def _clean_screen_name(raw: str, config: TaxonomyConfig) -> str:
 
 
 def _extract_text_content(node: dict) -> str | None:
+    if node.get("visible") is False:
+        return None
     if node.get("characters"):
         return node["characters"]
-    for child in node.get("children", []):
+    children = [child for child in node.get("children", [])
+                if child.get("visible") is not False and not _is_excluded(child.get("name", ""))]
+    for child in children:
         if child.get("type") == "TEXT" and child.get("name", "").lower() in (
             "label",
             "text",
@@ -91,20 +95,39 @@ def _extract_text_content(node: dict) -> str | None:
         ):
             if child.get("characters"):
                 return child["characters"]
-    for child in node.get("children", []):
+    for child in children:
         if child.get("type") == "TEXT" and child.get("characters"):
             if not _is_excluded(child.get("name", "")):
                 return child["characters"]
+    for child in children:
+        # A nested control owns its own text, not its enclosing card/form.
+        if _has_interactions(child) or (
+            child.get("type") in _COMPONENT_TYPES and _classify_element(child.get("name", ""))
+        ):
+            continue
+        if text := _extract_text_content(child):
+            return text
     return None
 
 
-def _screen_frames(container: dict) -> Iterator[dict]:
+def _screen_frames(container: dict, include_hidden: bool = True) -> Iterator[dict]:
     """Sections organize screens; frames contain screen layout, so stop there."""
     for child in container.get("children", []):
+        if not include_hidden and child.get("visible") is False:
+            continue
         if child.get("type") == "FRAME":
             yield child
         elif child.get("type") == "SECTION":
-            yield from _screen_frames(child)
+            yield from _screen_frames(child, include_hidden)
+
+
+def _variants(node: dict) -> list[str]:
+    properties = node.get("componentProperties", {})
+    if not isinstance(properties, dict):
+        return []
+    return [f"{name}={prop['value']}" for name, prop in sorted(properties.items())
+            if isinstance(prop, dict) and prop.get("type") == "VARIANT"
+            and isinstance(prop.get("value"), str)]
 
 
 def _walk_node(
@@ -118,6 +141,8 @@ def _walk_node(
     name = node.get("name", "")
     node_type = node.get("type", "")
 
+    if not config.detection.include_hidden and node.get("visible") is False:
+        return elements
     if _is_excluded(name):
         return elements
 
@@ -146,11 +171,12 @@ def _walk_node(
                 element_type=final_type,
                 text_content=text_content,
                 has_interaction=has_interaction,
-                variants=[],
+                variants=_variants(node),
                 parent_path=list(parent_path),
             )
         )
-        return elements
+        if not config.detection.traverse_interactive_children:
+            return elements
 
     for child in node.get("children", []):
         elements.extend(
@@ -168,7 +194,9 @@ def _page_frames(figma_file: dict, config: TaxonomyConfig) -> Iterator[tuple[dic
             continue
         if page.get("name", "") in config.figma.exclude_pages:
             continue
-        for frame in _screen_frames(page):
+        if not config.detection.include_hidden and page.get("visible") is False:
+            continue
+        for frame in _screen_frames(page, config.detection.include_hidden):
             yield page, frame
 
 

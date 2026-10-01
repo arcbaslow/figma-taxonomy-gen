@@ -9,6 +9,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Add fixture-backed hidden-layer and nested-control policies, retain instance variant metadata, search nested visible labels and recognize legacy prototype transitions. Preserve existing hidden-layer and parent-suppression defaults.
+
 - Support explicit Figma PAT, REST API plan-token and existing OAuth access-token authentication through `FIGMA_TOKEN_TYPE`, with correct headers and no persisted credentials.
 
 - Add an opt-in `amplitude-csv` profile for CLI/config/MCP with all 33 published Amplitude Data import columns, event-specific properties, string enums and a mandatory JSON provenance companion. Validate unsupported schemas before writing; retain the existing review CSV and default formats.

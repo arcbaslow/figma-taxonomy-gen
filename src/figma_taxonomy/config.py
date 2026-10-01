@@ -115,12 +115,19 @@ class AIConfig:
 
 
 @dataclass
+class DetectionConfig:
+    include_hidden: bool = True
+    traverse_interactive_children: bool = False
+
+
+@dataclass
 class TaxonomyConfig:
     app: AppConfig = field(default_factory=AppConfig)
     figma: FigmaConfig = field(default_factory=FigmaConfig)
     naming: NamingConfig = field(default_factory=NamingConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     ai: AIConfig = field(default_factory=AIConfig)
+    detection: DetectionConfig = field(default_factory=DetectionConfig)
     global_properties: list[dict[str, Any]] = field(default_factory=lambda: deepcopy(_DEFAULT_GLOBAL_PROPERTIES))
     property_rules: list[dict[str, Any]] = field(default_factory=lambda: deepcopy(_DEFAULT_PROPERTY_RULES))
 
@@ -226,6 +233,9 @@ def load_config(path: Path | None) -> TaxonomyConfig:
     _validate_shape(raw, asdict(TaxonomyConfig()))
 
     config = TaxonomyConfig()
+
+    if "detection" in raw:
+        config.detection = DetectionConfig(**raw["detection"])
 
     if "app" in raw:
         app = raw["app"]

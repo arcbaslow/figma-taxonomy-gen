@@ -1,0 +1,31 @@
+{
+  "document": {"id": "0:0", "type": "DOCUMENT", "name": "Synthetic policies", "children": [
+    {"id": "1:0", "type": "CANVAS", "name": "Shop", "children": [
+      {"id": "1:1", "type": "FRAME", "name": "Checkout", "children": [
+        {"id": "1:2", "type": "INSTANCE", "name": "Button/Primary", "componentProperties": {"State": {"type": "VARIANT", "value": "Ready"}}, "children": [
+          {"id": "1:3", "type": "FRAME", "name": "Layout", "children": [
+            {"id": "1:4", "type": "TEXT", "name": "Label", "characters": "Pay now"}
+          ]}
+        ]},
+        {"id": "1:5", "type": "INSTANCE", "name": "Card/Offer", "children": [
+          {"id": "1:6", "type": "INSTANCE", "name": "Button/Details", "children": [
+            {"id": "1:7", "type": "TEXT", "name": "Label", "characters": "Details"}
+          ]}
+        ]},
+        {"id": "1:8", "type": "INSTANCE", "name": "Button/Hidden", "visible": false},
+        {"id": "1:9", "type": "RECTANGLE", "name": "Legacy hotspot", "transitionNodeID": "2:1"},
+        {"id": "1:10", "type": "INSTANCE", "name": "Icon/Cart", "interactions": [{"trigger": {"type": "ON_CLICK"}}]},
+        {"id": "1:11", "type": "INSTANCE", "name": "Acme/Action"},
+        {"id": "1:12", "type": "RECTANGLE", "name": "Decoration"}
+      ]},
+      {"id": "1:20", "type": "SECTION", "name": "Hidden section", "visible": false, "children": [
+        {"id": "1:21", "type": "FRAME", "name": "Hidden screen", "children": [
+          {"id": "1:22", "type": "INSTANCE", "name": "Button/Continue"}
+        ]}
+      ]}
+    ]},
+    {"id": "2:0", "type": "CANVAS", "name": "Archive", "children": [
+      {"id": "2:1", "type": "FRAME", "name": "Old screen", "children": []}
+    ]}
+  ]}
+}

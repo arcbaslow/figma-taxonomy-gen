@@ -175,13 +175,20 @@ confirms `FastMCP` import removal, renamed model fields and HTTP dependency chan
 retain the maintained 1.x line for this release. A major migration is not implied
 by completion of its evaluation and remains a separate future release decision.
 
+Completed: detection fixture coverage and explicit policies. The synthetic
+`detection_policy.json` covers nested labels, nested controls, icon-only CTAs,
+hidden controls/sections, instance variant properties and legacy transitions.
+Nested labels and legacy interactions are detected; variant values are retained
+on elements. Hidden inclusion and parent suppression preserve legacy defaults,
+with explicit options to exclude hidden subtrees or collect nested controls.
+Decorative exclusions still win unless overridden in the next item.
+
 These proposals remain unfinished, in priority order. The provenance and import
 profile implementations above are complete. Excluded/undetected controls and
 real-account import acceptance are not claimed as covered.
 
 | Proposal | Why / evidence | Effort | Risk / decision needed |
 | --- | --- | --- | --- |
-| Extend fixture coverage before changing heuristic policy | Nested button labels, icon-only CTAs, interactive descendants of cards/forms, hidden layers, component variant metadata and legacy `transitionNodeID` are untested. `_walk_node` stops at a detected container; `_extract_text_content` only reads immediate children; `variants` is always empty | 2–4 | Medium: collecting every nested node can double-count gestures; exclusions conflict with the broad interaction promise. Decide policy before adding detections |
 
 ## Later
 
