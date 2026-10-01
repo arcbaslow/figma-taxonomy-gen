@@ -1,7 +1,7 @@
 """Tests for the MCP server's tool functions.
 
 These test the pure function bodies directly (not the MCP protocol layer).
-The MCP server just wraps these with FastMCP decorators.
+The MCP server just wraps these with MCPServer decorators.
 """
 
 from __future__ import annotations

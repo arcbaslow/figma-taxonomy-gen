@@ -23,14 +23,14 @@ from figma_taxonomy.mcp_tools import (
 def build_server():
     """Construct and configure the MCP server. Kept as a function for testability."""
     try:
-        from mcp.server.fastmcp import FastMCP
+        from mcp.server.mcpserver import MCPServer
     except ImportError as e:
         raise ImportError(
-            "MCP server requires the 'mcp' package. "
+            "MCP server requires the 'mcp' package version 2.2 or newer (below 3). "
             "Install with: uv pip install 'figma-taxonomy-gen[mcp]'"
         ) from e
 
-    mcp = FastMCP("figma-taxonomy-gen")
+    mcp = MCPServer("figma-taxonomy-gen")
 
     @mcp.tool()
     def extract_taxonomy(
@@ -100,7 +100,7 @@ def build_server():
 
 def main():
     server = build_server()
-    server.run()
+    server.run(transport="stdio")
 
 
 if __name__ == "__main__":
