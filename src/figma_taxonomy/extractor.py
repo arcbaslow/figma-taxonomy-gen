@@ -317,7 +317,9 @@ def explain_detection(
             walk(child, page_id, screen_id, screen_name, child_block, (*path, name))
 
     walk(document)
-    decisions = [decision for _, _, _, control_decisions in _named_controls(extract_elements(figma_file, config), config)
+    decisions = [decision for _, _, _, control_decisions in _named_controls(
+        extract_elements(figma_file, config), config, screens=extract_screens(figma_file, config),
+    )
                  for decision in control_decisions]
     for _, frame in _page_frames(figma_file, config):
         raw_name, node_id = frame.get("name", ""), frame.get("id", "")

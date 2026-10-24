@@ -263,6 +263,25 @@ def test_collision_resolution_survives_patterns_and_length_caps() -> None:
     ]
 
 
+def test_collision_suffix_skips_pageview_names_from_screen_inventory() -> None:
+    config = TaxonomyConfig()
+    config.naming.max_event_length = 7
+    data = _file(["Save", "Save!"])
+    data["document"]["children"][0]["children"].append(
+        {"id": "1:2", "type": "FRAME", "name": "login_2", "children": []},
+    )
+    events = generate_taxonomy(
+        extract_elements(data, config), config, screens=extract_screens(data, config),
+    )
+    assert [(event.event_name, event.source_node_ids) for event in events] == [
+        ("login_s", ["2:0"]),
+        ("login_3", ["2:1"]),
+        ("login_p", ["1:1"]),
+        ("login_2", ["1:2"]),
+    ]
+    assert explain_detection(data, config, events)["decisions"][0]["event_name"] == "login_3"
+
+
 def test_cli_reports_label_collision(tmp_path: Path) -> None:
     fixture = tmp_path / "collision.json"
     fixture.write_text(json.dumps(_file(["Оплата", "Oplata"]), ensure_ascii=False), encoding="utf-8")

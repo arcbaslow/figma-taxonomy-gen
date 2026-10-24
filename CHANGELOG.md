@@ -31,6 +31,8 @@ Versioning is [semantic](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Reserve generated pageview names before resolving control collisions so suffixes skip names used by the complete screen inventory.
+
 - Transliterate Russian and Kazakh names, reject empty normalized control labels without an allowed fallback, use stable node-ID screen and control names when their allowed labels normalize to empty (raising only without a usable ID), report `unnamed_screen` and `unnamed_control` decisions, and preserve distinct controls with collision decisions in explain reports.
 
 - Validate optional AI property responses, constrain suggestions to their source batch, and plan bounded calls before spending. Share batch planning with the cost preview and apply suggestions only after every call succeeds without truncation.

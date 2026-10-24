@@ -97,6 +97,7 @@ def _build_event_name(
 
 def _named_controls(
     elements: list[ScreenElement], config: TaxonomyConfig,
+    *, screens: list[Screen] | None = None,
 ) -> Iterator[tuple[ScreenElement, str, str, list[dict]]]:
     names = []
     for element in elements:
@@ -111,6 +112,13 @@ def _named_controls(
         names.append((element, clean_name, action, flow, full_name, name, page_key, naming_decision))
 
     used = {entry[5] for entry in names}
+    used.update(
+        _build_event_name(
+            screen.screen_name, "", config.naming.actions.get("screen", "pageview"),
+            config, page=screen.page_name,
+        )
+        for screen in screens or []
+    )
     groups: dict[tuple[str, tuple[str, str]], tuple[ScreenElement, str]] = {}
     resolved: dict[tuple[str, tuple[str, str], str], tuple[str, str]] = {}
     for element, clean_name, action, flow, full_name, name, page_key, naming_decision in names:
@@ -275,7 +283,7 @@ def generate_taxonomy(
         for elem in elements
     )
 
-    for elem, event_name, full_name, _ in _named_controls(elements, config):
+    for elem, event_name, full_name, _ in _named_controls(elements, config, screens=screen_inventory):
         action = config.naming.actions.get(elem.element_type, "clicked")
         flow = elem.parent_path[0] if elem.parent_path else ""
 
