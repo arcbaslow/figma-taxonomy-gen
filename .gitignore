@@ -16,4 +16,5 @@ output/
 *.xlsx
 !taxonomy.config.yaml
 .pytest_cache/
+tests/.tmp/
 .mypy_cache/
