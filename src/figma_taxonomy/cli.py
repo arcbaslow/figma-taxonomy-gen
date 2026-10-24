@@ -138,11 +138,15 @@ def extract(figma_url, fixture, config_path, output_dir, formats, page, explain_
         figma_file = {"document": {"children": matching}}
 
     click.echo("Extracting interactive elements...")
-    elements = extract_elements(figma_file, config)
+    try:
+        elements = extract_elements(figma_file, config)
+        screens = extract_screens(figma_file, config)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     click.echo(f"Found {len(elements)} interactive elements")
 
     click.echo("Generating taxonomy...")
-    events = _generate_taxonomy(elements, config, extract_screens(figma_file, config))
+    events = _generate_taxonomy(elements, config, screens)
     click.echo(f"Generated {len(events)} events")
 
     if use_ai or config.ai.enabled:
@@ -243,8 +247,12 @@ def validate(taxonomy_path, figma_url, fixture, config_path, no_cache, cache_ttl
     else:
         figma_file = _fetch_file(figma_url, no_cache=no_cache, cache_ttl=cache_ttl, offline=offline)
 
-    elements = extract_elements(figma_file, config)
-    current_events = _generate_taxonomy(elements, config, extract_screens(figma_file, config))
+    try:
+        elements = extract_elements(figma_file, config)
+        screens = extract_screens(figma_file, config)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    current_events = _generate_taxonomy(elements, config, screens)
 
     report = diff_taxonomies(existing_events, current_events)
 

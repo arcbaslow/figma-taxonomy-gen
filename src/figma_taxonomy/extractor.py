@@ -8,6 +8,7 @@ from collections.abc import Iterator
 
 from figma_taxonomy.config import TaxonomyConfig
 from figma_taxonomy.models import Screen, ScreenElement, TaxonomyEvent
+from figma_taxonomy.taxonomy_engine import _latinize, _named_controls
 
 INTERACTIVE_PATTERNS = [
     (re.compile(p, re.IGNORECASE), element_type)
@@ -86,7 +87,9 @@ def _classify_node(node: dict, config: TaxonomyConfig) -> tuple[str | None, str,
     return None, "not_interactive", None
 
 
-def _clean_screen_name(raw: str, config: TaxonomyConfig) -> str:
+def _clean_screen_name(
+    raw: str, config: TaxonomyConfig, node_id: str, *, validate: bool = True,
+) -> str:
     name = raw
     sn_config = config.naming.screen_name
 
@@ -98,7 +101,12 @@ def _clean_screen_name(raw: str, config: TaxonomyConfig) -> str:
             name = name[: -len(suffix)]
 
     name = name.strip().strip("-").strip()
-    name = re.sub(r"[^a-zA-Z0-9]+", "_", name).strip("_").lower()
+    name = re.sub(r"[^a-zA-Z0-9]+", "_", _latinize(name)).strip("_").lower()
+    if not name and validate:
+        identifier = re.sub(r"[^a-zA-Z0-9]+", "_", node_id).strip("_").lower()
+        if not identifier:
+            raise ValueError("Screen has no usable normalized name or node ID; rename the frame.")
+        name = f"frame_{identifier}"
     return name
 
 
@@ -224,7 +232,7 @@ def extract_screens(figma_file: dict, config: TaxonomyConfig) -> list[Screen]:
     return [
         Screen(
             node_id=frame.get("id", ""),
-            screen_name=_clean_screen_name(frame["name"], config),
+            screen_name=_clean_screen_name(frame.get("name", ""), config, frame.get("id", "")),
             page_name=page.get("name", ""),
             page_id=page.get("id", ""),
         )
@@ -237,8 +245,8 @@ def extract_elements(figma_file: dict, config: TaxonomyConfig) -> list[ScreenEle
     all_elements: list[ScreenElement] = []
     for page, frame in _page_frames(figma_file, config):
         page_name = page.get("name", "")
-        screen_name = _clean_screen_name(frame["name"], config)
-        elements = _walk_node(frame, screen_name, page_name, [page_name, frame["name"]], config)
+        screen_name = _clean_screen_name(frame.get("name", ""), config, frame.get("id", ""))
+        elements = _walk_node(frame, screen_name, page_name, [page_name, frame.get("name", "")], config)
         for element in elements:
             element.page_id = page.get("id", "")
             element.screen_node_id = frame.get("id", "")
@@ -277,7 +285,10 @@ def explain_detection(
                 blocked = "excluded_page"
         if node_id in frame_ids:
             screen_id = node_id
-            screen_name = _clean_screen_name(name, config)
+            screen_name = _clean_screen_name(
+                name, config, node_id,
+                validate=not blocked and (config.detection.include_hidden or node.get("visible") is not False),
+            )
         kind, rule_index = None, None
         if blocked:
             reason = blocked
@@ -306,4 +317,13 @@ def explain_detection(
             walk(child, page_id, screen_id, screen_name, child_block, (*path, name))
 
     walk(document)
-    return {"schema_version": 1, "nodes": records}
+    decisions = [decision for _, _, _, control_decisions in _named_controls(extract_elements(figma_file, config), config)
+                 for decision in control_decisions]
+    for _, frame in _page_frames(figma_file, config):
+        raw_name, node_id = frame.get("name", ""), frame.get("id", "")
+        if not _clean_screen_name(raw_name, config, node_id, validate=False):
+            decisions.append({
+                "reason": "unnamed_screen", "node_id": node_id, "raw_frame_name": raw_name,
+                "screen_name": _clean_screen_name(raw_name, config, node_id),
+            })
+    return {"schema_version": 1, "nodes": records, "decisions": decisions}

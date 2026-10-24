@@ -118,8 +118,21 @@ Event:    phone_input_phone_number_entered
 If that exceeds `max_event_length`, it's truncated (trailing underscores trimmed).
 If two different full names truncate to the same name, generation stops with an
 error identifying both names and available node IDs. Increase the cap or adjust
-the pattern/control names. Identical full names instead merge their source IDs
-into one event within a page, including matches across variant frames.
+the pattern/control names.
+
+Screen and element names normalize to Unicode NFC, transliterate Russian and Kazakh Cyrillic, and remove
+combining marks with Unicode NFKD before ASCII cleanup; control text that normalizes to
+empty uses the component name only when fallback is enabled, otherwise generation
+raises an error identifying the node.
+Screen names that normalize to empty use a stable node-ID fallback such as `frame_1_9` and record an `unnamed_screen` decision in `--explain`, raising only when no usable node ID is available.
+Controls whose allowed text and component names normalize to empty likewise use a stable node-ID fallback such as `node_2_0` and record an `unnamed_control` decision, raising only when no usable node ID is available.
+Identical full names merge source IDs within a page, including matches across variant frames,
+only when source labels agree ignoring canonical Unicode form, case and collapsed
+whitespace (component names in component mode or when text falls back to the component);
+different labels get a component-name or numeric disambiguator and a `collision`
+decision in `--explain` output.
+A suffixed name follows traversal order, so adding or reordering controls can
+rename a suffixed event; the drift check will surface the change.
 
 `style` supports `snake_case` and `camelCase`. The configured `pattern` can reorder
 `{page}`, `{screen}`, `{element}` and `{action}`. Pageviews use that pattern with an empty

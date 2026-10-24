@@ -198,6 +198,15 @@ and path, page/screen context, `variants`, `element_type`, `control_detected`,
 `included` means the node is a source of an event, including a screen pageview.
 Control exclusion does not remove a screen from the separate pageview inventory.
 
+The top-level `decisions` list records event-name collisions and unnamed screens or controls. Each collision entry has
+`reason: "collision"`, `node_id` for the disambiguated control,
+`conflicting_node_id` for the original control, `source_labels` for both original
+labels (or component names in component mode or fallback), `original_event_name`, and the
+resolved `event_name`. Unnamed-screen entries have `reason: "unnamed_screen"`,
+`node_id`, `raw_frame_name`, and the node-ID-derived `screen_name`.
+Unnamed-control entries have `reason: "unnamed_control"`, `node_id`, `raw_label`, and the node-ID-derived `element_name`.
+The list is empty when neither disambiguation nor a screen/control name fallback was needed.
+
 Reasons identify name or prototype detection, explicit overrides, hidden layers,
 excluded pages/names, suppressed descendants (`*_ancestor`), noninteractive nodes,
 pageview-only screens, or nodes outside screens. A matched rule refers to the

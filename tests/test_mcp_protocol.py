@@ -48,3 +48,22 @@ async def test_stdio_extract_export_validate_and_errors(tmp_path: Path) -> None:
                 invalid = await client.call_tool("export_taxonomy", {"taxonomy_json": stored, "format": "invalid", "output_path": str(tmp_path / "bad")})
                 assert invalid.is_error
                 assert not (tmp_path / "bad").exists()
+                unnamed_fixture = tmp_path / "emoji.json"
+                design = json.loads(Path(fixture).read_text(encoding="utf-8"))
+                frame = design["document"]["children"][0]["children"][0]
+                frame["name"] = "🔥"
+                unnamed_fixture.write_text(json.dumps(design), encoding="utf-8")
+                unnamed = _data(await client.call_tool("extract_taxonomy", {
+                    "figma_url_or_path": str(unnamed_fixture), "explain": True,
+                }))
+                assert unnamed["count"] == 23
+                assert unnamed["explanation"]["decisions"] == [{
+                    "reason": "unnamed_screen", "node_id": "1:1", "raw_frame_name": "🔥",
+                    "screen_name": "frame_1_1",
+                }]
+                pageview = next(event for event in unnamed["events"] if event["event_name"] == "frame_1_1_pageview")
+                assert pageview["source_node_ids"] == ["1:1"]
+                validated = _data(await client.call_tool("validate_taxonomy", {
+                    "taxonomy_json": unnamed, "figma_url_or_path": str(unnamed_fixture),
+                }))
+                assert validated["is_clean"]
