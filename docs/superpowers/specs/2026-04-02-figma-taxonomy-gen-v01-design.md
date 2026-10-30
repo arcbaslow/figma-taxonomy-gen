@@ -1,4 +1,4 @@
-# figma-taxonomy-gen v0.1 — Design Spec
+# figma-taxonomy-gen v0.1 - Design Spec
 
 **Date:** 2026-04-02
 **Scope:** End-to-end core pipeline (Figma extraction → naming engine → multi-format output)
@@ -117,7 +117,7 @@ class EventProperty:
 
 Three-layer detection strategy:
 
-### Layer 1 — Name pattern matching
+### Layer 1 - Name pattern matching
 
 ```python
 INTERACTIVE_PATTERNS = [
@@ -143,11 +143,11 @@ EXCLUDE_PATTERNS = [
 ]
 ```
 
-### Layer 2 — Prototype interactions
+### Layer 2 - Prototype interactions
 
 Any node with a Figma interaction (click, hover, drag) is automatically interactive regardless of name.
 
-### Layer 3 — Component type check
+### Layer 3 - Component type check
 
 Only `COMPONENT`, `COMPONENT_SET`, and `INSTANCE` nodes are considered. Raw frames/groups are skipped unless they have prototype interactions.
 
@@ -412,15 +412,15 @@ property_rules:
 - **test_extractor.py:** Verifies interactive element detection, screen map construction, variant collapsing
 - **test_taxonomy_engine.py:** Verifies naming conventions, action mapping, property rules
 - **test_output.py:** Verifies each output format produces correct structure
-- No live API calls in tests — all fixture-based
+- No live API calls in tests - all fixture-based
 
 ---
 
 ## Out of Scope for v0.1
 
-- AI enrichment (Claude API) — v0.3
-- MCP server — v0.4
-- Amplitude Taxonomy API push — v0.4
-- `validate` command (drift detection) — v0.2
-- `diff` command — v0.4
-- Figma plugin companion — v1.0
+- AI enrichment (Claude API) - v0.3
+- MCP server - v0.4
+- Amplitude Taxonomy API push - v0.4
+- `validate` command (drift detection) - v0.2
+- `diff` command - v0.4
+- Figma plugin companion - v1.0

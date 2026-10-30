@@ -70,7 +70,7 @@ git add tracking/taxonomy.json tracking/taxonomy.md
 git commit -m "Refresh tracking plan"
 ```
 
-GitHub renders `.md` in PR view — stakeholders see the tracking plan as a
+GitHub renders `.md` in PR view - stakeholders see the tracking plan as a
 readable document, not a JSON blob.
 
 ## Multiple apps, shared config
@@ -104,7 +104,7 @@ property_rules:
         type: "string"
 ```
 
-YAML doesn't merge configs natively — maintain a base via a small wrapper script
+YAML doesn't merge configs natively - maintain a base via a small wrapper script
 that merges them before calling the CLI, or just duplicate what you need.
 
 ## Custom element detection
@@ -112,7 +112,7 @@ that merges them before calling the CLI, or just duplicate what you need.
 If your design system uses unusual component names, rename them in Figma or add
 a post-extraction rename step. The detection heuristics are in
 [`src/figma_taxonomy/extractor.py`](https://github.com/arcbaslow/figma-taxonomy-gen/blob/master/src/figma_taxonomy/extractor.py)
-— open a PR or fork if your team has recurring mismatches.
+- open a PR or fork if your team has recurring mismatches.
 
 ## Verifying the initial taxonomy
 

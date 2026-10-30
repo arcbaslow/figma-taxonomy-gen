@@ -1087,7 +1087,7 @@ git commit -m "feat: add banking app Figma API response fixture"
 
 ---
 
-### Task 4: Extractor — interactive element detection + screen map
+### Task 4: Extractor - interactive element detection + screen map
 
 **Files:**
 - Create: `src/figma_taxonomy/extractor.py`
@@ -1832,7 +1832,7 @@ git commit -m "feat: add taxonomy naming engine with action mapping and property
 
 ---
 
-### Task 6: Output formatters — Excel
+### Task 6: Output formatters - Excel
 
 **Files:**
 - Create: `src/figma_taxonomy/output/excel.py`

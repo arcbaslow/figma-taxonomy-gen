@@ -60,7 +60,7 @@ From `CLAUDE.md`, and they are enforced in review:
 ## Tests use fixtures, never the live API
 
 `tests/fixtures/` holds recorded Figma API responses. CI has no Figma
-token and must never need one. If you add a case, add a fixture — do
+token and must never need one. If you add a case, add a fixture - do
 not add a test that hits the network, even guarded.
 
 The same goes for the AI enricher and the Amplitude push: mock the
@@ -90,12 +90,12 @@ loopback callbacks. Never open a developer's actual keychain or OAuth app from t
   money per run.
 - Turning this into a Figma plugin, a full tracking-plan lifecycle
   tool, or a code generator. See the non-goals in `CLAUDE.md`.
-- Big rewrites without a discussion first — open an issue describing
+- Big rewrites without a discussion first - open an issue describing
   the shape before the work
 
 ## Local-only files
 
-- `.figma-taxonomy-cache/` — cached Figma file trees. Real design data.
+- `.figma-taxonomy-cache/` - cached Figma file trees. Real design data.
 - `taxonomy.config.yaml` with `api_key` fields filled in. Use the
   environment variables instead.
 

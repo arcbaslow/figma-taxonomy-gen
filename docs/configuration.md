@@ -99,13 +99,13 @@ See [the import contract and limits](amplitude.md#amplitude-data-csv-import).
 
 The pattern `{screen}_{element}_{action}` runs through three layers of cleaning:
 
-1. **Screen name** — taken from the Figma frame hierarchy (`page → frame`). Numbered
+1. **Screen name** - taken from the Figma frame hierarchy (`page → frame`). Numbered
    prefixes like `01 - ` are stripped; `Step 1:` is not currently recognized. Variant suffixes like `- Default`
    or `- Dark` collapse so one screen isn't counted twice.
-2. **Element name** — if the element has text content (button label, field
+2. **Element name** - if the element has text content (button label, field
    placeholder), that's used. Otherwise the component name is used with common
    prefixes like `Component/` stripped. Final string is snake-cased.
-3. **Action** — looked up from `actions.{type}` based on the element's detected type.
+3. **Action** - looked up from `actions.{type}` based on the element's detected type.
 
 ### Example
 
@@ -160,7 +160,7 @@ an event name: include `{action}` and keep their configured actions distinct.
 ## Property rules
 
 Rules match against the **event name** using glob patterns (`fnmatch`). A property
-added via a rule is deduplicated against globals and against other rules — no
+added via a rule is deduplicated against globals and against other rules - no
 duplicate property names on a single event.
 
 Rule properties currently take precedence over globals with the same name; among

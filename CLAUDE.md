@@ -150,7 +150,7 @@ export AMPLITUDE_SECRET_KEY="your-secret" # optional, for push
 
 ---
 
-## Competitive landscape
+## Competitors
 
 See the dated, source-linked research in `docs/ROADMAP.md`. Avoid carrying forward
 unsupported claims about competitors' features, pricing or maintenance. This

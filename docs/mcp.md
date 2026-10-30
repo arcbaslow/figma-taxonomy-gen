@@ -47,7 +47,7 @@ stdio:
 figma-taxonomy-mcp
 ```
 
-You won't normally run this manually — Claude Desktop launches it for you.
+You won't normally run this manually - Claude Desktop launches it for you.
 
 ## Claude Desktop configuration
 
@@ -153,7 +153,7 @@ In Claude Desktop, you can now say things like:
 > flow: `https://figma.com/design/ABC123/MyApp`"
 
 > "Compare my committed `tracking/taxonomy.json` to the current state of that Figma
-> file — what drifted?"
+> file - what drifted?"
 
 > "Take this extraction result and export it as an Amplitude CSV."
 
