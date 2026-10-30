@@ -79,7 +79,7 @@ sequenceDiagram
 ### Regenerate on drift
 
 If you want CI to *apply* the fix rather than just report it, add a second job that
-runs `figma-taxonomy extract` and opens a PR. Keep it manual by default — auto-updates
+runs `figma-taxonomy extract` and opens a PR. Keep it manual by default - auto-updates
 can silently relabel events and break downstream dashboards.
 
 ### Multiple Figma files

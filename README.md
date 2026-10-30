@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Figma Taxonomy Gen — Turn interactive designs into a reviewable tracking plan." width="100%">
+  <img src="assets/banner.svg" alt="Figma Taxonomy Gen - Turn interactive designs into a reviewable tracking plan." width="100%">
 </p>
 
 # Figma Taxonomy Gen
@@ -263,7 +263,7 @@ Tests use local fixtures and mocked services. They cover extraction, naming, con
 
 ## Releases
 
-**[v0.4.2](https://github.com/arcbaslow/figma-taxonomy-gen/releases/tag/v0.4.2)** — see the [release notes](docs/RELEASE_NOTES.md) for this release and the [changelog](CHANGELOG.md) for project history.
+**[v0.4.2](https://github.com/arcbaslow/figma-taxonomy-gen/releases/tag/v0.4.2)** - see the [release notes](docs/RELEASE_NOTES.md) for this release and the [changelog](CHANGELOG.md) for project history.
 
 GitHub Releases include downloadable artifacts and checksums. Package-registry publication is a separate, opt-in workflow; a GitHub release does not imply that the same version is available on PyPI or npm. Maintainers can follow the [release guide](docs/RELEASING.md).
 
@@ -281,7 +281,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), run the checks above, and include a min
 | [Meta Ads Agents](https://github.com/arcbaslow/meta-ads-agents) | Campaign performance, creative fatigue and event health. |
 | [GTM Diff](https://github.com/arcbaslow/gtm-diff) | Review the changes in your Google Tag Manager exports. |
 
-Maintained by [Good Labs](https://goodlabs.kz) — measurement implementation, tracking plans and analytics audits.
+Maintained by [Good Labs](https://goodlabs.kz) - measurement implementation, tracking plans and analytics audits.
 
 ## License
 

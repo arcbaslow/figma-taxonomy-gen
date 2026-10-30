@@ -88,13 +88,13 @@ figma-taxonomy validate <taxonomy.json> --fixture <path> [OPTIONS]
 
 Reports:
 
-- **Added** — interactive elements in Figma with no matching event in the JSON
-- **Removed** — events in the JSON whose node no longer exists in Figma
-- **Renamed** — same node, different event name
-- **Property changes** — added or removed properties on an existing event
-- **Property schema changes** — changed types, descriptions, enums or stored constraints
-- **Source changes** — added or removed Figma sources for a matched event
-- **Category changes** — changed page/flow ownership
+- **Added** - interactive elements in Figma with no matching event in the JSON
+- **Removed** - events in the JSON whose node no longer exists in Figma
+- **Renamed** - same node, different event name
+- **Property changes** - added or removed properties on an existing event
+- **Property schema changes** - changed types, descriptions, enums or stored constraints
+- **Source changes** - added or removed Figma sources for a matched event
+- **Category changes** - changed page/flow ownership
 
 Matching considers every source of merged events. Ambiguous splits/merges use
 unchanged names where possible, otherwise additions/removals, without guessing

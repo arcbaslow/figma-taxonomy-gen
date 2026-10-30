@@ -38,9 +38,9 @@ CTAs whose names begin with `Icon`.
 
 Only these Figma node types are considered:
 
-- `COMPONENT` — the master definition
-- `COMPONENT_SET` — a variant container
-- `INSTANCE` — a placed instance
+- `COMPONENT` - the master definition
+- `COMPONENT_SET` - a variant container
+- `INSTANCE` - a placed instance
 
 Plain `FRAME`, `GROUP`, `TEXT`, and `RECTANGLE` nodes are skipped unless they have a
 prototype interaction attached.

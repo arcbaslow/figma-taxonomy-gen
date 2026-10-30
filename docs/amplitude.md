@@ -143,7 +143,7 @@ figma-taxonomy push output/taxonomy.json --base-url https://analytics.eu.amplitu
 ## One-way operations
 
 The Taxonomy API plans schema; creating a definition does not ingest an event.
-Deletes and renames must be done through the Amplitude UI —
+Deletes and renames must be done through the Amplitude UI -
 `push` only creates.
 
 Treat Amplitude as the downstream system. The Figma file + `taxonomy.json` is the

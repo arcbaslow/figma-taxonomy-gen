@@ -10,12 +10,12 @@ Please do not file public issues for security problems.
 ## What's in scope
 
 - Token handling in `src/figma_taxonomy/figma_client.py`,
-  `oauth.py`, `auth_cli.py`, `ai_enricher.py`, and `amplitude_push.py` — Figma tokens, OAuth app credentials, the
+  `oauth.py`, `auth_cli.py`, `ai_enricher.py`, and `amplitude_push.py` - Figma tokens, OAuth app credentials, the
   Anthropic API key, and the Amplitude key/secret pair
 - The local file cache under `.figma-taxonomy-cache/`. It holds full
   Figma file trees, which for an unreleased product is commercially
   sensitive.
-- Anything that writes a token into generated output — a taxonomy JSON,
+- Anything that writes a token into generated output - a taxonomy JSON,
   a CSV, a markdown plan, or an `.xlsx`
 - The MCP server in `mcp_server.py` / `mcp_tools.py`: an MCP client
   supplies the Figma URL, so path traversal, SSRF against non-Figma
@@ -30,7 +30,7 @@ Please do not file public issues for security problems.
 
 - Misuse of the tool against a Figma file you do not have access to.
   The Figma API enforces that; the tool does not add its own layer.
-- Bugs in the upstream Figma, Anthropic, or Amplitude APIs — report
+- Bugs in the upstream Figma, Anthropic, or Amplitude APIs - report
   those to the respective vendors
 - Issues that require an attacker with shell access to the user's
   machine
@@ -41,9 +41,9 @@ Please do not file public issues for security problems.
 
 Explicit environment credentials are not persisted by the tool:
 
-- `FIGMA_TOKEN` — Figma PAT, REST API plan token, or externally managed OAuth token
-- `ANTHROPIC_API_KEY` — only read when `--ai` is passed
-- `AMPLITUDE_API_KEY` / `AMPLITUDE_SECRET_KEY` — only read on `push`
+- `FIGMA_TOKEN` - Figma PAT, REST API plan token, or externally managed OAuth token
+- `ANTHROPIC_API_KEY` - only read when `--ai` is passed
+- `AMPLITUDE_API_KEY` / `AMPLITUDE_SECRET_KEY` - only read on `push`
 
 Optional `auth login` is a separate, explicit persistence path: the user's OAuth
 app client secret, access token and refresh token are saved together in the native
