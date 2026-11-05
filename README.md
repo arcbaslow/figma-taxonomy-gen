@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Figma Taxonomy Gen - Turn interactive designs into a reviewable tracking plan." width="100%">
+  <img src="assets/hero.jpg" alt="Figma Taxonomy Gen: small robots lift buttons and toggles off app screens on a design easel with tweezers and file them into a card catalog while another types labels." width="100%">
 </p>
 
 # Figma Taxonomy Gen
@@ -11,15 +11,20 @@ Turn interactive designs into a reviewable tracking plan.
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-db2777?logo=python&logoColor=white)](#installation)
 [![MIT license](https://img.shields.io/badge/license-MIT-475569)](LICENSE)
 
-[Quick start](#quick-start) · [Example output](#example-output) · [Tests](#tests) · [Releases](#releases) · [Contributing](CONTRIBUTING.md)
+[Quick start](#quick-start) | [Example output](#example-output) | [Configuration](#configuration) | [Drift checks](#drift-checks) | [Where it fits](#where-it-fits) | [Contributing](CONTRIBUTING.md)
 
 A CLI and optional MCP server that extracts interactive elements from a Figma file and generates a first-pass event taxonomy. Review the output as a tracking plan, then detect drift when the design changes.
 
-```text
-Figma REST API or local fixture
-  → interactive elements and screen context
-  → configurable event names and properties
-  → Excel · CSV · JSON · Markdown
+```mermaid
+flowchart LR
+  A["Figma REST API<br/>or local fixture"] --> B["Interactive elements<br/>and screen context"]
+  B --> C["Naming patterns<br/>and property rules"]
+  C -. "optional --ai" .-> X["Suggested properties"]
+  C --> D["Excel, CSV,<br/>JSON, Markdown"]
+  X --> D
+  D -. "taxonomy.json:<br/>validate, diff --exit-code" .-> E["Drift report<br/>by Figma node ID"]
+  classDef step fill:#fbe9f1,stroke:#db2777,color:#17202a
+  class A,B,C,D,E,X step
 ```
 
 ## What you can do
@@ -97,6 +102,10 @@ Amplitude Data import profile; it always writes a JSON provenance companion.
 See the [Amplitude guide](docs/amplitude.md) for schema and import limits. Pageviews include all
 contributing screen frame IDs, including variants and screens without controls.
 
+Excel exports retain the existing overview and add an `Event Properties` sheet
+with every event/property association, type, enum and source ID. Design strings
+are stored as literal text, including labels beginning with `=`.
+
 ## Example output
 
 ![Tracking-plan Markdown generated from the bundled banking-app Figma fixture](assets/screenshot.png)
@@ -105,7 +114,7 @@ The screenshot shows the **actual generated Markdown**, rendered for documentati
 
 ## Configuration
 
-The default naming pattern is `{screen}_{element}_{action}`. Adjust [taxonomy.config.yaml](taxonomy.config.yaml), or pass a different file:
+The default naming pattern is `{screen}_{element}_{action}`. Adjust [taxonomy.config.yaml](taxonomy.config.yaml), or pass a different file with `--config`.
 
 Both `snake_case` and `camelCase` are supported. Pageviews use the same pattern
 with an empty element and `actions.screen` (default `pageview`). All generated
@@ -149,6 +158,16 @@ still apply.
 Screen discovery includes frames inside nested Figma sections. Section labels do
 not change event names; the page remains the flow and the frame supplies the screen.
 
+Detection searches nested visible labels and recognizes legacy prototype links.
+Hidden-layer inclusion and traversal inside detected controls are explicit config
+options; their defaults preserve earlier behavior.
+Ordered `detection.overrides` can map custom component names or specific Figma
+nodes to control types, or exclude their subtrees. See [detection rules](docs/detection.md).
+
+Configuration is validated before extraction. `output.directory` supplies the
+default destination, with `--output` overriding it. Disabling component-name
+fallback makes unlabeled controls an explicit error containing the Figma node ID.
+
 ## Drift checks
 
 ```bash
@@ -160,6 +179,10 @@ figma-taxonomy diff previous/taxonomy.json output/taxonomy.json --exit-code
 ```
 
 Node IDs preserve the link to Figma so the comparison can report additions, removals, renames and property changes. `--exit-code` returns a nonzero status for drift. The repository includes a [composite drift-check action](.github/actions/drift-check/action.yml); pin the action to a reviewed release or commit in your workflow. Schedule a check as well if you need to detect design edits that do not modify a file in Git.
+
+Drift checks report property type, description and enum changes as well as added
+or removed property names. Enum order does not affect the result. Both CLI
+`validate`/`diff --exit-code` and MCP validation expose schema-only changes.
 
 ## Optional integrations
 
@@ -175,6 +198,10 @@ The CLI estimates the request cost and asks for confirmation. `--yes` skips that
 
 Estimates are per flow, use approximate token counts, and are not spending limits.
 For models without a known price, the CLI reports the estimate as unavailable.
+
+Optional AI uses bounded batches shared with its cost preview. Suggestions stay
+within their source batch; failed or truncated runs leave the input properties
+unchanged. AI remains off by default.
 
 ### MCP server
 
@@ -195,30 +222,8 @@ Pass an `extract_taxonomy` result directly into `export_taxonomy` or
 `validate_taxonomy`; both also accept stored taxonomy JSON. Explicit page selection
 overrides page exclusions, and a missing page reports available names.
 
-Drift checks report property type, description and enum changes as well as added
-or removed property names. Enum order does not affect the result. Both CLI
-`validate`/`diff --exit-code` and MCP validation expose schema-only changes.
-
-Configuration is validated before extraction. `output.directory` supplies the
-default destination, with `--output` overriding it. Disabling component-name
-fallback makes unlabeled controls an explicit error containing the Figma node ID.
-
-Excel exports retain the existing overview and add an `Event Properties` sheet
-with every event/property association, type, enum and source ID. Design strings
-are stored as literal text, including labels beginning with `=`.
-
-Optional AI uses bounded batches shared with its cost preview. Suggestions stay
-within their source batch; failed or truncated runs leave the input properties
-unchanged. AI remains off by default.
-
-The MCP extra targets SDK 2.2–2.x and has an offline stdio test covering the
-complete extraction → export → validation tool workflow.
-
-Detection searches nested visible labels and recognizes legacy prototype links.
-Hidden-layer inclusion and traversal inside detected controls are explicit config
-options; their defaults preserve earlier behavior.
-Ordered `detection.overrides` can map custom component names or specific Figma
-nodes to control types, or exclude their subtrees. See [detection rules](docs/detection.md).
+The MCP extra targets SDK 2.2 to 2.x and has an offline stdio test covering the
+complete extraction, export and validation tool workflow.
 
 ### Amplitude push
 
@@ -271,10 +276,28 @@ GitHub Releases include downloadable artifacts and checksums. Package-registry p
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md), run the checks above, and include a minimal reproduction for bugs. Report vulnerabilities through [SECURITY.md](SECURITY.md).
 
+## Where it fits
+
+```mermaid
+flowchart LR
+  A["Figma design"] -- "figma-taxonomy-gen" --> B["Tracking plan"]
+  B --> C["GTM container"]
+  C -- "gtm-diff" --> D["Reviewed<br/>container change"]
+  D --> E["Live site"]
+  E -- "pulsecheck" --> F["Recorded session"]
+  F -- "analysis skill" --> G["Coverage vs plan"]
+  B -.-> G
+  classDef here fill:#fbe9f1,stroke:#db2777,color:#17202a
+  class B here
+```
+
+Each tool works on its own inputs and runs without the others. The pulsecheck [analysis skill](https://github.com/arcbaslow/pulsecheck/blob/main/skill/SKILL.md) can take a plan from this tool and report planned events not seen in the session and seen events missing from the plan.
+
 ## Related tools
 
 | Project | Use it for |
 | --- | --- |
+| [Pulsecheck](https://github.com/arcbaslow/pulsecheck) | Record network hits, dataLayer pushes and consent in Chrome DevTools. |
 | [Google Ads Agents](https://github.com/arcbaslow/google-ads-agents) | Paid media audits, tracking checks and reviewed changes. |
 | [Google Analytics Agent](https://github.com/arcbaslow/google-analytics-agent) | GA4 data quality, funnels and property management. |
 | [Search Console Agent](https://github.com/arcbaslow/google-search-console-agent) | Search performance, indexing and page experience. |

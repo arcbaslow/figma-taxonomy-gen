@@ -1,8 +1,8 @@
 # Documentation assets
 
-- `banner.svg`: editable vector banner for Figma Taxonomy Gen.
-- `icon.svg`: independent project symbol, used in the banner and documentation previews.
-- `screenshot.png`: browser capture of real project output from the synthetic fixtures in `examples/demo/` (GTM input fixtures are in `test/fixtures/`).
+- `hero.jpg`: README banner. The illustration was generated with Higgsfield (GPT Image 2.6); the title is typeset in Manrope.
+- `icon.svg`: independent project symbol for documentation previews.
+- `screenshot.png`: browser capture of the generated Markdown tracking plan from the synthetic fixture `tests/fixtures/banking_app.json`, rendered in a documentation-only HTML viewer.
 - `banner.png`: earlier banner retained for existing links.
 
-The Markdown screenshots use a documentation-only HTML viewer. That viewer is not an application UI. The GTM screenshot uses the project's own HTML reporter. Inputs contain no customer data or credentials. Vector assets follow the repository's MIT license.
+Inputs contain no customer data or credentials. Vector assets follow the repository's MIT license.
