@@ -8,7 +8,6 @@ not delivery dates. Evidence below distinguishes code findings from vendor claim
 
 Read `CLAUDE.md`, `CONTRIBUTING.md`, README, changelog, security policy, published
 guides, historical design documents, package code, tests and GitHub workflows.
-The `~/.gemini/GEMINI.md` referenced by AGENTS.md was absent.
 
 Windows, Python 3.12.14; `uv sync --extra dev --extra ai --extra mcp` succeeded
 with uv 0.12.21 installed locally for this audit. Added the docs extra for its CI

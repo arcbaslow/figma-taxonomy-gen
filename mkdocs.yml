@@ -6,8 +6,6 @@ repo_name: arcbaslow/figma-taxonomy-gen
 edit_uri: edit/master/docs/
 
 docs_dir: docs
-exclude_docs: |
-  superpowers/
 
 theme:
   name: material
