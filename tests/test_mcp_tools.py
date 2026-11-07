@@ -138,10 +138,12 @@ def test_mcp_server_builds_with_all_tools():
     # Missing optional SDK may skip; an installed incompatible SDK must fail.
     pytest.importorskip("mcp")
 
+    from figma_taxonomy import __version__
     from figma_taxonomy.mcp_server import build_server
 
     server = build_server()
     assert server.name == "figma-taxonomy-gen"
+    assert server.version == __version__
 
 
 def test_export_taxonomy_tool_markdown(tmp_path):

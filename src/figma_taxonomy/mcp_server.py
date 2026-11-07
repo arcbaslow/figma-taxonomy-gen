@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from figma_taxonomy import __version__
 from figma_taxonomy.mcp_tools import (
     export_taxonomy_tool,
     extract_taxonomy_tool,
@@ -30,7 +31,7 @@ def build_server():
             "Install with: uv pip install 'figma-taxonomy-gen[mcp]'"
         ) from e
 
-    mcp = MCPServer("figma-taxonomy-gen")
+    mcp = MCPServer("figma-taxonomy-gen", version=__version__)
 
     @mcp.tool()
     def extract_taxonomy(
