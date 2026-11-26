@@ -10,6 +10,7 @@ Turn interactive designs into a reviewable tracking plan.
 [![Release](https://img.shields.io/github/v/release/arcbaslow/figma-taxonomy-gen?color=db2777&label=release)](https://github.com/arcbaslow/figma-taxonomy-gen/releases)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-db2777?logo=python&logoColor=white)](#installation)
 [![MIT license](https://img.shields.io/badge/license-MIT-475569)](LICENSE)
+[![arcbaslow/figma-taxonomy-gen MCP server](https://glama.ai/mcp/servers/arcbaslow/figma-taxonomy-gen/badges/score.svg)](https://glama.ai/mcp/servers/arcbaslow/figma-taxonomy-gen)
 
 [Quick start](#quick-start) | [Example output](#example-output) | [Configuration](#configuration) | [Drift checks](#drift-checks) | [Where it fits](#where-it-fits) | [Contributing](CONTRIBUTING.md)
 
