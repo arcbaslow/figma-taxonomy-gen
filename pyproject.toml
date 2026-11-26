@@ -43,7 +43,7 @@ mcp = [
 ]
 oauth = [
     "keyring>=25,<26",
-    "filelock>=3.16,<4",
+    "filelock>=3.16,<5",
 ]
 docs = [
     "mkdocs-material>=9.5",
